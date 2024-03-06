@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.pop-in{
+  animation: pop-in .2s ease-in;
+}
+
+@keyframes pop-in {
+ 0% {
+  scale: .5
+ } 
+ 30%{
+  scale: 1.1
+ }
+ 50%{
+  scale: 1
+ }
+}
