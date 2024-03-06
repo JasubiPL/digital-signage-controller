@@ -24,5 +24,4 @@ dist-ssr
 *.sw?
 
 #no cargamos storage
-*.pdf
-*.exe
+files

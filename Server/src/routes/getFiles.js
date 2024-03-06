@@ -31,7 +31,7 @@ getFiles.get("/search-templates", (req, res) =>{
       const metadata = fs.statSync(filePath)
       const sizeFile = metadata.size / (1024 * 1024) //convertimos de byte a Mb
       
-      const downloadPath = `http://172.30.106.126:7000/${company}/templates/${file}`
+      const downloadPath = `http://localhost:7000/${company}/templates/${file}`
 
       // Formatemaos la fecha
       const dateModified = metadata.mtime.toString()
@@ -77,7 +77,7 @@ getFiles.get("/search-blueprints", (req, res) =>{
       const metadata = fs.statSync(filePath)
       const sizeFile = metadata.size / (1024 * 1024) //convertimos de byte a Mb
       
-      const downloadPath = `http://172.30.106.126:7000/${company}/blueprints/${file}`
+      const downloadPath = `http://localhost:7000/${company}/blueprints/${file}`
 
       // Formatemaos la fecha
       const dateModified = metadata.mtime.toString()
@@ -123,7 +123,7 @@ getFiles.get("/search-price", (req, res) =>{
       const metadata = fs.statSync(filePath)
       const sizeFile = metadata.size / (1024 * 1024) //convertimos de byte a Mb
       
-      const downloadPath = `http://172.30.106.126:7000/${company}/price/${file}`
+      const downloadPath = `http://localhost:7000/${company}/price/${file}`
 
       // Formatemaos la fecha
       const dateModified = metadata.mtime.toString()

@@ -15,7 +15,7 @@ export const uploadForm = async ( file: File | null, category: Categories) => {
   }
 
   try {
-    const res = await axios.post(`http://172.30.106.126:7000/api/save-${categories}?company=${company}`, formData, {
+    const res = await axios.post(`http://localhost:7000/api/save-${categories}?company=${company}`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
