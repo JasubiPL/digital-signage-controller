@@ -3,6 +3,7 @@ const cors = require("cors")
 const path = require("path")
 const saveFiles = require("./routes/saveFiles")
 const getFiles = require("./routes/getFiles")
+const getCampaign = require("./routes/getCampaign")
 
 //Building Server
 const PORT = process.env.PORT || 7000
@@ -16,7 +17,7 @@ app.use(express.static(path.join(__dirname, "files")))
 
 
 //Routes
-app.use("/api", saveFiles, getFiles)
+app.use("/api", saveFiles, getFiles, getCampaign)
 
 
 app.get("/", (req, res) =>{
