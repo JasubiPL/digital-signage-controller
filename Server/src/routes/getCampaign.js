@@ -1,21 +1,18 @@
 const express = require("express")
 const colors = require("colors")
-const fs = require("fs")
-const path = require("path")
-const mysql = require("mysql2/promise")
 const createConnection = require("../db/db_connection")
 
 const getCampaign = express.Router()
 
 getCampaign.get("/get-taquillas", async (req, res) =>{
   const { company } = req.query
-  console.log(`Nueva consulta a taquillas ${company}` .blue)
+  console.log(`====== Nueva consulta a taquillas ${company} ======` .blue)
   
   console.log("Conectando con BD y trayendo datos..." .yellow)
-  const connection = await createConnection
   let taquillas = []
-
+  
   try {
+    const connection = await createConnection
     const [rows, fields] = await connection.query(
       `SELECT nombre FROM taquillas_${company}`
     );
