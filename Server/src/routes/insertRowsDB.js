@@ -59,9 +59,11 @@ insertRowDB.post('/add-campania', async (req, res) =>{
       }
     }   
 
+    console.log(data)
+
     const [status] = await connection.execute(
-      `INSERT INTO campañas_${company} (nombre) VALUES (?)`,
-      [data.name]
+      `INSERT INTO campañas_${company} (nombre, fecha_inicio, fecha_fin, estatus) VALUES (?, ?, ?, ?)`,
+      [data.name, data.inicio, data.fin, data.status]
     )
 
     console.log(status);

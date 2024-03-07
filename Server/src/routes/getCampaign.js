@@ -39,10 +39,15 @@ getCampaign.get("/get-campanias", async (req, res) =>{
 
   try {
     const [rows, fields] = await connection.query(
-      `SELECT nombre FROM campañas_${company}`
+      `SELECT * FROM campañas_${company}`
     );
 
-    rows.map( row => taquillas = [...taquillas, row.nombre])
+    rows.map( row => taquillas = [...taquillas, {
+      nombre: row.nombre,
+      inicio: row.fecha_inicio,
+      fin: row.fecha_fin,
+      status: row.estatus
+    }])
 
     console.log("\nEnviando datos recibidos =>" .green); // results contains rows returned by server
     console.log(taquillas); // results contains rows returned by server
