@@ -10,7 +10,8 @@ const config = {
 
 async function createConnection() {
   const connection = await mysql.createConnection(config);
+  return connection
   
 }
 
-module.exports = createConnection();
+module.exports = createConnection()
