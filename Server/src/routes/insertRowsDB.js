@@ -20,7 +20,7 @@ insertRowDB.post('/add-taquilla', async (req, res) =>{
     for (const taquilla of rows) {
       if (taquilla.nombre === data.name) {
         console.log("\nLa taquilla ya existe en la Base de datos" .red);
-        return res.status(300).json("La taquilla ya existe en la base de datos");
+        return res.status(409).json("La taquilla ya existe en la base de datos");
       }
     }   
 
@@ -55,7 +55,7 @@ insertRowDB.post('/add-campania', async (req, res) =>{
     for (const campania of rows) {
       if (campania.nombre === data.name) {
         console.log("\nLa Campaña ya existe en la Base de datos" .red);
-        return res.status(300).json("La Campaña ya existe en la base de datos");
+        res.status(409).json("La Campaña ya existe en la base de datos");
       }
     }   
 
