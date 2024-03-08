@@ -1,35 +1,61 @@
 const express = require("express")
 const colors = require("colors")
-const fs = require("fs")
-const path = require("path")
-const mysql = require("mysql2/promise")
+const createConnection = require("../db/db_connection")
 
 const getCampaign = express.Router()
 
-const config = {
-  host: "localhost",
-  user: "root",
-  port: 3306,
-  password: 'Q9spohTK1CY8fWa5c6L7*',
-  database: "digital_signage_db"
-}
-
-
-
-getCampaign.get("/get-campaign", async (req, res) =>{
-
-  const connection = await mysql.createConnection(config);
-
+getCampaign.get("/get-taquillas", async (req, res) =>{
+  const { company } = req.query
+  console.log(`====== Nueva consulta a taquillas ${company} ======` .blue)
+  
+  console.log("Conectando con BD y trayendo datos..." .yellow)
+  let taquillas = []
+  
   try {
-    const [results, fields] = await connection.query(
-      'SELECT * FROM taquillas_ETN'
+    const connection = await createConnection
+    const [rows, fields] = await connection.query(
+      `SELECT nombre FROM taquillas_${company}`
     );
 
-    res.json(results)
+    rows.map( row => taquillas = [...taquillas, row.nombre])
+
+    console.log("\nEnviando datos recibidos =>" .green); // results contains rows returned by server
+    console.log(taquillas); // results contains rows returned by server
+    
+    res.json(taquillas)
   
-    console.log(results); // results contains rows returned by server
   } catch (err) {
-    console.log(err);
+    console.log(err .red);
+  }
+})
+
+getCampaign.get("/get-campanias", async (req, res) =>{
+  const { company } = req.query
+  console.log(`Nueva consulta a taquillas ${company}` .blue)
+  
+  console.log("Conectando con BD y trayendo datos..." .yellow)
+  const connection = await createConnection
+  let taquillas = []
+
+  try {
+    const [rows, fields] = await connection.query(
+      `SELECT * FROM campañas_${company}`
+    );
+
+    rows.map( row => taquillas = [...taquillas, {
+      nombre: row.nombre,
+      inicio: row.fecha_inicio,
+      fin: row.fecha_fin,
+      status: row.estatus
+    }])
+
+    console.log("\nEnviando datos recibidos =>" .green); // results contains rows returned by server
+    console.log(taquillas); // results contains rows returned by server
+    
+    res.json(taquillas)
+  
+  } catch (err) {
+    console.log(err .red);
   }
 })
 

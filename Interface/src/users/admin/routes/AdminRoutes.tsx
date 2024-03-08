@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom"
-import { AdminDashboard, BlueprintsPage, DocumentationPage, PricePage, SoftwarePage, TemplatesPage } from "../../../pages"
+import { AdminDashboard, BlueprintsPage, BoxOfficePage, CampaignPage, DocumentationPage, PricePage, SoftwarePage, TemplatesPage } from "../../../pages"
 import { NavbarAdmin, UploadFilesForm } from "../components"
 import { Header, Main } from "../../../ui"
 import { useContext } from "react"
@@ -26,6 +26,8 @@ export const AdminRoutes = () =>{
             <Route path="/planos" element={<BlueprintsPage />} />
             <Route path="/cotizaciones" element={<PricePage />} />
             <Route path="/software" element={<SoftwarePage />} />
+            <Route path="/taquillas" element={<BoxOfficePage />} />
+            <Route path="/campanias" element={<CampaignPage />} />
             <Route path="/documentacion" element={<DocumentationPage />} />
           </Routes>
         </>
