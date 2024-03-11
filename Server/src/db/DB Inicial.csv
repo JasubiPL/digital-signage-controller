@@ -1,55 +1,55 @@
 nombre,dispositivo,proyeccion,estatus
-Mexico Norte,PANEL LED,PLAYER,OK
 Acapulco Diamante,PANEL LED,PLAYER,Remodelacion
-Mexico Sur,PANEL LED,PLAYER,Ok
+Acapulco Papagayo,PANEL LED,PLAYER,Remodelacion
 Aguascalientes TQ1,PANEL LED,PLAYER,Remodelacion
 Aguascalientes TQ2,PANEL LED,PLAYER,Remodelacion
-Leon TQ1,PANEL LED,PLAYER,Remodelacion
-Leon TQ2,PANEL LED,PLAYER,Remodelacion
-Tlaquepaque,PANEL LED,PLAYER,OK
-Acapulco Papagayo,PANEL LED,PLAYER,Remodelacion
+Apatzingan,PANTALLAS,USB,OK
+Barra Navidad,PANTALLAS,USB,OK
 Celaya,PANTALLAS,PLAYER,OK
 Colima,PANTALLAS,PLAYER,OK
 Cuernavaca,PANTALLAS,PLAYER,OK
 Culiacan,PANTALLAS,PLAYER,OK
 Durango,PANEL LED,PLAYER,OK
+Guadajalaja MOD Doters,PANTALLAS,PLAYER,OK
 Guadalajara MOD4,PANTALLAS,PLAYER,OK
 Guadalajara MOD7,PANTALLAS,PLAYER,OK
-Guadajalaja MOD Doters,PANTALLAS,PLAYER,OK
 Guanajuato,PANTALLAS,PLAYER,OK
 Irapuato,PANTALLAS,PLAYER,Pantalla Dañada
+La Piedad,PANTALLAS,USB,Pantalla Dañada
+Leon TQ1,PANEL LED,PLAYER,Remodelacion
+Leon TQ2,PANEL LED,PLAYER,Remodelacion
+Los Mochis,PANTALLAS,PLAYER,OK
 Manzanillo,PANTALLAS,PLAYER,OK
 Matamoros,PANTALLAS,PLAYER,OK
 Mazatlan,PANEL LED,PLAYER,OK
-Monterrey Colon,PANEL LED,PLAYER,OK
+Mexico Norte,PANEL LED,PLAYER,OK
+Mexico Poniente,PANTALLAS,PLAYER,OK
+Mexico Poniente SE,PANTALLAS,PLAYER,OK
+Mexico Sur,PANEL LED,PLAYER,Ok
 Monterrey Churubusco,PANTALLAS,PLAYER,OK
+Monterrey Colon,PANEL LED,PLAYER,OK
 Morelia,PANTALLAS,PLAYER,OK
 Nayarit,PANTALLAS,PLAYER,OK
 Nuevo Laredo,PANTALLAS,PLAYER,Pantalla Dañada
-Mexico Poniente,PANTALLAS,PLAYER,OK
-Mexico Poniente SE,PANTALLAS,PLAYER,OK
+Plaza Sendero,PANTALLAS,PLAYER,Pantalla Dañada
+Puebla,PANTALLAS,USB,OK
 Puerto Vallarta,PANEL LED,PLAYER,OK
 Queretaro B,PANEL LED,PLAYER,OK
 Queretaro B SE,LED Y PANTALLAS,PLAYER,OK
 Queretaro C,PANEL LED,PLAYER,OK
-Los Mochis,PANTALLAS,PLAYER,OK
+Reynosa,PANEL LED,PLAYER,Remodelacion
+Salamanca,PANTALLAS,USB,Pantalla Dañada
+San Juan de los Lagos,PANTALLAS,USB,OK
 San Juan Del Rio,PANTALLAS,PLAYER,OK
 San Luis Potosi,PANTALLAS,PLAYER,OK
+San Miguel de Allende,PANTALLAS,USB,OK
 Santiago,PANTALLAS,PLAYER,OK
-Plaza Sendero,PANTALLAS,PLAYER,Pantalla Dañada
 Tampico,PANTALLAS,PLAYER,OK
 Tepic,PANTALLAS,PLAYER,OK
 Tepotzotlan,PANTALLAS,PLAYER,OK
+Tequisquiapan,PANTALLAS,USB,Ok
+Tlaquepaque,PANEL LED,PLAYER,OK
 Uruapan,PANTALLAS,PLAYER,OK
 Zacatecas,PANTALLAS,PLAYER,OK
 Zamora,PANTALLAS,PLAYER,Pantalla Dañada
 Zapopan,PANTALLAS,PLAYER,OK
-Apatzingan,PANTALLAS,USB,OK
-Barra Navidad,PANTALLAS,USB,OK
-Puebla,PANTALLAS,USB,OK
-San Juan de los Lagos,PANTALLAS,USB,OK
-San Miguel de Allende,PANTALLAS,USB,OK
-Tequisquiapan,PANTALLAS,USB,Ok
-La Piedad,PANTALLAS,USB,Pantalla Dañada
-Salamanca,PANTALLAS,USB,Pantalla Dañada
-Reynosa,PANEL LED,PLAYER,Remodelacion
