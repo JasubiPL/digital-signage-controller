@@ -4,27 +4,26 @@ import { getInfoDb } from "../helpers/getInfoDB"
 
 export const BoxOfficePage = () =>{
 
-  const [currentBoxOffice, setCurrentBoxOffice] = useState("All")
   const [allBoxOffice, setAllBoxOffice] = useState([ 'All'])
-  const [boxOffice, setBoxOffice] = useState([])
+  const [selectOffice, setSelectOffice] = useState([ 'All'])
+  const [currentBoxOffice, setCurrentBoxOffice] = useState("All")
 
   console.log(currentBoxOffice)
 
   const setQuery = async () =>{
+    const selectQueryData =  await getInfoDb('taquillas', 'ETN')
+    setSelectOffice(selectQueryData)
 
     if(currentBoxOffice === "All"){
       const queryData =  await getInfoDb('taquillas', 'ETN')
-
-      //Enviamos las taquillas existentes
-      setBoxOffice(queryData)
-      console.log(boxOffice)
-
-      queryData.unshift('All')
       
       //enviamos a la lista de seleccion las taquillas existentes
       setAllBoxOffice(queryData)
 
+    }else{
+      setAllBoxOffice(['TODO => Crear la query'])
     }
+
 
     //TODO - Aqui iria la query por taquilla
 
@@ -45,8 +44,9 @@ export const BoxOfficePage = () =>{
         className=" self-end mr-[5%] bg-red-600 text-white text-xl"
         onChange={(e) => setCurrentBoxOffice(e.target.value)}
       >
+      <option key='All' value="All">Todas las taquillas</option>
       {
-        allBoxOffice.map( option =>(
+        selectOffice.map( option =>(
           <option key={option} value={option}>{option}</option>
         ))
       }
@@ -60,8 +60,16 @@ export const BoxOfficePage = () =>{
           <article>Acciones</article>
         </header>
         {
-          boxOffice.map( office =>(
-            <li>{office}</li>
+          allBoxOffice.map( office =>(
+            <div className="text-center grid grid-cols-5 border-b-[1px] border-gray-200 pb-1">
+              <div className=" text-left pl-4">{ office }</div>
+              <div></div>
+              <div></div>
+              <div></div>
+              <div>
+
+              </div>
+            </div>
           ))
         }
       </section>
