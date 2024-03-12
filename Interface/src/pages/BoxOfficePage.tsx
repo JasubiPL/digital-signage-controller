@@ -6,11 +6,6 @@ import { GrFormView } from "react-icons/gr";
 import { useLocation } from "react-router-dom";
 import { AddBoxOffice } from "../users/admin/components";
 
-interface Office {
-  nombre: string;
-  // otros campos necesarios
-}
-
 interface BoxOffice {
   nombre: string,
   dispositivo: string,
@@ -23,7 +18,7 @@ interface BoxOffice {
 export const BoxOfficePage = () =>{
 
   const [allBoxOffice, setAllBoxOffice] = useState<BoxOffice[]>([])
-  const [modal, setModal] = useState<JSX.Element | null>(null);
+  const [modal, setModal] = useState<React.ReactNode | null>(null);
 
   const currentPath = useLocation()
 
@@ -57,7 +52,7 @@ export const BoxOfficePage = () =>{
       <section className="w-[90%] flex justify-between mb-4">
         <button 
         onClick={() => setModal(<AddBoxOffice />)}
-          className="py-1 px-8 bg-red-600 text-white text-xl hover:scale-105 active:scale-90 transition-all"
+          className="py-1 px-8 bg-red-600 text-white hover:scale-105 active:scale-90 transition-all"
         >
           Agregar Taquilla +
         </button>

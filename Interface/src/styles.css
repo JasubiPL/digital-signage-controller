@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+input{
+  outline: none;
+}
+
 .pop-in{
   animation: pop-in .2s ease-in;
 }
