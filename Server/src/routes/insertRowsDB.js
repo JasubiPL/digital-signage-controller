@@ -25,8 +25,8 @@ insertRowDB.post('/add-taquilla', async (req, res) =>{
     }   
 
     const [status] = await connection.execute(
-      `INSERT INTO taquillas_${company} (nombre) VALUES (?)`,
-      [data.name]
+      `INSERT INTO taquillas_${company} (nombre, dispositivo, proyeccion, estatus) VALUES (?, ?, ?, ?)`,
+      [data.name, data.device, data.projection, data.status]
     )
 
     console.log(status);

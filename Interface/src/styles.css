@@ -2,9 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
+input{
+  outline: none;
+}
+
 .pop-in{
   animation: pop-in .2s ease-in;
 }
+
+/* etiquetas de estatus de taquilla*/
+
+.OK, .Ok {
+  background-color: yellowgreen;
+  color: #fff;
+  padding: 5px 20px;
+}
+.Remodelacion {
+  background-color: orange;
+  color: #fff;
+  padding: 5px 20px;
+}
+
+.Dañada {
+  background-color: red;
+  color: #fff;
+  padding: 5px 20px;
+}
+
 
 @keyframes pop-in {
  0% {
