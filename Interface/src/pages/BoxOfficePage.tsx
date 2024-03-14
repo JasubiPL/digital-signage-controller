@@ -7,6 +7,7 @@ import { useLocation } from "react-router-dom";
 import { AddBoxOffice } from "../users/admin/components";
 
 interface BoxOffice {
+  id: string,
   nombre: string,
   dispositivo: string,
   proyeccion: string,
@@ -67,7 +68,7 @@ export const BoxOfficePage = () =>{
         </header>
         {
           allBoxOffice.map( office =>(
-            <div key={office.nombre} className="text-center grid grid-cols-5 border-b-[1px] border-gray-200 py-2">
+            <div key={office.id} className="text-center grid grid-cols-5 border-b-[1px] border-gray-200 py-2">
               <div className=" text-left pl-4">{ office.nombre }</div>
               <div>{ office.dispositivo }</div>
               <div>{ office.proyeccion }</div>
