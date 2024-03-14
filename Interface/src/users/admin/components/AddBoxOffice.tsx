@@ -1,8 +1,14 @@
-import { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, Dispatch, FC, FormEvent, ReactNode, SetStateAction, useState } from "react";
 import { IoCloseSharp } from "react-icons/io5";
 import { insertRowsDB } from "../../../helpers/insertRowsDB";
+import { Alerts } from "../../../ui/components/Alerts";
 
-export const AddBoxOffice = () =>{
+interface Props {
+  modal:  Dispatch<SetStateAction<ReactNode>>,
+  reloadInfo: () => Promise<void>
+}
+
+export const AddBoxOffice:FC<Props> = ({ modal, reloadInfo }) =>{
 
   const [boxOfficeData, setBoxOfficeData] = useState({
     name: "",
@@ -11,7 +17,7 @@ export const AddBoxOffice = () =>{
     status: "OK"
   })
 
-  console.log(boxOfficeData)
+  //console.log(boxOfficeData)
 
   const handlerOffice = (e:ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>{
     setBoxOfficeData({
@@ -24,10 +30,40 @@ export const AddBoxOffice = () =>{
     e.preventDefault()
 
     const res = await insertRowsDB('taquilla', 'ETN', boxOfficeData)
-    console.log(res)
-    window.location.reload()
-  }
+    //console.log(res)
 
+    if(res.status != 201){
+      modal(
+        <Alerts type="warning">
+          <>
+            {res.message}
+          </>
+        </Alerts>
+      )
+
+      setTimeout(() =>{
+        modal(null)
+      },1000)
+
+      return
+    }
+
+    modal(
+      <Alerts type="success">
+        <>
+          {res.message}
+        </>
+      </Alerts>
+    )
+    
+    reloadInfo()
+    setTimeout(() =>{
+      modal(null)
+    },1000)
+    //TODO => Manejo de modal para el mensaje
+
+
+  }
 
   return(
     <section className={`w-screen h-screen bg-black/50 absolute top-0 left-0 flex justify-center items-center`}>

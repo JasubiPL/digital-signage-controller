@@ -20,7 +20,10 @@ insertRowDB.post('/add-taquilla', async (req, res) =>{
     for (const taquilla of rows) {
       if (taquilla.nombre === data.name) {
         console.log("\nLa taquilla ya existe en la Base de datos" .red);
-        return res.status(409).json("La taquilla ya existe en la base de datos");
+        return res.json({
+          status: 409,
+          message: "La taquilla ya existe en la base de datos"
+        });
       }
     }   
 
@@ -32,7 +35,10 @@ insertRowDB.post('/add-taquilla', async (req, res) =>{
     console.log(status);
 
     console.log("\nTaquillas guardadas con exito" .green); 
-    res.status(201).json("Taquilla agregada con exito")
+    res.json({
+      status: 201,
+      message: "Taquilla agregada con exito"
+    })
   
   } catch (err) {
     console.log(err .red);
@@ -55,7 +61,10 @@ insertRowDB.post('/add-campania', async (req, res) =>{
     for (const campania of rows) {
       if (campania.nombre === data.name) {
         console.log("\nLa Campaña ya existe en la Base de datos" .red);
-        res.status(409).json("La Campaña ya existe en la base de datos");
+        res.json({
+          status: 409,
+          message: "La Campaña ya existe en la base de datos"
+        });
       }
     }   
 
@@ -69,7 +78,10 @@ insertRowDB.post('/add-campania', async (req, res) =>{
     console.log(status);
 
     console.log("\nCampaña guardadas con exito" .green); 
-    res.status(201).json("Campaña agregada con exito")
+    res.json({
+      status: 201,
+      message: "Campaña agregada con exito"
+    })
   
   } catch (err) {
     console.log(err .red);

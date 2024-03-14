@@ -5,6 +5,8 @@ import { MdOutlineDeleteForever } from "react-icons/md";
 import { GrFormView } from "react-icons/gr";
 import { useLocation } from "react-router-dom";
 import { AddBoxOffice } from "../users/admin/components";
+import { deleteRowsDB } from "../helpers/deleteRowsDB";
+import { Alerts } from "../ui/components/Alerts";
 
 interface BoxOffice {
   id: string,
@@ -12,7 +14,6 @@ interface BoxOffice {
   dispositivo: string,
   proyeccion: string,
   estatus: string
-  // otras propiedades si las hay
 }
 
 
@@ -23,24 +24,33 @@ export const BoxOfficePage = () =>{
 
   const currentPath = useLocation()
 
-  //console.log(currentBoxOffice)
-
-  const setQuery = async () =>{
-
+  const getBoxOffice = async () =>{
     const queryData =  await getInfoDb('taquillas', 'ETN')
-    
-    //enviamos a la lista de seleccion las taquillas existentes
     setAllBoxOffice(queryData)
-
-
-
-    //TODO - Aqui iria la query por taquilla
 
   }
 
+  const deleteBoxOffice = async (name: string) =>{
+    const res = await deleteRowsDB("taquilla", "ETN", name)
+
+    setModal(
+      <Alerts type="success">
+        <>
+          {res.data}
+        </>
+      </Alerts>
+    )
+
+    getBoxOffice()
+    setTimeout(() =>{
+      setModal(null)
+    },1000)
+  }
+
+
   useEffect(() =>{
 
-    setQuery()
+    getBoxOffice()
 
   }, [])
 
@@ -50,10 +60,10 @@ export const BoxOfficePage = () =>{
   return(
     <section className="w-full  h-full flex flex-col items-center overflow-y-auto my-8">
       { modal }
-      <section className="w-[90%] flex justify-between mb-4">
+      <section className="w-[90%] flex justify-end mb-4">
         <button 
-        onClick={() => setModal(<AddBoxOffice />)}
-          className="py-1 px-8 bg-red-600 text-white hover:scale-105 active:scale-90 transition-all"
+        onClick={() => setModal(<AddBoxOffice modal={ setModal } reloadInfo={ getBoxOffice }/>)}
+          className="py-1 px-8 bg-green-600 text-white hover:scale-105 active:scale-90 transition-all"
         >
           Agregar Taquilla +
         </button>
@@ -85,9 +95,9 @@ export const BoxOfficePage = () =>{
                 {
                   //comprovamos si estamos en la ruta del Administrador para mostrar el boton de borrado
                   currentPath.pathname.includes('admin') 
-                  ? <button className="hover:scale-110 active:scale-90 transition-all hover:after:content-['Eliminar'] 
+                  ? <button onClick={() => deleteBoxOffice(office.nombre)} className="hover:scale-110 active:scale-90 transition-all hover:after:content-['Eliminar'] 
                   after:absolute after:bg-gray-900 after:px-2 after:text-white after:top-[-20px] after:left-0">
-                      <MdOutlineDeleteForever className="text-3xl text-red-600"/>
+                      <MdOutlineDeleteForever className="text-3xl text-red-600" />
                     </button>
                   : ""
                 }
