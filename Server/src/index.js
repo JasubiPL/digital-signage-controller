@@ -6,6 +6,7 @@ const getFiles = require("./routes/getFiles")
 const getCampaign = require("./routes/getCampaign")
 const insertRowsDB = require("./routes/insertRowsDB")
 const deleteRowsDB = require("./routes/deleteRowsDB")
+const updateRowsDB = require("./routes/updateRowsDB")
 
 //Building Server
 const PORT = process.env.PORT || 7000
@@ -19,7 +20,7 @@ app.use(express.static(path.join(__dirname, "files")))
 
 
 //Routes
-app.use("/api", saveFiles, getFiles, getCampaign, insertRowsDB, deleteRowsDB)
+app.use("/api", saveFiles, getFiles, getCampaign, insertRowsDB, deleteRowsDB, updateRowsDB)
 
 
 app.get("/", (req, res) =>{
