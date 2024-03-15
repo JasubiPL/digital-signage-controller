@@ -43,6 +43,8 @@ SELECT * FROM taquillas_ETN;
 SELECT * FROM campañas_ETN;
 SELECT * FROM taquillas_campañas_ETN;
 
+UPDATE taquillas_ETN SET nombre = "Test 1", dispositivo = "UPDATE", proyeccion = "UPDATE", estatus = "UPDATE" WHERE id = 76;
+
 -- Ejemplo de Consulta
 SELECT taquillas_ETN.nombre AS 'Nombre de Taquilla',
        campañas_ETN.nombre AS 'Nombre de Campaña',

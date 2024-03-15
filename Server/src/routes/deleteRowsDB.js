@@ -25,14 +25,14 @@ deleteRowDB.post('/delete-taquilla', async (req, res) =>{
         )
         console.log(status);
         console.log("\nLa taquilla fue borrada con exito" .green);
-        res.status(204).json("LLa taquilla fue borrada con exito");
+        res.json("La taquilla fue borrada con exito");
         return
       }
     }   
 
 
     console.log("\nTaquilla no existe en la Base de Datos" .red); 
-    res.status(404).json("Taquilla no existe en la Base de Datos")
+    res.json("Taquilla no existe en la Base de Datos")
   
   } catch (err) {
     console.log(err .red);
@@ -67,7 +67,7 @@ deleteRowDB.post('/delete-campania', async (req, res) =>{
 
 
     console.log("\nCampaña no existe en la Base de Datos" .red); 
-    res.status(404).json("Campaña no existe en la Base de Datos")
+    res.json("Campaña no existe en la Base de Datos")
   
   } catch (err) {
     console.log(err .red);
