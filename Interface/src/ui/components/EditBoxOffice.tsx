@@ -1,23 +1,30 @@
-import { ChangeEvent, Dispatch, FC, FormEvent, ReactNode, SetStateAction, useState } from "react";
-import { IoCloseSharp } from "react-icons/io5";
-import { insertRowsDB } from "../../../helpers/insertRowsDB";
-import { Alerts } from "../../../ui/components/Alerts";
+import { ChangeEvent, FC, FormEvent, useState } from "react"
+import { IoCloseSharp } from "react-icons/io5"
+import { editRowsDB } from "../../helpers/editRowsDB"
 
-interface Props {
-  modal:  Dispatch<SetStateAction<ReactNode>>,
-  reloadInfo: () => Promise<void>
+interface DataBoxOffice{
+  id: string
+  nombre: string,
+  dispositivo: string,
+  proyeccion: string,
+  estatus: string
 }
 
-export const AddBoxOffice:FC<Props> = ({ modal, reloadInfo }) =>{
+interface Props {
+  data: DataBoxOffice
+}
+
+
+
+export const EditBoxOffice: FC<Props> = ({ data }) =>{
 
   const [boxOfficeData, setBoxOfficeData] = useState({
-    name: "",
-    device: "PANTALLAS",
-    projection: "PLAYER",
-    status: "OK"
+    id: data.id,
+    name: data.nombre,
+    device: data.dispositivo,
+    projection: data.proyeccion,
+    status: data.estatus
   })
-
-  //console.log(boxOfficeData)
 
   const handlerOffice = (e:ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>{
     setBoxOfficeData({
@@ -26,50 +33,19 @@ export const AddBoxOffice:FC<Props> = ({ modal, reloadInfo }) =>{
     })
   }
 
-  const insertBoxOffice = async (e:FormEvent<HTMLFormElement>) =>{
+  const editBoxOffice = async (e:FormEvent<HTMLFormElement>) =>{
     e.preventDefault()
 
-    const res = await insertRowsDB('taquilla', 'ETN', boxOfficeData)
-    //console.log(res)
-
-    if(res.status != 201){
-      modal(
-        <Alerts type="warning">
-          <>
-            {res.message}
-          </>
-        </Alerts>
-      )
-
-      setTimeout(() =>{
-        modal(null)
-      },1000)
-
-      return
-    }
-
-    modal(
-      <Alerts type="success">
-        <>
-          {res.message}
-        </>
-      </Alerts>
-    )
-    
-    reloadInfo()
-    setTimeout(() =>{
-      modal(null)
-    },1000)
-    //TODO => Manejo de modal para el mensaje
+    const res = await editRowsDB("taquilla", "ETN", boxOfficeData)
 
 
   }
 
-  return(
+  return (
     <section className={`w-screen h-screen bg-black/50 absolute top-0 left-0 flex justify-center items-center`}>
-      <form className=" w-1/4 bg-white grid py-6 px-6 outline-none" onSubmit={insertBoxOffice}>
+      <form className=" w-1/4 bg-white grid py-6 px-6 outline-none" onSubmit={editBoxOffice}>
         <div className="flex w-full justify-between items-center border-b-2 border-gray-100">
-          <span>Añadir Nueva Taquilla</span>
+          <span>Editar Taquilla</span>
           <IoCloseSharp className=" cursor-pointer" onClick={() => window.location.reload()}/>
         </div>
         <label className="mt-6">Nombre de taquilla</label>
@@ -78,11 +54,13 @@ export const AddBoxOffice:FC<Props> = ({ modal, reloadInfo }) =>{
           type="text" 
           name="name" 
           onChange={handlerOffice}
+          value={boxOfficeData.name}
         />
       <div className="w-full grid mt-3">
         <label className="text-sm text-red-600" htmlFor="device">Selecciona el Dispositivo</label>
         <select 
           onChange={handlerOffice}
+          value={boxOfficeData.device}
           className="outline-red-300 border-gray-200 border-2" name="device">
           <option value="PANTALLAS">PANTALLAS</option>
           <option value="PANEL LED">PANEL LED</option>
@@ -93,6 +71,7 @@ export const AddBoxOffice:FC<Props> = ({ modal, reloadInfo }) =>{
         <label className="text-sm text-red-600" htmlFor="projection">Medio de Proyección</label>
         <select 
           onChange={handlerOffice}
+          value={boxOfficeData.projection}
           className="outline-red-300 border-gray-200 border-2" name="projection">
           <option value="PLAYER">PLAYER</option>
           <option value="USB">USB</option>
@@ -103,6 +82,7 @@ export const AddBoxOffice:FC<Props> = ({ modal, reloadInfo }) =>{
         <label className="text-sm text-red-600" htmlFor="status">Estatus de taquilla</label>
         <select 
           onChange={handlerOffice}
+          value={boxOfficeData.status}
           className="outline-red-300 border-gray-200 border-2" name="status">
           <option value="OK">OK</option>
           <option value="Remodelacion">Remodelación</option>
@@ -113,4 +93,4 @@ export const AddBoxOffice:FC<Props> = ({ modal, reloadInfo }) =>{
       </form>
     </section>
   )
-} 
+}

@@ -62,13 +62,13 @@
     },
     {
       "email" : "kbriseno@etn.com.mx",
-      "area" : "admin",
+      "area" : "manager",
       "image" : "/img/users/admin.jpg",
       "name" : "Fernanda Briseño"
     },
     {
       "email" : "rubaldo@etn.com.mx",
-      "area" : "admin",
+      "area" : "manager",
       "image" : "/img/users/admin.jpg",
       "name" : "Ricardo Ubaldo"
     }
