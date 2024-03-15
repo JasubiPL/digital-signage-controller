@@ -1,6 +1,7 @@
-import { ChangeEvent, FC, FormEvent, useState } from "react"
+import { ChangeEvent, Dispatch, FC, FormEvent, ReactNode, SetStateAction, useState } from "react"
 import { IoCloseSharp } from "react-icons/io5"
 import { editRowsDB } from "../../helpers/editRowsDB"
+import { Alerts } from "./Alerts"
 
 interface DataBoxOffice{
   id: string
@@ -11,12 +12,14 @@ interface DataBoxOffice{
 }
 
 interface Props {
-  data: DataBoxOffice
+  modal: Dispatch<SetStateAction<ReactNode>>,
+  data: DataBoxOffice,
+  reloadInfo: () => Promise<void>
 }
 
 
 
-export const EditBoxOffice: FC<Props> = ({ data }) =>{
+export const EditBoxOffice:FC<Props> = ({ data, modal, reloadInfo }) => {
 
   const [boxOfficeData, setBoxOfficeData] = useState({
     id: data.id,
@@ -38,6 +41,30 @@ export const EditBoxOffice: FC<Props> = ({ data }) =>{
 
     const res = await editRowsDB("taquilla", "ETN", boxOfficeData)
 
+    if(res.status != 200){
+      modal(
+        <Alerts type="error">
+          <>
+            {res.message}
+          </>
+        </Alerts>
+      )
+
+      return
+    }
+
+    modal(
+      <Alerts type="success">
+        <>
+          {res.message}
+        </>
+      </Alerts>
+    )
+
+    reloadInfo()
+    setTimeout(() =>{
+      modal(null)
+    },1000)
 
   }
 
@@ -46,7 +73,7 @@ export const EditBoxOffice: FC<Props> = ({ data }) =>{
       <form className=" w-1/4 bg-white grid py-6 px-6 outline-none" onSubmit={editBoxOffice}>
         <div className="flex w-full justify-between items-center border-b-2 border-gray-100">
           <span>Editar Taquilla</span>
-          <IoCloseSharp className=" cursor-pointer" onClick={() => window.location.reload()}/>
+          <IoCloseSharp className=" cursor-pointer" onClick={() => modal(null)}/>
         </div>
         <label className="mt-6">Nombre de taquilla</label>
         <input 
@@ -89,7 +116,7 @@ export const EditBoxOffice: FC<Props> = ({ data }) =>{
           <option value="Pantalla Dañada">Pantalla Dañada</option>
         </select>
       </div>
-      <button className="bg-red-600 py-1 px-2 text-white hover:bg-red-400 active:scale-95 transition-all mt-8">Subir</button>
+      <button className="bg-red-600 py-1 px-2 text-white hover:bg-red-400 active:scale-95 transition-all mt-8">Actualizar</button>
       </form>
     </section>
   )

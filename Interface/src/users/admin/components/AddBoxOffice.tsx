@@ -70,7 +70,7 @@ export const AddBoxOffice:FC<Props> = ({ modal, reloadInfo }) =>{
       <form className=" w-1/4 bg-white grid py-6 px-6 outline-none" onSubmit={insertBoxOffice}>
         <div className="flex w-full justify-between items-center border-b-2 border-gray-100">
           <span>Añadir Nueva Taquilla</span>
-          <IoCloseSharp className=" cursor-pointer" onClick={() => window.location.reload()}/>
+          <IoCloseSharp className=" cursor-pointer" onClick={() => modal(null)}/>
         </div>
         <label className="mt-6">Nombre de taquilla</label>
         <input 
@@ -109,7 +109,7 @@ export const AddBoxOffice:FC<Props> = ({ modal, reloadInfo }) =>{
           <option value="Pantalla Dañada">Pantalla Dañada</option>
         </select>
       </div>
-      <button className="bg-red-600 py-1 px-2 text-white hover:bg-red-400 active:scale-95 transition-all mt-8">Subir</button>
+      <button className="bg-red-600 py-1 px-2 text-white hover:bg-red-400 active:scale-95 transition-all mt-8">Agregar</button>
       </form>
     </section>
   )
