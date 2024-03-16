@@ -1,19 +1,54 @@
-import { NavLink } from "react-router-dom"
+import { NavLink, useLocation } from "react-router-dom"
 import { LuStore } from "react-icons/lu";
-import { FC } from "react";
+import { IoIosArrowForward } from "react-icons/io";
+import { FC, useEffect, useState } from "react";
 
 interface Props {
   path: string,
 }
 
+let active = false
+
 export const BoxOfficeItem:FC<Props>  = ({ path  }) =>{
+  const [showBrand, setShowBrand] = useState({
+    isActive: false,
+    style: "h-0 overflow-hidden",
+    arrow: ""
+  })
+
+  const handlerSubmenu = () =>{
+    if(showBrand.isActive){
+      setShowBrand({
+        isActive: false,
+        style: "h-0 overflow-hidden",
+        arrow: ""
+      })
+    }else{
+      setShowBrand({
+        isActive: true,
+        style: "",
+        arrow: "rotate-90"
+      })
+    }
+  }
+
 
   return(
-    <NavLink to={`/${path}/taquillas`} className={({ isActive }) => ` px-4 border-l-4 py-1 hover:border-gray-400 hover:bg-gray-200 ${ isActive ? 'text-red-600 border-red-600' : 'border-white' }`}>
-      <li className="flex items-center gap-2 text-lg">
-        <LuStore className="text-2xl"/>
-        Taquillas
-      </li>
-    </NavLink>
+    <div>
+      <div 
+      onClick={handlerSubmenu}
+      className="flex gap-2 items-center justify-between pl-4 cursor-pointer">
+        <span className="flex gap-2 items-center text-xl">
+          <LuStore className="text-2xl"/>
+          Taquillas
+        </span>
+        <IoIosArrowForward className={`mr-2 transition-all ${showBrand.arrow}`}/>
+      </div>
+      <ul className={`grid ${showBrand.style} transition-all`}>
+        <NavLink to={`/${ path }/taquillas/ETN`} className={({ isActive }) => `pl-6 border-l-4 py-1 hover:border-gray-400 hover:bg-gray-200 ${ isActive ? 'text-red-600 border-red-600' : 'border-white' }`}>ETN</NavLink>
+        <NavLink to={`/${ path }/taquillas/GHO`} className={({ isActive }) => `pl-6 border-l-4 py-1 hover:border-gray-400 hover:bg-gray-200 ${ isActive ? 'text-red-600 border-red-600' : 'border-white' }`}>GHO</NavLink>
+        <NavLink to={`/${ path }/taquillas/Costaline`} className={({ isActive }) => ` px-6 border-l-4 py-1 hover:border-gray-400 hover:bg-gray-200 ${ isActive ? 'text-red-600 border-red-600' : 'border-white' }`}>Costaline</NavLink>
+      </ul>
+    </div>
   )
 }

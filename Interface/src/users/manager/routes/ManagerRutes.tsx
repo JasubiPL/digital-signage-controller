@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom"
-import { BlueprintsPage, DocumentationPage, PricePage, TemplatesPage } from "../../../pages"
+import { BlueprintsPage, BoxOfficePageCosta, BoxOfficePageETN, BoxOfficePageGHO, CampaignPage, DocumentationPage, PricePage, TemplatesPage } from "../../../pages"
 import { NavbarManager } from "../components"
 import { Header, Main } from "../../../ui"
 
@@ -17,6 +17,10 @@ export const ManagerRoutes = () =>{
             <Route path="/planos" element={<BlueprintsPage />} />
             <Route path="/cotizaciones" element={<PricePage />} />
             <Route path="/documentacion" element={<DocumentationPage />} />
+            <Route path="/taquillas/ETN" element={<BoxOfficePageETN />} />
+            <Route path="/taquillas/GHO" element={<BoxOfficePageGHO />} />
+            <Route path="/taquillas/Costaline" element={<BoxOfficePageCosta />} />
+            <Route path="/campanias" element={<CampaignPage />} />
           </Routes>
         </>
       </Main>
