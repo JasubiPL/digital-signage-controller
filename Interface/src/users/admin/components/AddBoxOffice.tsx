@@ -5,10 +5,11 @@ import { Alerts } from "../../../ui/components/Alerts";
 
 interface Props {
   modal:  Dispatch<SetStateAction<ReactNode>>,
-  reloadInfo: () => Promise<void>
+  reloadInfo: () => Promise<void>,
+  company: string
 }
 
-export const AddBoxOffice:FC<Props> = ({ modal, reloadInfo }) =>{
+export const AddBoxOffice:FC<Props> = ({ modal, reloadInfo, company }) =>{
 
   const [boxOfficeData, setBoxOfficeData] = useState({
     name: "",
@@ -29,7 +30,7 @@ export const AddBoxOffice:FC<Props> = ({ modal, reloadInfo }) =>{
   const insertBoxOffice = async (e:FormEvent<HTMLFormElement>) =>{
     e.preventDefault()
 
-    const res = await insertRowsDB('taquilla', 'ETN', boxOfficeData)
+    const res = await insertRowsDB('taquilla', `${company}`, boxOfficeData)
     //console.log(res)
 
     if(res.status != 201){

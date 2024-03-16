@@ -14,12 +14,13 @@ interface DataBoxOffice{
 interface Props {
   modal: Dispatch<SetStateAction<ReactNode>>,
   data: DataBoxOffice,
-  reloadInfo: () => Promise<void>
+  reloadInfo: () => Promise<void>,
+  company: string
 }
 
 
 
-export const EditBoxOffice:FC<Props> = ({ data, modal, reloadInfo }) => {
+export const EditBoxOffice:FC<Props> = ({ data, modal, reloadInfo, company }) => {
 
   const [boxOfficeData, setBoxOfficeData] = useState({
     id: data.id,
@@ -39,7 +40,7 @@ export const EditBoxOffice:FC<Props> = ({ data, modal, reloadInfo }) => {
   const editBoxOffice = async (e:FormEvent<HTMLFormElement>) =>{
     e.preventDefault()
 
-    const res = await editRowsDB("taquilla", "ETN", boxOfficeData)
+    const res = await editRowsDB("taquilla", `${company}`, boxOfficeData)
 
     if(res.status != 200){
       modal(

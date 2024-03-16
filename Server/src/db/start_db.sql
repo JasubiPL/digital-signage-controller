@@ -17,6 +17,24 @@ CREATE TABLE IF NOT EXISTS taquillas_ETN (
     
 );
 
+CREATE TABLE IF NOT EXISTS taquillas_GHO (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    dispositivo VARCHAR(50) NOT NULL,
+    proyeccion VARCHAR(50) NOT NULL,
+    estatus VARCHAR(50) NOT NULL
+    
+);
+
+CREATE TABLE IF NOT EXISTS taquillas_COSTA (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    dispositivo VARCHAR(50) NOT NULL,
+    proyeccion VARCHAR(50) NOT NULL,
+    estatus VARCHAR(50) NOT NULL
+    
+);
+
 CREATE TABLE IF NOT EXISTS campañas_ETN (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL UNIQUE,
@@ -40,6 +58,8 @@ show tables;
 
 -- Mostramos datos
 SELECT * FROM taquillas_ETN;
+SELECT * FROM taquillas_GHO;
+SELECT * FROM taquillas_COSTA;
 SELECT * FROM campañas_ETN;
 SELECT * FROM taquillas_campañas_ETN;
 

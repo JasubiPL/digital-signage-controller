@@ -18,7 +18,7 @@ interface BoxOffice {
 }
 
 
-export const BoxOfficePage = () =>{
+export const BoxOfficePageGHO = () =>{
 
   const [allBoxOffice, setAllBoxOffice] = useState<BoxOffice[]>([])
   const [modal, setModal] = useState<React.ReactNode | null>(null);
@@ -26,13 +26,13 @@ export const BoxOfficePage = () =>{
   const currentPath = useLocation()
 
   const getBoxOffice = async () =>{
-    const queryData =  await getInfoDb('taquillas', 'ETN')
+    const queryData =  await getInfoDb('taquillas', 'GHO')
     setAllBoxOffice(queryData)
 
   }
 
   const deleteBoxOffice = async (name: string) =>{
-    const res = await deleteRowsDB("taquilla", "ETN", name)
+    const res = await deleteRowsDB("taquilla", "GHO", name)
 
     setModal(
       <Alerts type="success">
@@ -65,7 +65,7 @@ export const BoxOfficePage = () =>{
         {
           currentPath.pathname.includes('admin') 
           ? <button 
-          onClick={() => setModal(<AddBoxOffice modal={ setModal } reloadInfo={ getBoxOffice }/>)}
+          onClick={() => setModal(<AddBoxOffice modal={ setModal } reloadInfo={ getBoxOffice } company="GHO"/>)}
             className="py-1 px-8 bg-green-600 text-white hover:scale-105 active:scale-90 transition-all"
           >
             Agregar Taquilla +
@@ -92,7 +92,7 @@ export const BoxOfficePage = () =>{
                 after:absolute after:bg-gray-900 after:px-2 after:text-white after:top-[-20px] after:left-0">
                   <GrFormView className="text-4xl text-blue-500"/>
                 </button>
-                <button onClick={() => setModal(<EditBoxOffice modal={setModal} reloadInfo={ getBoxOffice } data={office}/>)} className="hover:scale-110 active:scale-90 transition-all hover:after:content-['Editar'] 
+                <button onClick={() => setModal(<EditBoxOffice modal={setModal} reloadInfo={ getBoxOffice } data={office} company="GHO"/>)} className="hover:scale-110 active:scale-90 transition-all hover:after:content-['Editar'] 
                 after:absolute after:bg-gray-900 after:px-2 after:text-white after:top-[-20px] after:left-0">
                   <FaRegEdit className="text-2xl text-orange-400"/>
                 </button>
