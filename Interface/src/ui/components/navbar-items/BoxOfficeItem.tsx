@@ -1,13 +1,11 @@
-import { NavLink, useLocation } from "react-router-dom"
+import { NavLink } from "react-router-dom"
 import { LuStore } from "react-icons/lu";
 import { IoIosArrowForward } from "react-icons/io";
-import { FC, useEffect, useState } from "react";
+import { FC, useState } from "react";
 
 interface Props {
   path: string,
 }
-
-let active = false
 
 export const BoxOfficeItem:FC<Props>  = ({ path  }) =>{
   const [showBrand, setShowBrand] = useState({
@@ -37,8 +35,8 @@ export const BoxOfficeItem:FC<Props>  = ({ path  }) =>{
     <div>
       <div 
       onClick={handlerSubmenu}
-      className="flex gap-2 items-center justify-between pl-4 cursor-pointer">
-        <span className="flex gap-2 items-center text-xl">
+      className="flex gap-2 items-center justify-between pl-5 cursor-pointer">
+        <span className="flex gap-2 items-center text-lg">
           <LuStore className="text-2xl"/>
           Taquillas
         </span>
