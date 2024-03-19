@@ -43,6 +43,22 @@ CREATE TABLE IF NOT EXISTS campañas_ETN (
     estatus VARCHAR(50)
 );
 
+CREATE TABLE IF NOT EXISTS campañas_GHO (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL UNIQUE,
+    fecha_inicio VARCHAR(15),
+    fecha_fin VARCHAR(15),
+    estatus VARCHAR(50)
+);
+
+CREATE TABLE IF NOT EXISTS campañas_COSTA (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL UNIQUE,
+    fecha_inicio VARCHAR(15),
+    fecha_fin VARCHAR(15),
+    estatus VARCHAR(50)
+);
+
 CREATE TABLE taquillas_campañas_ETN(
 	taquilla_id INT REFERENCES taquillas_ETN(id),
     campaña_id INT REFERENCES campañas_ETN(id),

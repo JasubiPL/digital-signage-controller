@@ -66,9 +66,9 @@ export const BoxOfficePageCosta = () =>{
           currentPath.pathname.includes('admin') 
           ? <button 
           onClick={() => setModal(<AddBoxOffice modal={ setModal } reloadInfo={ getBoxOffice } company="COSTA"/>)}
-            className="py-1 px-8 bg-green-600 text-white hover:scale-105 active:scale-90 transition-all"
+            className="py-1 px-4 bg-green-600 text-white hover:scale-105 active:scale-90 transition-all"
           >
-            Agregar Taquilla +
+            Nueva Taquilla +
           </button> : null
         }
       </section>
