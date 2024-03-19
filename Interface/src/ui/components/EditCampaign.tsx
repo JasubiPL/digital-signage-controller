@@ -2,6 +2,7 @@ import { ChangeEvent, Dispatch, FC, FormEvent, ReactNode, SetStateAction, useSta
 import { IoCloseSharp } from "react-icons/io5"
 import { editRowsDB } from "../../helpers/editRowsDB"
 import { Alerts } from "./Alerts"
+import { useLocation } from "react-router-dom"
 
 interface DataCampaign{
   id: string
@@ -30,7 +31,7 @@ export const EditCampaign:FC<Props> = ({ data, modal, reloadInfo, company }) => 
     status: data.status
   })
 
-  console.log(campaignData)
+  const currentPath = useLocation()
 
   const handlerCampaign = (e:ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>{
     setCampaignData({
@@ -74,36 +75,44 @@ export const EditCampaign:FC<Props> = ({ data, modal, reloadInfo, company }) => 
   return (
     <section className={`w-screen h-screen bg-black/50 absolute top-0 left-0 flex justify-center items-center`}>
       <form className=" w-1/4 bg-white grid py-6 px-6 outline-none" onSubmit={editCampaign}>
-      <div className="flex w-full justify-between items-center border-b-2 border-gray-100">
+        <div className="flex w-full justify-between items-center border-b-2 border-gray-100">
           <span>Añadir Nueva Campaña</span>
           <IoCloseSharp className=" cursor-pointer" onClick={() => modal(null)}/>
         </div>
-        <label className="mt-6">Nombre de campaña</label>
-        <input 
-          className="text-sm block w-full p-1 border-b-2 border-red-600 placeholder-red-400 text-whitefocus:border-blue-500" 
-          type="text" 
-          name="name" 
-          value={campaignData.name}
-          onChange={handlerCampaign}
-        />
-        <label className="mt-6">Fecha de inicio</label>
-        <input 
-          className="text-sm block w-full p-1 border-b-2 border-red-600 placeholder-red-400 text-whitefocus:border-blue-500" 
-          type="text" 
-          name="inicio" 
-          placeholder="DD/MM/AA o ALWAYS ON"
-          value={campaignData.inicio}
-          onChange={handlerCampaign}
-        />
-        <label className="mt-6">Fecha de fin</label>
-        <input 
-          className="text-sm block w-full p-1 border-b-2 border-red-600 placeholder-red-400 text-whitefocus:border-blue-500" 
-          type="text" 
-          name="fin" 
-          placeholder="DD/MM/AA o ALWAYS ON"
-          value={campaignData.fin}
-          onChange={handlerCampaign}
-        />
+        {
+          currentPath.pathname.includes("admin")
+          ?
+          <>
+            <label className="mt-6">Nombre de campaña</label>
+            <input 
+              className="text-sm block w-full p-1 border-b-2 border-red-600 placeholder-red-400 text-whitefocus:border-blue-500" 
+              type="text" 
+              name="name" 
+              value={campaignData.name}
+              onChange={handlerCampaign}
+            />
+            <label className="mt-6">Fecha de inicio</label>
+            <input 
+              className="text-sm block w-full p-1 border-b-2 border-red-600 placeholder-red-400 text-whitefocus:border-blue-500" 
+              type="text" 
+              name="inicio" 
+              placeholder="DD/MM/AA o ALWAYS ON"
+              value={campaignData.inicio}
+              onChange={handlerCampaign}
+            />
+            <label className="mt-6">Fecha de fin</label>
+            <input 
+              className="text-sm block w-full p-1 border-b-2 border-red-600 placeholder-red-400 text-whitefocus:border-blue-500" 
+              type="text" 
+              name="fin" 
+              placeholder="DD/MM/AA o ALWAYS ON"
+              value={campaignData.fin}
+              onChange={handlerCampaign}
+            />
+          </>
+          :
+          ""
+        }
         <div className="w-full grid mt-3">
           <label className="text-sm" htmlFor="status">Estatus de campaña</label>
           <select 

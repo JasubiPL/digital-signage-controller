@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS campañas_COSTA (
 CREATE TABLE taquillas_campañas_ETN(
 	taquilla_id INT REFERENCES taquillas_ETN(id),
     campaña_id INT REFERENCES campañas_ETN(id),
+    estatus_individual VARCHAR(50),
     PRIMARY KEY (taquilla_id, campaña_id)
 );
 
@@ -70,7 +71,7 @@ show tables;
 
 -- Insertamos relacion
 -- Ejemplo de insercion
--- INSERT INTO taquillas_campañas_ETN(taquilla_id, campaña_id) VALUES ((SELECT id FROM taquillas_ETN WHERE nombre = 'Mexico Norte'),(SELECT id FROM campañas_ETN WHERE nombre = 'No discriminacion'));
+INSERT INTO taquillas_campañas_ETN(taquilla_id, campaña_id, estatus_individual) VALUES ((SELECT id FROM taquillas_ETN WHERE nombre = 'Mexico Norte TQ1'),(SELECT id FROM campañas_ETN WHERE nombre = 'Abordaje he identificación'), "INACTIVA");
 
 -- Mostramos datos
 SELECT * FROM taquillas_ETN;
@@ -86,7 +87,16 @@ SELECT taquillas_ETN.nombre AS 'Nombre de Taquilla',
        campañas_ETN.nombre AS 'Nombre de Campaña',
        campañas_ETN.fecha_inicio AS 'Fecha de Inicio',
        campañas_ETN.fecha_fin AS 'Fecha de Fin',
-       campañas_ETN.estatus AS 'Estatus'
+       estatus_individual AS 'Estatus'
 FROM taquillas_ETN
 JOIN taquillas_campañas_ETN ON taquillas_ETN.id = taquillas_campañas_ETN.taquilla_id
-JOIN campañas_ETN ON taquillas_campañas_ETN.campaña_id = campañas_ETN.id;
+JOIN campañas_ETN ON taquillas_campañas_ETN.campaña_id = campañas_ETN.id WHERE taquillas_ETN.nombre = 'Mexico Norte TQ1';
+
+SELECT campañas_ETN.nombre AS 'Nombre de Campaña',
+       taquillas_ETN.nombre AS 'Nombre de Taquilla',
+       estatus_individual AS 'Estatus'
+FROM campañas_ETN
+JOIN taquillas_campañas_ETN ON campañas_ETN.id = taquillas_campañas_ETN.campaña_id
+JOIN taquillas_ETN ON taquillas_campañas_ETN.taquilla_id = taquillas_ETN.id WHERE campañas_ETN.nombre = 'Aviso de privacidad';
+
+DROP TABLE taquillas_campañas_ETN;
