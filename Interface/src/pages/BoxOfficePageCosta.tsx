@@ -92,10 +92,15 @@ export const BoxOfficePageCosta = () =>{
                 after:absolute after:bg-gray-900 after:px-2 after:text-white after:top-[-20px] after:left-0">
                   <GrFormView className="text-4xl text-blue-500"/>
                 </button>
-                <button onClick={() => setModal(<EditBoxOffice modal={setModal} reloadInfo={ getBoxOffice } data={office} company="COSTA"/>)} className="hover:scale-110 active:scale-90 transition-all hover:after:content-['Editar'] 
-                after:absolute after:bg-gray-900 after:px-2 after:text-white after:top-[-20px] after:left-0">
-                  <FaRegEdit className="text-2xl text-orange-400"/>
-                </button>
+                {
+                  //comprovamos si estamos en la ruta del Administrador para mostrar el boton de borrado
+                  currentPath.pathname.includes('admin') 
+                  ? <button onClick={() => setModal(<EditBoxOffice modal={setModal} reloadInfo={ getBoxOffice } data={office} company="COSTA"/>)} className="hover:scale-110 active:scale-90 transition-all hover:after:content-['Editar'] 
+                  after:absolute after:bg-gray-900 after:px-2 after:text-white after:top-[-20px] after:left-0">
+                    <FaRegEdit className="text-2xl text-orange-400"/>
+                  </button>
+                  : ""
+                }
                 {
                   //comprovamos si estamos en la ruta del Administrador para mostrar el boton de borrado
                   currentPath.pathname.includes('admin') 
