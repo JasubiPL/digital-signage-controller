@@ -4,6 +4,7 @@ import { boxOfficeCampaigns } from "../../helpers/boxOfficeCampaigns"
 import { useLocation } from "react-router-dom"
 import { MdOutlineDeleteForever } from "react-icons/md"
 import { FaRegEdit } from "react-icons/fa"
+import { AddCampaignToBoxOffice } from "../../users/admin/components"
 
 interface Props {
   boxOffice: string,
@@ -41,6 +42,17 @@ export const BoxOfficeCampaigns:FC<Props> = ({ boxOffice, modal }) =>{
           <h2 className="text-2xl text-red-600">Campañas Activas en {boxOffice}</h2>
           <IoCloseSharp className=" cursor-pointer" onClick={() => modal(null)}/>
         </header>
+        <div className="flex justify-end mb-4">
+          {
+            currentPath.pathname.includes('admin') 
+            ? <button 
+            onClick={() => modal(<AddCampaignToBoxOffice modal={ modal } company="ETN" boxOffice={boxOffice}/> )}
+              className="py-1 px-4 bg-green-600 text-white hover:scale-105 active:scale-90 transition-all"
+            >
+              Asignar Campaña +
+            </button> : null
+          }
+        </div>
         <div className="text-center grid grid-cols-5 font-semibold border-b-[1px] border-gray-200 pb-1">          
           <article>Campaña ▾</article>
           <article>Fecha de inicio▾</article>
