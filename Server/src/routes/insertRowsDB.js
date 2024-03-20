@@ -88,4 +88,64 @@ insertRowDB.post('/add-campania', async (req, res) =>{
   }
 })
 
+
+// Insecionde Campañlas en taquillas ==============================>
+
+
+insertRowDB.post("/add-campanias-en-taquilla", async (req, res) =>{
+  const { company } = req.query
+  const data = req.body
+  console.log(`====== Nueva peticion para agregar campaña a taquilla ${company} ======` .cyan)
+
+  try{
+    console.log("\n✅ Conectando con BD")
+    const connection = await createConnection
+
+    console.log(`✅ Buscando campañas activas en ${data.boxOffice}`)
+    const [rows, fields] = await connection.query(
+    `SELECT taquillas_${company}.nombre AS 'taquilla',
+       campañas_${company}.nombre AS 'campania',
+       campañas_${company}.fecha_inicio AS 'inicio',
+       campañas_${company}.fecha_fin AS 'fin',
+       estatus_individual AS 'status'
+    FROM taquillas_${company}
+    JOIN taquillas_campañas_${company} ON taquillas_${company}.id = taquillas_campañas_${company}.taquilla_id
+    JOIN campañas_${company} ON taquillas_campañas_${company}.campaña_id = campañas_${company}.id
+    WHERE taquillas_${company}.nombre = ?`, [data.boxOffice]
+    )
+    
+    console.log(`✅ Comprobando que no exita en la BD`)
+    for (const campaign of rows) {
+      if (campaign.campania === data.campaign) {
+        console.log("❌ La Campaña ya existe en la taquilla" .red);
+        res.json({
+          status: 409,
+          message: "La Campaña ya existe en la en la taquilla"
+        });
+      }
+    }
+
+    
+    const [status] = await connection.execute(
+      `INSERT INTO taquillas_campañas_${company} (taquilla_id, campaña_id, estatus_individual) 
+       VALUES ((SELECT id FROM taquillas_${company} WHERE nombre = ?),
+               (SELECT id FROM campañas_${company} WHERE nombre = ?), "ACTIVA")`,
+      [data.boxOffice, data.campaign]
+    )
+    console.log(`✅ Campaña agregada con exito`)
+
+    res.json({
+      status: 201,
+      message: "Campaña agregada con exito"
+    })
+  } catch (err) {
+    console.log(err .red);
+  }
+
+
+})
+
+
+
+
 module.exports = insertRowDB
