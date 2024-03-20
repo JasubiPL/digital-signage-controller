@@ -8,6 +8,7 @@ import { AddBoxOffice } from "../users/admin/components";
 import { deleteRowsDB } from "../helpers/deleteRowsDB";
 import { Alerts } from "../ui/components/Alerts";
 import { EditBoxOffice } from "../ui/components/EditBoxOffice";
+import { BoxOfficeCampaigns } from "../ui";
 
 interface BoxOffice {
   id: string,
@@ -88,7 +89,7 @@ export const BoxOfficePageGHO = () =>{
               <div>{ office.proyeccion }</div>
               <div><span className={office.estatus  != 'dañada' ?  office.estatus : 'dañada'}>{ office.estatus }</span></div>
               <div className="flex gap-4 justify-center">
-                <button className="hover:scale-110 active:scale-90 transition-all hover:after:content-['Ver'] 
+                <button onClick={() => setModal(<BoxOfficeCampaigns boxOffice={office.nombre} modal={setModal} company="GHO" />)} className="hover:scale-110 active:scale-90 transition-all hover:after:content-['Ver'] 
                 after:absolute after:bg-gray-900 after:px-2 after:text-white after:top-[-20px] after:left-0">
                   <GrFormView className="text-4xl text-blue-500"/>
                 </button>

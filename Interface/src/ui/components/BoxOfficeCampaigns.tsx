@@ -10,6 +10,7 @@ import { insertRowsDB } from "../../helpers/insertRowsDB"
 interface Props {
   boxOffice: string,
   modal: Dispatch<SetStateAction<ReactNode>>,
+  company: string
 }
 
 interface QueryCampaigns {
@@ -28,7 +29,7 @@ interface Campaign {
   status: string
 }
 
-export const BoxOfficeCampaigns:FC<Props> = ({ boxOffice, modal }) =>{
+export const BoxOfficeCampaigns:FC<Props> = ({ boxOffice, modal, company }) =>{
 
   const [campaigns, setCampaigns] = useState<QueryCampaigns[]>([])
   const [selectedCampaigns, setSelectedCampaigns] = useState("")
@@ -37,12 +38,12 @@ export const BoxOfficeCampaigns:FC<Props> = ({ boxOffice, modal }) =>{
   const currentPath = useLocation()
 
   const getCampaigns = async () =>{
-    const queryData = await boxOfficeCampaigns("campanias-en-taquilla", "ETN", boxOffice)
+    const queryData = await boxOfficeCampaigns("campanias-en-taquilla", company, boxOffice)
     setCampaigns(queryData)
   }
 
   const getAllCampaigns = async () =>{
-    const queryData =  await getInfoDb('campanias', "ETN")
+    const queryData =  await getInfoDb('campanias', company)
     //console.log(queryData)
     setAllCampaign(queryData)
     setSelectedCampaigns(queryData[0].nombre)
@@ -50,7 +51,7 @@ export const BoxOfficeCampaigns:FC<Props> = ({ boxOffice, modal }) =>{
   }
 
   const addCampaignToBoxOffice = async () =>{
-    const queryData = await insertRowsDB("campanias-en-taquilla", "ETN", {
+    const queryData = await insertRowsDB("campanias-en-taquilla", company, {
       campaign: selectedCampaigns,
       boxOffice: boxOffice
     })
