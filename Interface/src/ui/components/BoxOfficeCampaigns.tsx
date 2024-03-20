@@ -4,7 +4,7 @@ import { boxOfficeCampaigns } from "../../helpers/boxOfficeCampaigns"
 import { useLocation } from "react-router-dom"
 import { MdOutlineDeleteForever } from "react-icons/md"
 import { FaRegEdit } from "react-icons/fa"
-import { AddCampaignToBoxOffice } from "../../users/admin/components"
+import { getInfoDb } from "../../helpers/getInfoDB"
 
 interface Props {
   boxOffice: string,
@@ -19,9 +19,19 @@ interface QueryCampaigns {
   status: string
 }
 
+interface Campaign {
+  id: string,
+  nombre: string,
+  inicio: string,
+  fin: string,
+  status: string
+}
+
 export const BoxOfficeCampaigns:FC<Props> = ({ boxOffice, modal }) =>{
 
   const [campaigns, setCampaigns] = useState<QueryCampaigns[]>([])
+  const [selectedCampaigns, setSelectedCampaigns] = useState("Aviso de Privaciad")
+  const [allCampaign, setAllCampaign] = useState<Campaign[]>([])
   const currentPath = useLocation()
 
   const getCampaigns = async () =>{
@@ -29,10 +39,19 @@ export const BoxOfficeCampaigns:FC<Props> = ({ boxOffice, modal }) =>{
     setCampaigns(queryData)
   }
 
-  console.log(campaigns)
+  const getAllCampaigns = async () =>{
+    const queryData =  await getInfoDb('campanias', "ETN")
+    console.log(queryData)
+    setAllCampaign(queryData)
+
+  }
+
+
+  console.log(selectedCampaigns)
 
   useEffect(() =>{
     getCampaigns()
+    getAllCampaigns()
   }, [])
 
   return (
@@ -42,12 +61,22 @@ export const BoxOfficeCampaigns:FC<Props> = ({ boxOffice, modal }) =>{
           <h2 className="text-2xl text-red-600">Campañas Activas en {boxOffice}</h2>
           <IoCloseSharp className=" cursor-pointer" onClick={() => modal(null)}/>
         </header>
-        <div className="flex justify-end mb-4">
+        <div className="flex justify-end gap-2 mb-8">
+          <select 
+            className="grid grid-cols-2 gap-4 border-2 py-1"
+            onChange={( e ) => setSelectedCampaigns(e.target.value)}
+          >
+            {
+              allCampaign.map(campaign =>(
+                <option value={campaign.nombre}>{campaign.nombre}</option>
+              ))
+            }
+          </select>
           {
             currentPath.pathname.includes('admin') 
             ? <button 
-            onClick={() => modal(<AddCampaignToBoxOffice modal={ modal } company="ETN" boxOffice={boxOffice}/> )}
-              className="py-1 px-4 bg-green-600 text-white hover:scale-105 active:scale-90 transition-all"
+            onClick={() => {}}
+              className="px-4 bg-green-600 text-white hover:scale-105 active:scale-90 transition-all"
             >
               Asignar Campaña +
             </button> : null
@@ -55,10 +84,10 @@ export const BoxOfficeCampaigns:FC<Props> = ({ boxOffice, modal }) =>{
         </div>
         <div className="text-center grid grid-cols-5 font-semibold border-b-[1px] border-gray-200 pb-1">          
           <article>Campaña ▾</article>
-          <article>Fecha de inicio▾</article>
+          <article>Fecha de inicio ▾</article>
           <article>Fecha de Fin ▾</article>
-          <article>Estatus</article>
-          <article>Acciones</article>
+          <article>Estatus ▾</article>
+          <article>Acciones </article>
         </div>
           {
           campaigns.map( campaign =>(
