@@ -8,7 +8,7 @@ export const insertRowsDB = async ( route: string, company: string, officeData:o
     },
   })
   const data  = await res.data
-  console.log(data)
+  //console.log(data)
   
   return data
 
