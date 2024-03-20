@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom"
-import { AdminDashboard, BlueprintsPage, BoxOfficePageCosta, BoxOfficePageETN, BoxOfficePageGHO, CampaignPage, DocumentationPage, PricePage, SoftwarePage, TemplatesPage } from "../../../pages"
+import { AdminDashboard, BlueprintsPage, BoxOfficePageCosta, BoxOfficePageETN, BoxOfficePageGHO, CampaignPageCosta, CampaignPageETN, CampaignPageGHO, DocumentationPage, PricePage, SoftwarePage, TemplatesPage } from "../../../pages"
 import { NavbarAdmin, UploadFilesForm } from "../components"
 import { Header, Main } from "../../../ui"
 import { useContext } from "react"
@@ -29,7 +29,9 @@ export const AdminRoutes = () =>{
             <Route path="/taquillas/ETN" element={<BoxOfficePageETN />} />
             <Route path="/taquillas/GHO" element={<BoxOfficePageGHO />} />
             <Route path="/taquillas/Costaline" element={<BoxOfficePageCosta />} />
-            <Route path="/campanias" element={<CampaignPage />} />
+            <Route path="/campanias/ETN" element={<CampaignPageETN />} />
+            <Route path="/campanias/GHO" element={<CampaignPageGHO />} />
+            <Route path="/campanias/Costaline" element={<CampaignPageCosta />} />
             <Route path="/documentacion" element={<DocumentationPage />} />
           </Routes>
         </>

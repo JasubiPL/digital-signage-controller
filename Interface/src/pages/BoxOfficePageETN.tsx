@@ -8,6 +8,7 @@ import { AddBoxOffice } from "../users/admin/components";
 import { deleteRowsDB } from "../helpers/deleteRowsDB";
 import { Alerts } from "../ui/components/Alerts";
 import { EditBoxOffice } from "../ui/components/EditBoxOffice";
+import { BoxOfficeCampaigns } from "../ui";
 
 interface BoxOffice {
   id: string,
@@ -66,9 +67,9 @@ export const BoxOfficePageETN = () =>{
           currentPath.pathname.includes('admin') 
           ? <button 
           onClick={() => setModal(<AddBoxOffice modal={ setModal } reloadInfo={ getBoxOffice } company="ETN"/>)}
-            className="py-1 px-8 bg-green-600 text-white hover:scale-105 active:scale-90 transition-all"
+            className="py-1 px-4 bg-green-600 text-white hover:scale-105 active:scale-90 transition-all"
           >
-            Agregar Taquilla +
+            Nueva Taquilla +
           </button> : null
         }
       </section>
@@ -88,14 +89,20 @@ export const BoxOfficePageETN = () =>{
               <div>{ office.proyeccion }</div>
               <div><span className={office.estatus  != 'dañada' ?  office.estatus : 'dañada'}>{ office.estatus }</span></div>
               <div className="flex gap-4 justify-center">
-                <button className="hover:scale-110 active:scale-90 transition-all hover:after:content-['Ver'] 
+                <button onClick={() => setModal(<BoxOfficeCampaigns boxOffice={office.nombre} modal={setModal}/>)} className="hover:scale-110 active:scale-90 transition-all hover:after:content-['Ver'] 
                 after:absolute after:bg-gray-900 after:px-2 after:text-white after:top-[-20px] after:left-0">
                   <GrFormView className="text-4xl text-blue-500"/>
                 </button>
-                <button onClick={() => setModal(<EditBoxOffice modal={setModal} reloadInfo={ getBoxOffice } data={office} company="ETN"/>)} className="hover:scale-110 active:scale-90 transition-all hover:after:content-['Editar'] 
-                after:absolute after:bg-gray-900 after:px-2 after:text-white after:top-[-20px] after:left-0">
-                  <FaRegEdit className="text-2xl text-orange-400"/>
-                </button>
+
+                {
+                  //comprovamos si estamos en la ruta del Administrador para mostrar el boton de borrado
+                  currentPath.pathname.includes('admin') 
+                  ? <button onClick={() => setModal(<EditBoxOffice modal={setModal} reloadInfo={ getBoxOffice } data={office} company="ETN"/>)} className="hover:scale-110 active:scale-90 transition-all hover:after:content-['Editar'] 
+                  after:absolute after:bg-gray-900 after:px-2 after:text-white after:top-[-20px] after:left-0">
+                    <FaRegEdit className="text-2xl text-orange-400"/>
+                  </button>
+                  : ""
+                }
                 {
                   //comprovamos si estamos en la ruta del Administrador para mostrar el boton de borrado
                   currentPath.pathname.includes('admin') 

@@ -56,6 +56,7 @@ getCampaign.get("/get-campanias", async (req, res) =>{
     );
 
     rows.map( row => campanias = [...campanias, {
+      id: row.id,
       nombre: row.nombre,
       inicio: row.fecha_inicio,
       fin: row.fecha_fin,

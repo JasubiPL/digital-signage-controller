@@ -12,20 +12,38 @@ input{
 
 /* etiquetas de estatus de taquilla*/
 
-.OK, .Ok {
+.OK, .Ok, .ACTIVA {
   background-color: yellowgreen;
   color: #fff;
   padding: 5px 20px;
 }
-.Remodelacion {
+.Remodelacion, .ENTREGAR {
   background-color: orange;
   color: #fff;
   padding: 5px 20px;
 }
 
-.Dañada {
+.Dañada, .INACTIVA {
   background-color: red;
   color: #fff;
+  padding: 5px 20px;
+}
+
+.ACTUALIZAR{
+  background-color: skyblue;
+  color: #fff;
+  padding: 5px 20px;
+}
+
+.ENTREGAR{
+  background-color: orangered;
+  color: #fff;
+  padding: 5px 20px;
+}
+
+.ENTREGADAS{
+  background-color: yellow;
+  color: #333;
   padding: 5px 20px;
 }
 

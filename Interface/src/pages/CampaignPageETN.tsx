@@ -4,35 +4,36 @@ import { getInfoDb } from "../helpers/getInfoDB"
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { GrFormView } from "react-icons/gr";
 import { useLocation } from "react-router-dom";
-import { AddBoxOffice } from "../users/admin/components";
+import { AddCampaign } from "../users/admin/components";
 import { deleteRowsDB } from "../helpers/deleteRowsDB";
 import { Alerts } from "../ui/components/Alerts";
-import { EditBoxOffice } from "../ui/components/EditBoxOffice";
+import { EditCampaign } from "../ui";
 
-interface BoxOffice {
+interface Campaign {
   id: string,
   nombre: string,
-  dispositivo: string,
-  proyeccion: string,
-  estatus: string
+  inicio: string,
+  fin: string,
+  status: string
 }
 
 
-export const BoxOfficePageCosta = () =>{
+export const CampaignPageETN = () =>{
 
-  const [allBoxOffice, setAllBoxOffice] = useState<BoxOffice[]>([])
+  const [allCampaign, setAllCampaign] = useState<Campaign[]>([])
   const [modal, setModal] = useState<React.ReactNode | null>(null);
 
   const currentPath = useLocation()
 
-  const getBoxOffice = async () =>{
-    const queryData =  await getInfoDb('taquillas', 'COSTA')
-    setAllBoxOffice(queryData)
+  const getCampaign = async () =>{
+    const queryData =  await getInfoDb('campanias', 'ETN')
+    //console.log(queryData)
+    setAllCampaign(queryData)
 
   }
 
-  const deleteBoxOffice = async (name: string) =>{
-    const res = await deleteRowsDB("taquilla", "COSTA", name)
+  const deleteCampaign = async (name: string) =>{
+    const res = await deleteRowsDB("campania", "ETN", name)
 
     setModal(
       <Alerts type="success">
@@ -42,7 +43,7 @@ export const BoxOfficePageCosta = () =>{
       </Alerts>
     )
 
-    getBoxOffice()
+    getCampaign()
     setTimeout(() =>{
       setModal(null)
     },1000)
@@ -51,7 +52,7 @@ export const BoxOfficePageCosta = () =>{
 
   useEffect(() =>{
 
-    getBoxOffice()
+    getCampaign()
 
   }, [])
 
@@ -65,46 +66,41 @@ export const BoxOfficePageCosta = () =>{
         {
           currentPath.pathname.includes('admin') 
           ? <button 
-          onClick={() => setModal(<AddBoxOffice modal={ setModal } reloadInfo={ getBoxOffice } company="COSTA"/>)}
+          onClick={() => setModal(<AddCampaign modal={ setModal } reloadInfo={ getCampaign } company="ETN"/>)}
             className="py-1 px-4 bg-green-600 text-white hover:scale-105 active:scale-90 transition-all"
           >
-            Nueva Taquilla +
+            Nueva Campaña +
           </button> : null
         }
       </section>
       <section className="w-[90%] pt-4 bg-white mt-2 border-b-[1px] border-gray-200">
         <header className="text-center grid grid-cols-5 font-semibold border-b-[1px] border-gray-200 pb-1">
-          <article>Taquilla ▾</article>
-          <article>Dispositivo ▾</article>
-          <article>Proyeccion por▾</article>
+          <article>Campaña ▾</article>
+          <article>Fecha de Inicio ▾</article>
+          <article>Fecha de Finalización▾</article>
           <article>Estatus ▾</article>
           <article>Acciones</article>
         </header>
         {
-          allBoxOffice.map( office =>(
-            <div key={office.id} className="text-center grid grid-cols-5 border-b-[1px] border-gray-200 py-2">
-              <div className=" text-left pl-4">{ office.nombre }</div>
-              <div>{ office.dispositivo }</div>
-              <div>{ office.proyeccion }</div>
-              <div><span className={office.estatus  != 'dañada' ?  office.estatus : 'dañada'}>{ office.estatus }</span></div>
+          allCampaign.map( campaign =>(
+            <div key={campaign.id} className="text-center grid grid-cols-5 border-b-[1px] border-gray-200 py-2">
+              <div className=" text-left pl-4">{ campaign.nombre }</div>
+              <div>{ campaign.inicio }</div>
+              <div>{ campaign.fin }</div>
+              <div><span className={campaign.status  != 'dañada' ?  campaign.status : 'dañada'}>{ campaign.status }</span></div>
               <div className="flex gap-4 justify-center">
                 <button className="hover:scale-110 active:scale-90 transition-all hover:after:content-['Ver'] 
                 after:absolute after:bg-gray-900 after:px-2 after:text-white after:top-[-20px] after:left-0">
                   <GrFormView className="text-4xl text-blue-500"/>
                 </button>
+                <button onClick={() => setModal(<EditCampaign modal={setModal} reloadInfo={ getCampaign } data={campaign} company="ETN"/>)} className="hover:scale-110 active:scale-90 transition-all hover:after:content-['Editar'] 
+                after:absolute after:bg-gray-900 after:px-2 after:text-white after:top-[-20px] after:left-0">
+                  <FaRegEdit className="text-2xl text-orange-400"/>
+                </button>
                 {
                   //comprovamos si estamos en la ruta del Administrador para mostrar el boton de borrado
                   currentPath.pathname.includes('admin') 
-                  ? <button onClick={() => setModal(<EditBoxOffice modal={setModal} reloadInfo={ getBoxOffice } data={office} company="COSTA"/>)} className="hover:scale-110 active:scale-90 transition-all hover:after:content-['Editar'] 
-                  after:absolute after:bg-gray-900 after:px-2 after:text-white after:top-[-20px] after:left-0">
-                    <FaRegEdit className="text-2xl text-orange-400"/>
-                  </button>
-                  : ""
-                }
-                {
-                  //comprovamos si estamos en la ruta del Administrador para mostrar el boton de borrado
-                  currentPath.pathname.includes('admin') 
-                  ? <button onClick={() => deleteBoxOffice(office.nombre)} className="hover:scale-110 active:scale-90 transition-all hover:after:content-['Eliminar'] 
+                  ? <button onClick={() => deleteCampaign(campaign.nombre)} className="hover:scale-110 active:scale-90 transition-all hover:after:content-['Eliminar'] 
                   after:absolute after:bg-gray-900 after:px-2 after:text-white after:top-[-20px] after:left-0">
                       <MdOutlineDeleteForever className="text-3xl text-red-600" />
                     </button>
