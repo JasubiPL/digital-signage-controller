@@ -85,4 +85,36 @@ updateRowDB.put('/edit-campania', async (req, res) => {
   }
 });
 
+updateRowDB.put('/edit-campanias-en-taquilla', async (req, res) => {
+  const { company } = req.query;
+  const data = req.body; 
+  console.log(`====== Nueva peticion para actualizar campañas en ${data.boxOffice} ======` .cyan)
+  console.log(data)
+
+  try {
+    console.log("\nConectando con BD y buscando la Campaña..." .yellow)
+    const connection = await createConnection
+
+    const [rows, fields] = await connection.query(
+      `SELECT id FROM campañas_${company}`
+    );
+
+    const [status] = await connection.execute(
+      `UPDATE taquillas_campañas_${company} SET estatus_individual = ?
+       WHERE taquilla_id = (SELECT id FROM taquillas_${company} WHERE nombre = ?) 
+       AND campaña_id = (SELECT id FROM campañas_${company} WHERE nombre = ?);`,
+      [data.status, data.boxOffice, data.campaign]
+    )
+
+    res.json({
+      status: 200,
+      message: "Taquilla Actualizada"
+    })
+  
+  } catch (err) {
+    console.log(err .red);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 module.exports = updateRowDB;
