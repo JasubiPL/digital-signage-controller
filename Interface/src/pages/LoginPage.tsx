@@ -17,7 +17,7 @@ export const LoginPage = () =>{
 
       localStorage.setItem("login", JSON.stringify(user) )
 
-      return navigate(`/${user?.area}/dashboard`)
+      return navigate(`/${user?.area}/`)
     }else{
       const { err } = resp
       setErrLogin(err ? err : "")

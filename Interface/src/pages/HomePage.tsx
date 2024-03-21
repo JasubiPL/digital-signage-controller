@@ -13,7 +13,7 @@ export const HomePage = () =>{
 
     const userData = JSON.parse(loged ? loged : "")
     
-    return redirect(`/${userData?.area}/dashboard`)
+    return redirect(`/${userData?.area}/`)
     
   })
 

@@ -9,7 +9,7 @@ export const NavbarManager = () =>{
         <TemplatesItem path="manager" />
         <BlueprintsItem path="manager"/>
         <PricedItem path="manager" />
-        <DocumentationItem path="manager" />
+        {/* <DocumentationItem path="manager" /> */}
       </ul>
     </Navbar>
   )

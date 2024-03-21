@@ -20,8 +20,8 @@ export const AdminRoutes = () =>{
           <Header />
           { form ? <UploadFilesForm /> : ""}
           <Routes>
-            <Route path="/" element={<Navigate to="dashboard" />} />
-            <Route path="/dashboard" element={<AdminDashboard />} />
+            <Route path="/" element={<Navigate to="taquillas/ETN" />} />
+            {/* <Route path="/dashboard" element={<AdminDashboard />} /> */}
             <Route path="/plantillas" element={<TemplatesPage />} />
             <Route path="/planos" element={<BlueprintsPage />} />
             <Route path="/cotizaciones" element={<PricePage />} />
@@ -32,7 +32,7 @@ export const AdminRoutes = () =>{
             <Route path="/campanias/ETN" element={<CampaignPageETN />} />
             <Route path="/campanias/GHO" element={<CampaignPageGHO />} />
             <Route path="/campanias/Costaline" element={<CampaignPageCosta />} />
-            <Route path="/documentacion" element={<DocumentationPage />} />
+            {/* <Route path="/documentacion" element={<DocumentationPage />} /> */}
           </Routes>
         </>
       </Main>

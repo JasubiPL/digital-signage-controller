@@ -76,7 +76,7 @@ export const EditCampaign:FC<Props> = ({ data, modal, reloadInfo, company }) => 
     <section className={`w-screen h-screen bg-black/50 absolute top-0 left-0 flex justify-center items-center`}>
       <form className=" w-1/4 bg-white grid py-6 px-6 outline-none" onSubmit={editCampaign}>
         <div className="flex w-full justify-between items-center border-b-2 border-gray-100">
-          <span>Añadir Nueva Campaña</span>
+          <span>Actualizar Estatus</span>
           <IoCloseSharp className=" cursor-pointer" onClick={() => modal(null)}/>
         </div>
         {
