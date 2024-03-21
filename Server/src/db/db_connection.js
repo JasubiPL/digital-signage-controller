@@ -1,11 +1,12 @@
+require('dotenv').config()
 const mysql = require("mysql2/promise")
 
 const config = {
-  host: "localhost",
-  user: "root",
-  port: 3306,
-  password: 'Q9spohTK1CY8fWa5c6L7*',
-  database: "digital_signage_db"
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  port: process.env.DB_PORT,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE
 }
 
 async function createConnection() {

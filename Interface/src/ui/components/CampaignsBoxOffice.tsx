@@ -25,12 +25,10 @@ interface QueryCampaigns {
 export const CampaignsBoxOffice:FC<Props> = ({ campaign, modal, company }) =>{
 
   const [boxOffice, setBoxOffice] = useState<QueryCampaigns[]>([])
-  //console.log(boxOffice)
 
   const getCampaigns = async () =>{
     const queryData = await boxOfficeCampaigns("taquillas-en-campania", company, campaign)
     setBoxOffice(queryData)
-    //console.log(queryData)
   }
 
   useEffect(() =>{

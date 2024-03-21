@@ -56,7 +56,7 @@ boxOfficeCampaigns.post("/query-taquillas-en-campania", async (req, res) =>{
     FROM campañas_${company}
     JOIN taquillas_campañas_${company} ON campañas_${company}.id = taquillas_campañas_${company}.campaña_id
     JOIN taquillas_${company} ON taquillas_campañas_${company}.taquilla_id = taquillas_${company}.id 
-    WHERE campañas_${company}.nombre = 'Aviso de privacidad';`, [data.name]
+    WHERE campañas_${company}.nombre = ?;`, [data.name]
     )
     
     console.log(`✅ Enviando taquillas activas en ${data.name}`)
