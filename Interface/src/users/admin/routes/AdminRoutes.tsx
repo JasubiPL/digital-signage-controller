@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom"
-import { AdminDashboard, BlueprintsPage, DocumentationPage, PricePage, SoftwarePage, TemplatesPage } from "../../../pages"
+import { AdminDashboard, BlueprintsPage, BoxOfficePageCosta, BoxOfficePageETN, BoxOfficePageGHO, CampaignPageCosta, CampaignPageETN, CampaignPageGHO, DocumentationPage, PricePage, SoftwarePage, TemplatesPage } from "../../../pages"
 import { NavbarAdmin, UploadFilesForm } from "../components"
 import { Header, Main } from "../../../ui"
 import { useContext } from "react"
@@ -20,13 +20,19 @@ export const AdminRoutes = () =>{
           <Header />
           { form ? <UploadFilesForm /> : ""}
           <Routes>
-            <Route path="/" element={<Navigate to="dashboard" />} />
-            <Route path="/dashboard" element={<AdminDashboard />} />
+            <Route path="/" element={<Navigate to="taquillas/ETN" />} />
+            {/* <Route path="/dashboard" element={<AdminDashboard />} /> */}
             <Route path="/plantillas" element={<TemplatesPage />} />
             <Route path="/planos" element={<BlueprintsPage />} />
             <Route path="/cotizaciones" element={<PricePage />} />
             <Route path="/software" element={<SoftwarePage />} />
-            <Route path="/documentacion" element={<DocumentationPage />} />
+            <Route path="/taquillas/ETN" element={<BoxOfficePageETN />} />
+            <Route path="/taquillas/GHO" element={<BoxOfficePageGHO />} />
+            <Route path="/taquillas/Costaline" element={<BoxOfficePageCosta />} />
+            <Route path="/campanias/ETN" element={<CampaignPageETN />} />
+            <Route path="/campanias/GHO" element={<CampaignPageGHO />} />
+            <Route path="/campanias/Costaline" element={<CampaignPageCosta />} />
+            {/* <Route path="/documentacion" element={<DocumentationPage />} /> */}
           </Routes>
         </>
       </Main>
