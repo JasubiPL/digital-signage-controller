@@ -60,7 +60,7 @@ export const UpdateBoxOfficeCampaign:FC<Props> = ({ modal, company, boxOffice, c
             <option value="ARTES ENTREGADAS">ARTES ENTREGADAS</option>
           </select>
         </div>
-        <button className="bg-red-600 py-1 px-2 text-white hover:bg-red-400 active:scale-95 transition-all mt-8">Agregar</button>
+        <button className="bg-red-600 py-1 px-2 text-white hover:bg-red-400 active:scale-95 transition-all mt-8">Actualizar</button>
       </form>
     </section>
   )

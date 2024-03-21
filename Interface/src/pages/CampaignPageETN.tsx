@@ -7,7 +7,7 @@ import { useLocation } from "react-router-dom";
 import { AddCampaign } from "../users/admin/components";
 import { deleteRowsDB } from "../helpers/deleteRowsDB";
 import { Alerts } from "../ui/components/Alerts";
-import { EditCampaign } from "../ui";
+import { CampaignsBoxOffice, EditCampaign } from "../ui";
 
 interface Campaign {
   id: string,
@@ -89,7 +89,7 @@ export const CampaignPageETN = () =>{
               <div>{ campaign.fin }</div>
               <div><span className={campaign.status  != 'dañada' ?  campaign.status : 'dañada'}>{ campaign.status }</span></div>
               <div className="flex gap-4 justify-center">
-                <button className="hover:scale-110 active:scale-90 transition-all hover:after:content-['Taquillas'] 
+                <button onClick={() => setModal(<CampaignsBoxOffice campaign={campaign.nombre} modal={setModal} company="ETN" />)} className="hover:scale-110 active:scale-90 transition-all hover:after:content-['Taquillas'] 
                 after:absolute after:bg-gray-900 after:px-2 after:text-white after:top-[-20px] after:left-0">
                   <GrFormView className="text-4xl text-blue-500"/>
                 </button>
