@@ -74,4 +74,33 @@ deleteRowDB.post('/delete-campania', async (req, res) =>{
   }
 })
 
+deleteRowDB.post('/delete-campanias-en-taquilla', async (req, res) =>{
+  const { company } = req.query
+  const data = req.body
+  console.log(data, company)
+
+  try {
+    const connection = await createConnection
+
+    const [status] = await connection.execute(
+      `DELETE FROM taquillas_campañas_${company} 
+       WHERE taquilla_id = (SELECT id FROM taquillas_${company} WHERE nombre = ?) 
+       AND campaña_id = (SELECT id FROM campañas_${company} WHERE nombre = ?);`,
+      [data.boxOffice, data.campaign]
+    )
+
+    console.log(status.affectedRows)
+
+    if(status.affectedRows === 0){
+      res.json("No existe la campaña en taquilla")
+    }else{
+      res.json("La campaña se elimino con exito")
+    }
+  
+  } catch (err) {
+    console.log(err .red);
+  }
+
+})
+
 module.exports = deleteRowDB

@@ -6,6 +6,7 @@ import { MdOutlineDeleteForever } from "react-icons/md"
 import { FaRegEdit } from "react-icons/fa"
 import { getInfoDb } from "../../helpers/getInfoDB"
 import { insertRowsDB } from "../../helpers/insertRowsDB"
+import { deleteRowsDB } from "../../helpers/deleteRowsDB"
 
 interface Props {
   boxOffice: string,
@@ -40,6 +41,7 @@ export const BoxOfficeCampaigns:FC<Props> = ({ boxOffice, modal, company }) =>{
   const getCampaigns = async () =>{
     const queryData = await boxOfficeCampaigns("campanias-en-taquilla", company, boxOffice)
     setCampaigns(queryData)
+    //console.log(queryData)
   }
 
   const getAllCampaigns = async () =>{
@@ -74,6 +76,11 @@ export const BoxOfficeCampaigns:FC<Props> = ({ boxOffice, modal, company }) =>{
     }
 
     
+  }
+
+  const deleteCampaign = async (campaign: string) =>{
+    const res = await deleteRowsDB("campanias-en-taquilla", company, boxOffice, campaign, )
+    getCampaigns()
   }
 
   useEffect(() =>{
@@ -139,7 +146,7 @@ export const BoxOfficeCampaigns:FC<Props> = ({ boxOffice, modal, company }) =>{
                   {
                     //comprovamos si estamos en la ruta del Administrador para mostrar el boton de borrado
                     currentPath.pathname.includes('admin') 
-                    ? <button onClick={() => {}} className="hover:scale-110 active:scale-90 transition-all hover:after:content-['Eliminar'] 
+                    ? <button onClick={() => deleteCampaign(campaign.campania)} className="hover:scale-110 active:scale-90 transition-all hover:after:content-['Eliminar'] 
                     after:absolute after:bg-gray-900 after:px-2 after:text-white after:top-[-20px] after:left-0">
                         <MdOutlineDeleteForever className="text-3xl text-red-600" />
                       </button>
