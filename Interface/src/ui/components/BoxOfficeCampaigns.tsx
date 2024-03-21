@@ -7,6 +7,7 @@ import { FaRegEdit } from "react-icons/fa"
 import { getInfoDb } from "../../helpers/getInfoDB"
 import { insertRowsDB } from "../../helpers/insertRowsDB"
 import { deleteRowsDB } from "../../helpers/deleteRowsDB"
+import { UpdateBoxOfficeCampaign } from "."
 
 interface Props {
   boxOffice: string,
@@ -96,25 +97,28 @@ export const BoxOfficeCampaigns:FC<Props> = ({ boxOffice, modal, company }) =>{
           <IoCloseSharp className=" cursor-pointer" onClick={() => modal(null)}/>
         </header>
         <div className="flex justify-end gap-2 mb-8">
-          <span className={`${newCampaign.color} py-1 mr-2`}>{newCampaign.message}</span>
-          <select 
-            className="grid grid-cols-2 gap-4 border-2 py-1"
-            onChange={( e ) => setSelectedCampaigns(e.target.value)}
-          >
-            {
-              allCampaign.map(campaign =>(
-                <option key={campaign.id} value={campaign.nombre}>{campaign.nombre}</option>
-              ))
-            }
-          </select>
           {
             currentPath.pathname.includes('admin') 
-            ? <button 
-            onClick={addCampaignToBoxOffice}
-              className="px-4 bg-green-600 text-white hover:scale-105 active:scale-90 transition-all"
+            ?
+            <>
+            <span className={`${newCampaign.color} py-1 mr-2`}>{newCampaign.message}</span>
+            <select 
+              className="grid grid-cols-2 gap-4 border-2 py-1"
+              onChange={( e ) => setSelectedCampaigns(e.target.value)}
             >
-              Asignar Campaña +
-            </button> : null
+              {
+                allCampaign.map(campaign =>(
+                  <option key={campaign.id} value={campaign.nombre}>{campaign.nombre}</option>
+                ))
+              }
+            </select>
+            <button 
+              onClick={addCampaignToBoxOffice}
+                className="px-4 bg-green-600 text-white hover:scale-105 active:scale-90 transition-all"
+              >
+                Asignar Campaña +
+              </button>
+            </> : null
           }
         </div>
         <div className="text-center grid grid-cols-5 font-semibold border-b-[1px] border-gray-200 pb-1">          
@@ -133,16 +137,10 @@ export const BoxOfficeCampaigns:FC<Props> = ({ boxOffice, modal, company }) =>{
                 <div>{ campaign.fin }</div>
                 <div><span className={campaign.status}>{ campaign.status }</span></div>
                 <div className="flex gap-4 justify-center">
-
-                  {
-                    //comprovamos si estamos en la ruta del Administrador para mostrar el boton de borrado
-                    currentPath.pathname.includes('admin') 
-                    ? <button onClick={() => {}} className="hover:scale-110 active:scale-90 transition-all hover:after:content-['Editar'] 
+                  <button onClick={() => modal(<UpdateBoxOfficeCampaign modal={modal} boxOffice={boxOffice} company={company} campaign={campaign.campania} status={campaign.status}/>)} className="hover:scale-110 active:scale-90 transition-all hover:after:content-['Editar'] 
                     after:absolute after:bg-gray-900 after:px-2 after:text-white after:top-[-20px] after:left-0">
                       <FaRegEdit className="text-2xl text-orange-400"/>
-                    </button>
-                    : ""
-                  }
+                  </button>
                   {
                     //comprovamos si estamos en la ruta del Administrador para mostrar el boton de borrado
                     currentPath.pathname.includes('admin') 
