@@ -1,13 +1,7 @@
 import { Dispatch, FC, ReactNode, SetStateAction, useEffect, useState } from "react"
 import { IoCloseSharp } from "react-icons/io5"
 import { boxOfficeCampaigns } from "../../helpers/boxOfficeCampaigns"
-import { useLocation } from "react-router-dom"
-import { MdOutlineDeleteForever } from "react-icons/md"
-import { FaRegEdit } from "react-icons/fa"
-import { getInfoDb } from "../../helpers/getInfoDB"
-import { insertRowsDB } from "../../helpers/insertRowsDB"
-import { deleteRowsDB } from "../../helpers/deleteRowsDB"
-import { UpdateBoxOfficeCampaign } from "."
+
 
 interface Props {
   campaign: string,

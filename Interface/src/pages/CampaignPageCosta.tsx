@@ -62,7 +62,11 @@ export const CampaignPageCosta = () =>{
   return(
     <section className="w-full  h-full flex flex-col items-center overflow-y-auto my-8">
       { modal }
-      <section className="w-[90%] flex justify-end mb-4">
+      <section className="w-[90%] flex justify-between mb-4">
+        <div className="text-xl">
+          <span className="text-red-600 font-semibold">No. Campañas:</span> { allCampaign.length }
+        </div>
+        <img className="h-12" src="/img/brands/logo-costa-azul.webp" alt="Costa Logo" />
         {
           currentPath.pathname.includes('admin') 
           ? <button 

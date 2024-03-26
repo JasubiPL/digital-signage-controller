@@ -1,4 +1,4 @@
-import { BlueprintsItem, BoxOfficeItem, CampaignItem, DashboardItem, DocumentationItem, Navbar, PricedItem, SoftwareItem, TemplatesItem } from "../../../ui"
+import { BlueprintsItem, BoxOfficeItem, CampaignItem, Navbar, PricedItem, SoftwareItem, TemplatesItem } from "../../../ui"
 
 
 export const NavbarAdmin = () =>{

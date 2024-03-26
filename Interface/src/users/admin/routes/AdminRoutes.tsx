@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom"
-import { AdminDashboard, BlueprintsPage, BoxOfficePageCosta, BoxOfficePageETN, BoxOfficePageGHO, CampaignPageCosta, CampaignPageETN, CampaignPageGHO, DocumentationPage, PricePage, SoftwarePage, TemplatesPage } from "../../../pages"
+import { BlueprintsPage, BoxOfficePageCosta, BoxOfficePageETN, BoxOfficePageGHO, CampaignPageCosta, CampaignPageETN, CampaignPageGHO, PricePage, SoftwarePage, TemplatesPage } from "../../../pages"
 import { NavbarAdmin, UploadFilesForm } from "../components"
 import { Header, Main } from "../../../ui"
 import { useContext } from "react"
