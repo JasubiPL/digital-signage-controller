@@ -1,9 +1,9 @@
--- Archivo de reacion inicial de la Base de Datos
-
 DROP DATABASE IF EXISTS digital_signage_db;
 
 -- Creamos la BD
 CREATE DATABASE IF NOT EXISTS digital_signage_db;
+
+show databases;
 
 USE digital_signage_db;
 
@@ -66,7 +66,43 @@ CREATE TABLE taquillas_campañas_ETN(
     PRIMARY KEY (taquilla_id, campaña_id)
 );
 
--- Ejemplo de Consulta de campañas en taquillas
+CREATE TABLE taquillas_campañas_GHO(
+	taquilla_id INT REFERENCES taquillas_GHO(id),
+    campaña_id INT REFERENCES campañas_GHO(id),
+    estatus_individual VARCHAR(50),
+    PRIMARY KEY (taquilla_id, campaña_id)
+);
+
+CREATE TABLE taquillas_campañas_COSTA(
+	taquilla_id INT REFERENCES taquillas_COSTA(id),
+    campaña_id INT REFERENCES campañas_COSTA(id),
+    estatus_individual VARCHAR(50),
+    PRIMARY KEY (taquilla_id, campaña_id)
+);
+
+show tables;
+
+-- Insertamos relacion
+-- Ejemplo de insercion
+INSERT INTO taquillas_campañas_ETN(taquilla_id, campaña_id, estatus_individual) VALUES ((SELECT id FROM taquillas_ETN WHERE nombre = 'Mexico Norte TQ1'),(SELECT id FROM campañas_ETN WHERE nombre = 'Doters'), "INACTIVA");
+DELETE FROM taquillas_campañas_ETN 
+WHERE taquilla_id = (SELECT id FROM taquillas_ETN WHERE nombre = 'Mexico Norte TQ1') 
+AND campaña_id = (SELECT id FROM campañas_ETN WHERE nombre = 'Doters');
+
+-- Mostramos datos
+SELECT * FROM taquillas_ETN;
+SELECT * FROM taquillas_GHO;
+SELECT * FROM taquillas_COSTA;
+SELECT * FROM campañas_ETN;
+SELECT * FROM campañas_GHO;
+SELECT * FROM campañas_COSTA;
+SELECT * FROM taquillas_campañas_ETN;
+SELECT * FROM taquillas_campañas_GHO;
+SELECT * FROM taquillas_campañas_COSTA;
+
+UPDATE taquillas_ETN SET nombre = "Test 1", dispositivo = "UPDATE", proyeccion = "UPDATE", estatus = "UPDATE" WHERE id = 76;
+
+-- Ejemplo de Consulta
 SELECT taquillas_ETN.nombre AS 'taquilla',
        campañas_ETN.nombre AS 'campaña',
        campañas_ETN.fecha_inicio AS 'inicio',
@@ -76,7 +112,6 @@ FROM taquillas_ETN
 JOIN taquillas_campañas_ETN ON taquillas_ETN.id = taquillas_campañas_ETN.taquilla_id
 JOIN campañas_ETN ON taquillas_campañas_ETN.campaña_id = campañas_ETN.id WHERE taquillas_ETN.nombre = 'Mexico Norte TQ1';
 
--- Ejemplo de Consulta taquillas en campañas
 SELECT campañas_ETN.nombre AS 'Nombre de Campaña',
        taquillas_ETN.nombre AS 'Nombre de Taquilla',
        estatus_individual AS 'Estatus'
@@ -84,3 +119,4 @@ FROM campañas_ETN
 JOIN taquillas_campañas_ETN ON campañas_ETN.id = taquillas_campañas_ETN.campaña_id
 JOIN taquillas_ETN ON taquillas_campañas_ETN.taquilla_id = taquillas_ETN.id WHERE campañas_ETN.nombre = 'Aviso de privacidad';
 
+DROP TABLE taquillas_campañas_ETN;
