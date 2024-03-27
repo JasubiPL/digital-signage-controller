@@ -19,7 +19,7 @@ interface Props {
 
 export const BoxOfficeMetrix: FC<Props> = ({boxOffice, title }) =>{
   return(
-    <div className="w-1/5 bg-white py-4 px-8">
+    <div className="w-1/3 bg-white py-4 px-8">
       <p className="text-xl text-red-600">{title}</p>
       <div className="flex justify-between mt-2 items-center">
         <p className="text-6xl font-semibold">{boxOffice.length}</p>

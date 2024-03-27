@@ -62,14 +62,15 @@ users.post("/users/add-usuario", async (req, res) =>{
 
 users.post("/users/delete-usuario", async (req, res) =>{
   const user = req.body
+  console.log(user)
 
   try{
 
     const connection = await createConnection  
 
     const [status] = await connection.query(
-      `DELETE FROM usuarios WHERE nombre = ?`,
-      [user.nombre]
+      `DELETE FROM usuarios WHERE email = ?`,
+      [user.email]
     );
 
     console.log(status)
