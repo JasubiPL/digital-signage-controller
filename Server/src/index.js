@@ -9,6 +9,7 @@ const insertRowsDB = require("./routes/insertRowsDB")
 const deleteRowsDB = require("./routes/deleteRowsDB")
 const updateRowsDB = require("./routes/updateRowsDB")
 const boxOfficeCampaigns = require("./routes/boxOfficeCampaigns")
+const usersManagement = require("./routes/usersManagement")
 
 //Building Server
 const PORT = process.env.PORT || 7000
@@ -23,7 +24,7 @@ app.use(express.static(path.join(__dirname, "files")))
 
 //Routes
 app.use("/api", saveFiles, getFiles, getCampaign, insertRowsDB, deleteRowsDB, updateRowsDB,
-boxOfficeCampaigns)
+boxOfficeCampaigns, usersManagement)
 
 
 app.get("/", (req, res) =>{
