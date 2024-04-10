@@ -2,17 +2,18 @@ import { FC, ReactElement, useReducer } from "react"
 import { AuthContext } from "./AuthContext"
 import { authReducer } from "./authReducer"
 import { types } from "../types/types"
+import { authUser } from "../../helpers/getAllUsers"
 
 interface Props {
   children: ReactElement
 }
 
 const init = () =>{
-  const user = localStorage.getItem("user") ? true : false
+  const user = localStorage.getItem("user")
 
   return {
-    logged:user,
-    user
+    logged:user ? true : false,
+    user: user ? JSON.parse( user ) : null
   }
 }
 
@@ -20,17 +21,22 @@ export const AuthProvider:FC<Props> = ({ children }) =>{
 
   const [authState, dispatch] = useReducer( authReducer, {}, init )
 
-  const login = ( name = "") =>{
-    const user = { id: "ABC", name } //TODO: Cambiar esto por el Login con el backend
+  const login = async ( email = "") =>{
+    const resp = await authUser(email)
+
+    if(resp.status != 200){
+      return resp
+    }
 
     const action = {
       type: types.login,
-      payload: user
+      payload: resp.users
     }
 
     dispatch( action )
 
-    localStorage.setItem("user", JSON.stringify( user ))
+    localStorage.setItem("user", JSON.stringify( resp.users ))
+    return resp
   }
 
   const logout = () =>{

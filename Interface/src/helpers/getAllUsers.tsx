@@ -23,3 +23,16 @@ export const userDelete = async (email: string) =>{
   return users
 }
 
+export const authUser = async (email: string) =>{
+
+  const res = await axios.post("http://localhost:7000/api/users/auth", { email: email },{
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+  const users = await res.data
+  //console.log(users)
+
+  return users
+}
+
