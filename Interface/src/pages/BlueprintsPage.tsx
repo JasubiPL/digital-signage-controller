@@ -2,6 +2,10 @@ import { IoCloudDownloadOutline } from "react-icons/io5";
 import { useEffect, useState } from "react"
 import { FileType } from "../ui/components/FileType";
 import { getFiles } from "../helpers/getFiles";
+import { useLocation } from "react-router-dom";
+import { cleanUrl } from "../helpers/cleanUrl";
+import { deleteFiles } from "../helpers/deleteFiles";
+import { MdOutlineDeleteForever } from "react-icons/md";
 
 
 interface Doc {
@@ -15,12 +19,25 @@ interface Doc {
 export const BlueprintsPage= () =>{
   const [files, setFiles] = useState<Doc[]>([])
   const [company, setCompany] = useState("ETN")
- 
-  
+
+  const currentPath = useLocation()
+
   const readFiles = async () =>{
     const filesData = await getFiles("blueprints", company)
     setFiles(filesData)
     //console.log(filesData)
+  }
+
+  const deleteFile = async ( filePath:string) =>{
+    
+    const newFilePath = cleanUrl(filePath)
+    const res = await deleteFiles(newFilePath)
+
+    if(res.status != 200) return alert("Algo salio mal")
+    
+    readFiles()
+
+
   }
 
   useEffect(() =>{
@@ -55,9 +72,20 @@ export const BlueprintsPage= () =>{
               </div>
               <div className="text-sm text-center py-3 flex justify-center items-center">{file.modifiedDate}</div>
               <div className="text-sm text-center py-3 flex justify-center items-center">{file.size}</div>
-              <a href={file.filePath} target="__blanck" className="text-2xl flex justify-center items-center text-green-500 hover:scale-110 transition-all">
-              <IoCloudDownloadOutline />
-              </a>
+              <div className="flex justify-center gap-4">
+                <a href={file.filePath} target="__blanck" className="text-2xl flex justify-center items-center text-green-500 hover:scale-110 transition-all">
+                <IoCloudDownloadOutline />
+                </a>
+                {
+                  //comprovamos si estamos en la ruta del Administrador para mostrar el boton de borrado
+                  currentPath.pathname.includes('admin') 
+                  ? <button onClick={() => deleteFile(file.filePath)} className="hover:scale-110 active:scale-90 transition-all hover:after:content-['Eliminar'] 
+                  after:absolute after:bg-gray-900 after:px-2 after:text-white after:top-[-20px] after:left-0">
+                      <MdOutlineDeleteForever className="text-3xl text-red-600" />
+                    </button>
+                  : ""
+                }
+              </div>
             </div>
           ))
         }

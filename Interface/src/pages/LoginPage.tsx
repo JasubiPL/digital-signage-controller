@@ -1,26 +1,29 @@
-import { FormEvent, useState } from "react"
-import { login } from "../auth/auth"
+import { FormEvent, useContext, useState } from "react"
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../auth/context/AuthContext";
 
 export const LoginPage = () =>{
   const [emailInput, setEmailInput] = useState("")
   const [errLogin, setErrLogin] = useState("")
   const navigate = useNavigate()
 
-  const handlerLogin = (e: FormEvent) =>{
+  const { login } = useContext(AuthContext)
+
+  const handlerLogin = async (e: FormEvent) =>{
     e.preventDefault()
 
-    const resp = login(emailInput)
+    const resp = await login(emailInput)
+    console.log(resp)
 
     if(resp.status === 200){
-      const user = resp.data
+      const user = resp.users
 
-      localStorage.setItem("login", JSON.stringify(user) )
-
+      console.log(user)
       return navigate(`/${user?.area}/`)
     }else{
-      const { err } = resp
-      setErrLogin(err ? err : "")
+      console.log(resp)
+      const { message } = resp
+      setErrLogin(message ? message : "")
     }
   }
 

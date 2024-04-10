@@ -1,5 +1,6 @@
-import { FC, ReactElement } from "react"
+import { FC, ReactElement, useContext } from "react"
 import { useNavigate } from "react-router-dom"
+import { AuthContext } from "../../auth/context/AuthContext"
 
 interface Props {
   children: ReactElement
@@ -8,10 +9,11 @@ interface Props {
 
 export const Navbar:FC<Props> = ({ children }) =>{
   const redirect = useNavigate()
+  const { logout } = useContext( AuthContext )
 
   const handlerLogout = () =>{
-
-    localStorage.removeItem("login")
+    logout()
+    
     redirect("/login")
   }
 

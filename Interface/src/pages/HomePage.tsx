@@ -5,13 +5,13 @@ export const HomePage = () =>{
   const redirect = useNavigate()
 
   useEffect(() =>{
-    const loged = localStorage.getItem("login")
+    const logged = localStorage.getItem("user")
     
-    if(!loged){
+    if(!logged){
       return redirect("/login")
     }
 
-    const userData = JSON.parse(loged ? loged : "")
+    const userData = JSON.parse(logged ? logged : "")
     
     return redirect(`/${userData?.area}/`)
     

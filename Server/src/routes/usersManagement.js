@@ -62,14 +62,15 @@ users.post("/users/add-usuario", async (req, res) =>{
 
 users.post("/users/delete-usuario", async (req, res) =>{
   const user = req.body
+  console.log(user)
 
   try{
 
     const connection = await createConnection  
 
     const [status] = await connection.query(
-      `DELETE FROM usuarios WHERE nombre = ?`,
-      [user.nombre]
+      `DELETE FROM usuarios WHERE email = ?`,
+      [user.email]
     );
 
     console.log(status)
@@ -113,6 +114,36 @@ users.put("/users/update-usuario", async (req, res) =>{
 
     console.log("\nEl susuario existe en la Base de Datos" .red); 
     res.json("El susuario existe en la Base de Datos")
+
+  }catch(err){
+    console.log(err .red);
+    res.json(err)
+  }
+
+})
+
+users.post("/users/auth", async (req, res) =>{
+  const user = req.body
+  console.log(user)
+
+  try{
+
+    const connection = await createConnection
+
+    const [rows, fields] = await connection.query(
+      `SELECT * FROM usuarios WHERE email = ?`, 
+      [user.email]
+    );
+
+
+
+    if(rows.length > 0){
+      console.log(rows[0])
+      return res.json({ status: 200, users: rows[0]})
+    }else{
+      console.log("Usuario no encontrado")
+      return res.json({ status: 404, message: "Usuario no valido"})
+    }
 
   }catch(err){
     console.log(err .red);
