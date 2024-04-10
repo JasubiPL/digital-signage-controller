@@ -4,6 +4,7 @@ const cors = require("cors")
 const path = require("path")
 const saveFiles = require("./routes/saveFiles")
 const getFiles = require("./routes/getFiles")
+const deleteFiles = require("./routes/deleteFiles")
 const getCampaign = require("./routes/getCampaign")
 const insertRowsDB = require("./routes/insertRowsDB")
 const deleteRowsDB = require("./routes/deleteRowsDB")
@@ -24,7 +25,7 @@ app.use(express.static(path.join(__dirname, "files")))
 
 //Routes
 app.use("/api", saveFiles, getFiles, getCampaign, insertRowsDB, deleteRowsDB, updateRowsDB,
-boxOfficeCampaigns, usersManagement)
+boxOfficeCampaigns, usersManagement, deleteFiles)
 
 
 app.get("/", (req, res) =>{
