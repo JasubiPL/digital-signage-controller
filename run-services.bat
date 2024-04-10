@@ -1,7 +1,7 @@
 @echo off
 
 cd C:/dev/digital-signage/Interface
-start cmd /k "yarn dev --host"
+start cmd /k "yarn start --host"
 
 
 cd C:/dev/digital-signage/Server
