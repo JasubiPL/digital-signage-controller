@@ -122,4 +122,34 @@ users.put("/users/update-usuario", async (req, res) =>{
 
 })
 
+users.post("/users/auth", async (req, res) =>{
+  const user = req.body
+  console.log(user)
+
+  try{
+
+    const connection = await createConnection
+
+    const [rows, fields] = await connection.query(
+      `SELECT * FROM usuarios WHERE email = ?`, 
+      [user.email]
+    );
+
+
+
+    if(rows.length > 0){
+      console.log(rows[0])
+      return res.json({ status: 200, users: rows[0]})
+    }else{
+      console.log("Usuario no encontrado")
+      return res.json({ status: 404, message: "Usuario no valido"})
+    }
+
+  }catch(err){
+    console.log(err .red);
+    res.json(err)
+  }
+
+})
+
 module.exports = users

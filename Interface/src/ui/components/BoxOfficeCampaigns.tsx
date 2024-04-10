@@ -80,7 +80,7 @@ export const BoxOfficeCampaigns:FC<Props> = ({ boxOffice, modal, company }) =>{
   }
 
   const deleteCampaign = async (campaign: string) =>{
-    const res = await deleteRowsDB("campanias-en-taquilla", company, boxOffice, campaign, )
+    await deleteRowsDB("campanias-en-taquilla", company, boxOffice, campaign, )
     getCampaigns()
   }
 

@@ -13,6 +13,7 @@ export const deleteRowsDB = async ( route: string, company: string, name:string,
       "Content-Type": "application/json",
     },
   })
+  
   const data  = await res
   console.log(data)
   
