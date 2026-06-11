@@ -39,13 +39,13 @@ Objetivo: preparar el proyecto para una migracion ordenada.
 
 Checklist:
 
-- [ ] Crear rama de trabajo `migracion-nextjs`.
-- [ ] Crear carpeta `specs/` en el root.
-- [ ] Guardar este plan en `specs/`.
-- [ ] Definir convencion para nuevos documentos tecnicos dentro de `specs/`.
-- [ ] Revisar scripts existentes de `Interface/` y `Server/`.
-- [ ] Elegir package manager unico para el nuevo proyecto.
-- [ ] Decidir si se conserva el monorepo o si Next.js reemplaza `Interface/` y `Server/` desde una carpeta nueva.
+- [x] Crear rama de trabajo `migracion-nextjs`.
+- [x] Crear carpeta `specs/` en el root.
+- [x] Guardar este plan en `specs/`.
+- [x] Definir convencion para nuevos documentos tecnicos dentro de `specs/`.
+- [x] Revisar scripts existentes de `Interface/` y `Server/`.
+- [x] Elegir npm como package manager unico para el nuevo proyecto.
+- [x] Decidir si se conserva el monorepo o si Next.js reemplaza `Interface/` y `Server/` desde una carpeta nueva.
 
 Criterio de salida:
 
@@ -59,16 +59,17 @@ Objetivo: definir como quedara el sistema antes de implementar.
 
 Checklist:
 
-- [ ] Inventariar pantallas actuales de `Interface/`.
-- [ ] Inventariar endpoints actuales de `Server/`.
-- [ ] Inventariar tablas esperadas del sistema anterior desde codigo y scripts SQL.
-- [ ] Definir roles del sistema:
+- [x] Inventariar pantallas actuales de `Interface/`.
+- [x] Inventariar endpoints actuales de `Server/`.
+- [x] Inventariar tablas esperadas del sistema anterior desde codigo y scripts SQL.
+- [x] Definir roles del sistema:
   - Admin.
   - Operador.
+  - Disenador de contenido.
   - Visor.
-  - Dispositivo o pantalla.
-- [ ] Definir companias validas y reglas multiempresa.
-- [ ] Definir entidades principales:
+  - Player/dispositivo.
+- [x] Definir companias validas y reglas multiempresa.
+- [x] Definir entidades principales:
   - Empresas.
   - Usuarios/perfiles.
   - Campanas.
@@ -76,13 +77,13 @@ Checklist:
   - Taquillas o ubicaciones.
   - Pantallas/dispositivos.
   - Asignaciones de contenido.
-- [ ] Definir si las pantallas Windows requieren funcionamiento offline.
-- [ ] Definir estrategia de despliegue:
+- [x] Definir si las pantallas Windows requieren funcionamiento offline.
+- [x] Definir estrategia de despliegue:
   - Vercel.
   - Servidor propio.
   - Docker.
   - Instalacion local/LAN.
-- [ ] Crear `specs/arquitectura-objetivo.md`.
+- [x] Crear `specs/arquitectura-objetivo.md`.
 
 Criterio de salida:
 
@@ -94,7 +95,7 @@ Objetivo: levantar la base tecnica nueva sin depender del backend viejo.
 
 Checklist:
 
-- [ ] Crear app Next.js con TypeScript.
+- [ ] Crear app Next.js con TypeScript en `App/`.
 - [ ] Usar App Router.
 - [ ] Configurar ESLint y TypeScript estricto.
 - [ ] Configurar aliases de imports.
@@ -370,11 +371,13 @@ Este MVP prueba lo mas importante: autenticacion, autorizacion, base de datos, a
 ## Documentos esperados en `specs/`
 
 - [x] `plan-migracion-nextjs-supabase.md`
-- [ ] `arquitectura-objetivo.md`
+- [x] `fase-0-preparacion.md`
+- [x] `convenciones-specs.md`
+- [x] `arquitectura-objetivo.md`
 - [ ] `modelo-datos.md`
 - [ ] `supabase-configuracion.md`
 - [ ] `rls-politicas.md`
 - [ ] `datos-iniciales.md`
-- [ ] `decision-package-manager.md`
+- [x] `decision-package-manager.md`
+- [x] `decision-estructura-proyecto.md`
 - [ ] `deployment.md`
-
