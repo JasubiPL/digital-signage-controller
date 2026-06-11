@@ -95,28 +95,28 @@ Objetivo: levantar la base tecnica nueva sin depender del backend viejo.
 
 Checklist:
 
-- [ ] Crear app Next.js con TypeScript en `App/`.
-- [ ] Usar App Router.
-- [ ] Configurar ESLint y TypeScript estricto.
-- [ ] Configurar aliases de imports.
-- [ ] Definir estructura sugerida:
+- [x] Crear app Next.js con TypeScript en `App/`.
+- [x] Usar App Router.
+- [x] Configurar ESLint y TypeScript estricto.
+- [x] Configurar aliases de imports.
+- [x] Definir estructura sugerida:
   - `src/app`
   - `src/components`
   - `src/features`
   - `src/lib`
   - `src/server`
   - `src/styles`
-- [ ] Configurar variables de entorno:
+- [x] Configurar variables de entorno:
   - `NEXT_PUBLIC_SUPABASE_URL`
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
   - `SUPABASE_SERVICE_ROLE_KEY`
-- [ ] Agregar `.env.example` sin secretos reales.
-- [ ] Agregar scripts:
+- [x] Agregar `.env.example` sin secretos reales.
+- [x] Agregar scripts:
   - `dev`
   - `build`
   - `lint`
   - `typecheck`
-- [ ] Verificar build inicial.
+- [x] Verificar build inicial.
 
 Criterio de salida:
 
@@ -380,4 +380,5 @@ Este MVP prueba lo mas importante: autenticacion, autorizacion, base de datos, a
 - [ ] `datos-iniciales.md`
 - [x] `decision-package-manager.md`
 - [x] `decision-estructura-proyecto.md`
+- [x] `fase-2-nextjs-app.md`
 - [ ] `deployment.md`
