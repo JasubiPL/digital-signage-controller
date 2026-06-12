@@ -21,6 +21,8 @@ export type CompanyAccess = {
   } | null;
 };
 
+type ProfileRole = "user" | "super_admin";
+
 export async function getCurrentUser() {
   const supabase = await createClient();
   const {
@@ -65,7 +67,6 @@ export async function ensureProfile(user: SupabaseUser) {
       email,
       full_name: fullName,
       avatar_url: user.user_metadata?.avatar_url ?? null,
-      global_role: "user",
     },
     {
       onConflict: "id",
@@ -88,6 +89,45 @@ export async function ensureProfile(user: SupabaseUser) {
 export async function getUserCompanyAccess(userId: string) {
   const supabase = await createClient();
 
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("global_role")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (profileError) {
+    return {
+      data: [],
+      error: profileError.message,
+      isGlobalAdmin: false,
+    };
+  }
+
+  if ((profile?.global_role as ProfileRole | undefined) === "super_admin") {
+    const { data, error } = await supabase
+      .from("companies")
+      .select("id, slug, name")
+      .eq("status", "active")
+      .order("slug", { ascending: true });
+
+    if (error) {
+      return {
+        data: [],
+        error: error.message,
+        isGlobalAdmin: true,
+      };
+    }
+
+    return {
+      data: (data ?? []).map((company) => ({
+        role: "super_admin",
+        companies: company,
+      })),
+      error: null,
+      isGlobalAdmin: true,
+    };
+  }
+
   const { data, error } = await supabase
     .from("user_companies")
     .select("role, companies(id, slug, name)")
@@ -98,30 +138,33 @@ export async function getUserCompanyAccess(userId: string) {
     return {
       data: [],
       error: error.message,
+      isGlobalAdmin: false,
     };
   }
 
   return {
     data: (data ?? []) as unknown as CompanyAccess[],
     error: null,
+    isGlobalAdmin: false,
   };
 }
 
 export async function getBootstrapState() {
   const supabase = await createClient();
 
-  const [{ count: accessCount, error: accessError }, { count: companyCount, error: companyError }] =
+  const [{ count: adminCount, error: adminError }, { count: companyCount, error: companyError }] =
     await Promise.all([
       supabase
-        .from("user_companies")
-        .select("id", { count: "exact", head: true }),
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("global_role", "super_admin"),
       supabase.from("companies").select("id", { count: "exact", head: true }),
     ]);
 
   return {
-    canBootstrap: !accessError && !companyError && accessCount === 0 && (companyCount ?? 0) > 0,
-    accessCount: accessCount ?? 0,
+    canBootstrap: !adminError && !companyError && adminCount === 0 && (companyCount ?? 0) > 0,
+    accessCount: adminCount ?? 0,
     companyCount: companyCount ?? 0,
-    error: accessError?.message ?? companyError?.message ?? null,
+    error: adminError?.message ?? companyError?.message ?? null,
   };
 }

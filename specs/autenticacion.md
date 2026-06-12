@@ -2,7 +2,7 @@
 
 ## Estado
 
-Implementacion base completada en Next.js con Supabase Auth. Pendiente confirmar en Supabase Dashboard que los proveedores deseados estan activos.
+Implementacion base completada en Next.js con Supabase Auth. El login usara usuario/email y contrasena. Pendiente confirmar en Supabase Dashboard que email/password este activo.
 
 ## Archivos implementados
 
@@ -24,7 +24,7 @@ Helpers:
 
 ## Flujos soportados
 
-### Login con password
+### Login con usuario/email y contrasena
 
 Formulario en `/login`.
 
@@ -34,37 +34,11 @@ Accion:
 supabase.auth.signInWithPassword()
 ```
 
-### Registro con password
+Nota: Supabase Auth usa email para `signInWithPassword()`. El campo de UI se muestra como `Usuario / email` para dejar abierta la convencion funcional, pero tecnicamente se envia como email.
 
-Formulario en `/login`.
+### Creacion de usuarios
 
-Accion:
-
-```ts
-supabase.auth.signUp()
-```
-
-### Magic link
-
-Formulario en `/login`.
-
-Accion:
-
-```ts
-supabase.auth.signInWithOtp()
-```
-
-Callback:
-
-```text
-GET /auth/callback
-```
-
-La ruta intercambia `code` por sesion con:
-
-```ts
-supabase.auth.exchangeCodeForSession(code)
-```
+No hay registro publico desde `/login`. Las cuentas se crean desde Supabase Dashboard o desde una operacion server-side con `supabase.auth.admin.createUser()`.
 
 ### Logout
 
@@ -104,7 +78,8 @@ Si el usuario existe en Supabase Auth pero no en `public.profiles`, se crea o ac
 - `email`
 - `full_name`
 - `avatar_url`
-- `global_role`
+
+`ensureProfile()` no sobreescribe `global_role` si el perfil ya existe. Esto evita degradar accidentalmente un `super_admin` a `user` durante el login.
 
 ## Bootstrap del primer admin
 
@@ -113,7 +88,7 @@ El dashboard permite crear el primer admin solo cuando:
 - El usuario esta autenticado.
 - El perfil existe o puede crearse.
 - Existe al menos una compania.
-- No existe ningun registro en `user_companies`.
+- No existe ningun perfil con `global_role = 'super_admin'`.
 
 Accion:
 
@@ -123,9 +98,11 @@ bootstrapFirstAdmin()
 
 Resultado:
 
-- Inserta al usuario actual en `user_companies` con rol `admin`.
-- Usa la primera compania activa por `slug`.
-- Despues del primer registro, el bootstrap deja de estar disponible.
+- Actualiza el perfil del usuario actual a `global_role = 'super_admin'`.
+- El admin global ve todas las companias activas.
+- Despues del primer `super_admin`, el bootstrap deja de estar disponible.
+
+`user_companies` queda para permisos acotados por compania. No es necesario para el admin global.
 
 ## Estados validados en UI
 
@@ -134,6 +111,7 @@ El dashboard contempla:
 - Usuario no autenticado: redireccion a login.
 - Usuario autenticado sin perfil: intenta crearlo y muestra error si falla.
 - Usuario autenticado sin compania: muestra estado de permisos pendientes.
+- Usuario autenticado con `global_role = 'super_admin'`: muestra acceso global.
 - Usuario autenticado con permisos: muestra companias y roles.
 - Schema sin companias: muestra pendiente de seed.
 
@@ -141,16 +119,11 @@ El dashboard contempla:
 
 En Supabase Dashboard se debe confirmar:
 
-- Email/password habilitado si se usara login con password.
-- Email signup habilitado si se permitira crear cuentas desde `/login`.
-- Magic link/OTP habilitado si se usara acceso sin password.
-- Redirect URL permitido para `/auth/callback`.
+- Email/password habilitado para login con usuario/email y contrasena.
+- Email signup publico deshabilitado si no se permitira autoregistro.
+- Los usuarios admin creados manualmente deben tener email confirmado.
 
-URLs recomendadas en desarrollo:
-
-```text
-http://localhost:3000/auth/callback
-```
+`/auth/callback` queda disponible para flujos futuros de confirmacion/invitacion, pero el login principal no depende de magic link ni registro publico.
 
 ## Verificacion local
 
@@ -170,7 +143,8 @@ Resultados:
 - `GET /login` respondio `200`.
 - `HEAD /dashboard` sin sesion respondio `307` hacia `/login?next=%2Fdashboard`.
 - Se valido que `next` se normaliza con `sanitizeNextPath()` para evitar redirects externos.
-- En navegador integrado, `/login` mostro titulo, email, password y botones `Entrar`, `Magic link`, `Crear cuenta`.
+- En navegador integrado, `/login` mostro titulo, usuario/email, contrasena y boton `Entrar`.
+- Se valido que `/login` no muestra `Crear cuenta`.
 - En navegador integrado, `/dashboard` sin sesion termino en `/login?next=%2Fdashboard`.
 
 Observacion:

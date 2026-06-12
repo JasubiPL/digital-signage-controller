@@ -21,23 +21,10 @@ export async function bootstrapFirstAdmin() {
   }
 
   const supabase = await createClient();
-  const { data: company, error: companyError } = await supabase
-    .from("companies")
-    .select("id")
-    .eq("status", "active")
-    .order("slug", { ascending: true })
-    .limit(1)
-    .maybeSingle();
-
-  if (companyError || !company) {
-    redirect("/dashboard?error=no-company-available");
-  }
-
-  const { error } = await supabase.from("user_companies").insert({
-    user_id: user.id,
-    company_id: company.id,
-    role: "admin",
-  });
+  const { error } = await supabase
+    .from("profiles")
+    .update({ global_role: "super_admin" })
+    .eq("id", user.id);
 
   if (error) {
     redirect(`/dashboard?error=${encodeURIComponent(error.message)}`);
@@ -46,4 +33,3 @@ export async function bootstrapFirstAdmin() {
   revalidatePath("/dashboard");
   redirect("/dashboard");
 }
-

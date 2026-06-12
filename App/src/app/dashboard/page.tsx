@@ -66,8 +66,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       {profile.ok && !access.error && access.data.length === 0 && bootstrap.canBootstrap ? (
         <StateCard title="Bootstrap del primer admin">
           <p>
-            No existen asignaciones en `user_companies`. Puedes convertir este
-            usuario en admin de la primera compania activa.
+            No existe ningun `super_admin`. Puedes convertir este usuario en
+            admin global de todas las companias.
           </p>
           <form action={bootstrapFirstAdmin} className="mt-4">
             <button className="rounded bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-800">
@@ -84,7 +84,13 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       bootstrap.companyCount > 0 ? (
         <StateCard title="Usuario autenticado sin compania">
           Tu perfil existe, pero todavia no tienes permisos asignados en ninguna
-          compania.
+          compania ni rol global.
+        </StateCard>
+      ) : null}
+
+      {profile.ok && access.isGlobalAdmin ? (
+        <StateCard title="Admin global">
+          Este usuario tiene acceso administrativo a todas las companias activas.
         </StateCard>
       ) : null}
 
@@ -133,4 +139,3 @@ function StateCard({
     </section>
   );
 }
-

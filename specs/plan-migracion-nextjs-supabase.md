@@ -184,7 +184,7 @@ Objetivo: eliminar login solo por email y reemplazarlo por Supabase Auth.
 
 Checklist:
 
-- [ ] Activar proveedor email/password o magic link en Supabase.
+- [ ] Activar proveedor email/password en Supabase.
 - [x] Crear pantalla `/login`.
 - [x] Crear flujo de logout real.
 - [x] Crear perfil automaticamente al crear usuario.
@@ -193,6 +193,9 @@ Checklist:
 - [x] Crear layout privado para dashboard.
 - [x] Crear bootstrap del primer admin.
 - [x] Sanitizar redirects `next` para evitar redirects externos.
+- [x] Retirar magic link del flujo principal de login.
+- [x] Retirar registro publico del login.
+- [x] Documentar creacion manual del usuario admin en Supabase.
 - [x] Validar estados:
   - Usuario no autenticado.
   - Usuario autenticado sin perfil.
@@ -386,6 +389,7 @@ Este MVP prueba lo mas importante: autenticacion, autorizacion, base de datos, a
 - [ ] `rls-politicas.md`
 - [ ] `datos-iniciales.md`
 - [x] `autenticacion.md`
+- [x] `crear-admin-supabase.md`
 - [x] `decision-package-manager.md`
 - [x] `decision-estructura-proyecto.md`
 - [x] `fase-2-nextjs-app.md`

@@ -79,10 +79,11 @@ Campos principales:
 Nota:
 
 - No se seedearon perfiles porque dependen de usuarios reales en Supabase Auth.
+- `super_admin` representa al admin global del sistema anterior y no requiere filas en `user_companies`.
 
 ### `user_companies`
 
-Relaciona usuarios con empresas y roles.
+Relaciona usuarios con empresas y roles cuando el permiso esta limitado a companias concretas.
 
 Campos principales:
 

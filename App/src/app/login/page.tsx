@@ -3,18 +3,17 @@ import { redirect } from "next/navigation";
 import { sanitizeNextPath } from "@/lib/auth/redirect";
 import { getCurrentUser } from "@/server/auth/session";
 
-import { sendMagicLink, signInWithPassword, signUpWithPassword } from "./actions";
+import { signInWithPassword } from "./actions";
 
 type LoginPageProps = {
   searchParams: Promise<{
     error?: string;
-    message?: string;
     next?: string;
   }>;
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const [{ error, message, next: rawNext }, user] = await Promise.all([
+  const [{ error, next: rawNext }, user] = await Promise.all([
     searchParams,
     getCurrentUser(),
   ]);
@@ -35,8 +34,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             Iniciar sesion
           </h1>
           <p className="mt-3 text-sm leading-6 text-zinc-600">
-            Accede con Supabase Auth. Puedes usar password o solicitar un magic
-            link si el proveedor esta activo en el proyecto.
+            Accede con tu usuario y contrasena. En Supabase Auth el usuario
+            corresponde al email de la cuenta.
           </p>
 
           {error ? (
@@ -45,16 +44,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </div>
           ) : null}
 
-          {message ? (
-            <div className="mt-5 rounded border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
-              {message}
-            </div>
-          ) : null}
-
           <form action={signInWithPassword} className="mt-6 space-y-4">
             <input name="next" type="hidden" value={next} />
             <label className="block">
-              <span className="text-sm font-medium text-zinc-700">Email</span>
+              <span className="text-sm font-medium text-zinc-700">
+                Usuario / email
+              </span>
               <input
                 autoComplete="email"
                 className="mt-1 w-full rounded border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-red-700"
@@ -65,7 +60,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               />
             </label>
             <label className="block">
-              <span className="text-sm font-medium text-zinc-700">Password</span>
+              <span className="text-sm font-medium text-zinc-700">
+                Contrasena
+              </span>
               <input
                 autoComplete="current-password"
                 className="mt-1 w-full rounded border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-red-700"
@@ -80,25 +77,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             >
               Entrar
             </button>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <button
-                className="w-full rounded border border-zinc-300 px-4 py-2 text-sm font-semibold text-zinc-800 hover:bg-zinc-50"
-                formAction={sendMagicLink}
-              >
-                Magic link
-              </button>
-              <button
-                className="w-full rounded border border-zinc-300 px-4 py-2 text-sm font-semibold text-zinc-800 hover:bg-zinc-50"
-                formAction={signUpWithPassword}
-              >
-                Crear cuenta
-              </button>
-            </div>
           </form>
 
           <p className="mt-4 text-xs leading-5 text-zinc-500">
-            Para magic link o crear cuenta, llena email/password arriba y usa el
-            boton correspondiente cuando esos proveedores esten activos.
+            Las cuentas se crean desde Supabase y se asignan como admin en la
+            base de datos del proyecto.
           </p>
         </div>
       </section>
