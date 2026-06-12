@@ -6,7 +6,8 @@ Fase 6 implementada como migracion SQL versionada:
 
 - `supabase/migrations/202606120002_rls_policies.sql`
 
-Queda pendiente aplicar la migracion en Supabase cloud y ejecutar pruebas manuales con usuarios reales de distintos roles.
+La migracion RLS ya fue aplicada en Supabase cloud. Queda pendiente ejecutar
+pruebas manuales con usuarios reales de distintos roles.
 
 ## Modelo de roles
 
@@ -166,7 +167,6 @@ Validar:
 
 ## Pendientes
 
-- Aplicar la migracion en Supabase cloud.
 - Ejecutar pruebas con sesiones reales.
 - Generar tipos TypeScript desde Supabase despues de aplicar migraciones.
 - Revisar si `designer` debe poder subir archivos en Fase 7.

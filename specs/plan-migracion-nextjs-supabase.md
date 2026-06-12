@@ -172,7 +172,7 @@ Checklist:
 - [x] Crear seed minimo de desarrollo.
 - [x] Documentar modelo en `specs/modelo-datos.md`.
 - [x] Aplicar migraciones en Supabase cloud con acceso administrativo.
-- [ ] Aplicar/verificar seed en Supabase cloud.
+- [x] Aplicar/verificar seed en Supabase cloud.
 
 Criterio de salida:
 
@@ -225,7 +225,7 @@ Checklist:
 - [x] Agregar indices para columnas usadas en politicas.
 - [ ] Probar politicas con usuarios de distintos roles.
 - [x] Documentar politicas en `specs/rls-politicas.md`.
-- [ ] Aplicar migracion RLS en Supabase cloud.
+- [x] Aplicar migracion RLS en Supabase cloud.
 
 Criterio de salida:
 
@@ -249,7 +249,8 @@ Checklist:
 - [x] Implementar signed URLs si el bucket es privado.
 - [x] Bloquear nombres de archivo usados como rutas.
 - [ ] Probar archivos invalidos, grandes o con nombres maliciosos.
-- [ ] Aplicar migracion Storage en Supabase cloud.
+- [x] Aplicar migracion Storage en Supabase cloud.
+- [x] Probar Storage con bucket privado, upload, metadata, signed URL y limpieza.
 
 Criterio de salida:
 
@@ -262,16 +263,16 @@ Objetivo: reemplazar endpoints de `Server/` con Route Handlers, Server Actions o
 Checklist:
 
 - [ ] Migrar modulo de usuarios.
-- [ ] Migrar modulo de campanas.
-- [ ] Migrar modulo de archivos.
-- [ ] Migrar modulo de taquillas/ubicaciones.
-- [ ] Migrar modulo de pantallas/dispositivos.
-- [ ] Centralizar validacion de payloads.
-- [ ] Reemplazar SQL manual por Supabase client o funciones SQL controladas.
-- [ ] Eliminar interpolacion de nombres de tabla.
-- [ ] Crear formato consistente de errores.
+- [x] Migrar modulo de campanas.
+- [x] Migrar modulo de archivos.
+- [x] Migrar modulo de taquillas/ubicaciones.
+- [x] Migrar modulo de pantallas/dispositivos.
+- [x] Centralizar validacion de payloads.
+- [x] Reemplazar SQL manual por Supabase client o funciones SQL controladas.
+- [x] Eliminar interpolacion de nombres de tabla.
+- [x] Crear formato consistente de errores.
 - [ ] Agregar logs server-side para operaciones criticas.
-- [ ] Identificar endpoints que ya no son necesarios por usar Supabase directo.
+- [x] Identificar endpoints que ya no son necesarios por usar Supabase directo.
 
 Criterio de salida:
 
@@ -393,6 +394,7 @@ Este MVP prueba lo mas importante: autenticacion, autorizacion, base de datos, a
 - [x] `autenticacion.md`
 - [x] `crear-admin-supabase.md`
 - [x] `storage-archivos.md`
+- [x] `fase-8-api-nextjs.md`
 - [x] `decision-package-manager.md`
 - [x] `decision-estructura-proyecto.md`
 - [x] `fase-2-nextjs-app.md`

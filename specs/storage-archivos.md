@@ -11,7 +11,9 @@ Archivos principales:
 - `App/src/app/api/media/route.ts`
 - `App/src/app/api/media/[id]/route.ts`
 
-Queda pendiente aplicar la migracion en Supabase cloud y probar con usuarios reales.
+La migracion ya fue aplicada en Supabase cloud y se valido Storage con una prueba
+server-side reversible. Queda pendiente probar el flujo completo desde UI con un
+usuario autenticado y casos de rechazo.
 
 ## Decision de bucket
 
@@ -201,7 +203,21 @@ Probar rechazos:
 
 ## Pendientes
 
-- Aplicar migracion en Supabase cloud.
-- Probar con archivos reales.
+- Probar upload desde UI con sesion real.
+- Probar archivos reales.
+- Probar archivos invalidos, grandes o con nombres maliciosos.
 - Definir en Fase 7/8 si `designer` puede subir contenido de campania.
 - Crear UI para administrar archivos desde el dashboard.
+
+## Verificacion cloud realizada
+
+Se valido contra Supabase cloud:
+
+- `SUPABASE_SECRET_KEY` configurada y endpoint `?probe=admin` en estado `ok`.
+- Bucket privado `campaign-media` existente.
+- Limite de bucket en `50 MB`.
+- Upload de PNG minimo en path seguro `company_id/campaign_id/file_id.png`.
+- Insert temporal en `media_files`.
+- Generacion de signed URL.
+- Lectura exitosa del archivo firmado.
+- Limpieza de la fila temporal y del objeto de Storage.
