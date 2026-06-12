@@ -128,16 +128,17 @@ Objetivo: dejar listo el backend cloud.
 
 Checklist:
 
-- [ ] Crear proyecto en Supabase cloud.
-- [ ] Configurar URL y anon key en `.env.local`.
-- [ ] Guardar service role key solo en entorno server-side.
-- [ ] Instalar dependencias de Supabase para Next.js.
-- [ ] Crear clientes Supabase:
+- [x] Crear proyecto en Supabase cloud.
+- [x] Configurar URL y anon/publishable key en `.env.local`.
+- [x] Guardar service role/secret key solo en entorno server-side.
+- [x] Instalar dependencias de Supabase para Next.js.
+- [x] Crear clientes Supabase:
   - Cliente browser.
   - Cliente server con cookies.
   - Cliente admin server-only, si hace falta.
-- [ ] Validar conexion desde una ruta de prueba server-side.
-- [ ] Documentar configuracion en `specs/supabase-configuracion.md`.
+- [x] Validar configuracion desde una ruta de prueba server-side.
+- [x] Validar conexion publica cloud con credenciales reales.
+- [x] Documentar configuracion en `specs/supabase-configuracion.md`.
 
 Criterio de salida:
 
@@ -375,7 +376,7 @@ Este MVP prueba lo mas importante: autenticacion, autorizacion, base de datos, a
 - [x] `convenciones-specs.md`
 - [x] `arquitectura-objetivo.md`
 - [ ] `modelo-datos.md`
-- [ ] `supabase-configuracion.md`
+- [x] `supabase-configuracion.md`
 - [ ] `rls-politicas.md`
 - [ ] `datos-iniciales.md`
 - [x] `decision-package-manager.md`
