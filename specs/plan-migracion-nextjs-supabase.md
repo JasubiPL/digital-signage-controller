@@ -284,21 +284,21 @@ Objetivo: portar la UI actual de React/Vite a Next.js.
 
 Checklist:
 
-- [ ] Migrar layout principal.
-- [ ] Migrar componentes compartidos.
-- [ ] Migrar login.
-- [ ] Migrar dashboard.
+- [x] Migrar layout principal.
+- [x] Migrar componentes compartidos.
+- [x] Migrar login.
+- [x] Migrar dashboard.
 - [ ] Migrar usuarios.
-- [ ] Migrar archivos.
-- [ ] Migrar campanas.
-- [ ] Migrar taquillas/ubicaciones.
-- [ ] Migrar pantallas/dispositivos.
-- [ ] Reemplazar llamadas hardcodeadas a `localhost:7000`.
-- [ ] Separar componentes server/client correctamente.
+- [x] Migrar archivos.
+- [x] Migrar campanas.
+- [x] Migrar taquillas/ubicaciones.
+- [x] Migrar pantallas/dispositivos.
+- [x] Reemplazar llamadas hardcodeadas a `localhost:7000`.
+- [x] Separar componentes server/client correctamente.
 - [ ] Agregar estados de loading.
-- [ ] Agregar estados de error.
-- [ ] Validar responsive basico.
-- [ ] Mantener paridad funcional antes de redisenar.
+- [x] Agregar estados de error.
+- [x] Validar responsive basico.
+- [x] Mantener paridad funcional antes de redisenar.
 
 Criterio de salida:
 
@@ -395,6 +395,7 @@ Este MVP prueba lo mas importante: autenticacion, autorizacion, base de datos, a
 - [x] `crear-admin-supabase.md`
 - [x] `storage-archivos.md`
 - [x] `fase-8-api-nextjs.md`
+- [x] `fase-9-ui-nextjs.md`
 - [x] `decision-package-manager.md`
 - [x] `decision-estructura-proyecto.md`
 - [x] `fase-2-nextjs-app.md`

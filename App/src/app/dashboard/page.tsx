@@ -1,10 +1,13 @@
 import { bootstrapFirstAdmin } from "@/server/auth/bootstrap";
+import { createClient } from "@/lib/supabase/server";
 import {
   ensureProfile,
   getBootstrapState,
   getUserCompanyAccess,
   requireUser,
 } from "@/server/auth/session";
+
+import { DashboardLink, Feedback, PageHeader, Panel, StatusBadge } from "./components";
 
 type DashboardPageProps = {
   searchParams: Promise<{
@@ -18,31 +21,55 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     requireUser("/dashboard"),
   ]);
   const profile = await ensureProfile(user);
+  const supabase = await createClient();
   const [access, bootstrap] = await Promise.all([
     getUserCompanyAccess(user.id),
     getBootstrapState(),
   ]);
+  const companyIds = access.data
+    .map((item) => item.companies?.id)
+    .filter((id): id is string => Boolean(id));
+  const [
+    { count: campaignCount },
+    { count: locationCount },
+    { count: screenCount },
+    { count: mediaCount },
+  ] = await Promise.all([
+    companyIds.length
+      ? supabase.from("campaigns").select("id", { count: "exact", head: true }).in("company_id", companyIds)
+      : Promise.resolve({ count: 0 }),
+    companyIds.length
+      ? supabase.from("locations").select("id", { count: "exact", head: true }).in("company_id", companyIds)
+      : Promise.resolve({ count: 0 }),
+    companyIds.length
+      ? supabase.from("screens").select("id", { count: "exact", head: true }).in("company_id", companyIds)
+      : Promise.resolve({ count: 0 }),
+    companyIds.length
+      ? supabase
+          .from("media_files")
+          .select("id", { count: "exact", head: true })
+          .in("company_id", companyIds)
+          .eq("status", "active")
+      : Promise.resolve({ count: 0 }),
+  ]);
 
   return (
-    <div className="space-y-6">
-      <section>
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-red-700">
-          Dashboard
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-          Panel privado
-        </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-600">
-          Esta pantalla ya usa sesion real de Supabase Auth y crea el perfil
-          local del usuario cuando hace falta.
-        </p>
-      </section>
+    <div className="mx-auto flex h-full w-[95%] flex-col gap-6">
+      <PageHeader eyebrow="Dashboard" title="Panel privado">
+        <div className="flex gap-2">
+          <DashboardLink href="/dashboard/campaigns">Campanas</DashboardLink>
+          <DashboardLink href="/dashboard/files">Archivos</DashboardLink>
+        </div>
+      </PageHeader>
 
-      {error ? (
-        <StateCard tone="error" title="Accion no completada">
-          {error}
-        </StateCard>
-      ) : null}
+      <Feedback error={error} />
+
+      <section className="grid gap-4 md:grid-cols-4">
+        <MetricCard helper="Activas y borrador" label="Campanas" value={campaignCount ?? 0} />
+        <MetricCard helper="Taquillas/puntos" label="Taquillas" value={locationCount ?? 0} />
+        <MetricCard helper="Players y pantallas" label="Pantallas" value={screenCount ?? 0} />
+        <MetricCard helper="Storage privado" label="Archivos" value={mediaCount ?? 0} />
+      </section>
 
       {!profile.ok ? (
         <StateCard tone="error" title="Usuario autenticado sin perfil">
@@ -95,26 +122,46 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       ) : null}
 
       {profile.ok && access.data.length > 0 ? (
-        <section className="grid gap-4 md:grid-cols-2">
-          {access.data.map((item) => (
-            <article
-              className="rounded border border-zinc-200 bg-white p-5 shadow-sm"
-              key={`${item.companies?.id}-${item.role}`}
-            >
-              <p className="text-sm font-medium uppercase tracking-[0.14em] text-zinc-500">
-                {item.role}
-              </p>
-              <h2 className="mt-2 text-xl font-semibold">
-                {item.companies?.name ?? "Compania sin nombre"}
-              </h2>
-              <p className="mt-2 text-sm text-zinc-600">
-                Slug: {item.companies?.slug ?? "sin-slug"}
-              </p>
-            </article>
-          ))}
-        </section>
+        <Panel title="Companias disponibles">
+          <section className="grid gap-4 md:grid-cols-2">
+            {access.data.map((item) => (
+              <article
+                className="rounded border border-zinc-200 bg-white p-4"
+                key={`${item.companies?.id}-${item.role}`}
+              >
+                <StatusBadge>{item.role}</StatusBadge>
+                <h2 className="mt-3 text-lg font-semibold">
+                  {item.companies?.name ?? "Compania sin nombre"}
+                </h2>
+                <p className="mt-1 text-sm text-zinc-600">
+                  Slug: {item.companies?.slug ?? "sin-slug"}
+                </p>
+              </article>
+            ))}
+          </section>
+        </Panel>
       ) : null}
     </div>
+  );
+}
+
+function MetricCard({
+  helper,
+  label,
+  value,
+}: Readonly<{
+  helper: string;
+  label: string;
+  value: number;
+}>) {
+  return (
+    <article className="bg-white px-8 py-4">
+      <p className="text-xl text-red-600">{label}</p>
+      <div className="mt-2 flex items-center justify-between">
+        <p className="text-6xl font-semibold text-zinc-950">{value}</p>
+        <p className="max-w-24 text-right text-sm text-zinc-500">{helper}</p>
+      </div>
+    </article>
   );
 }
 
