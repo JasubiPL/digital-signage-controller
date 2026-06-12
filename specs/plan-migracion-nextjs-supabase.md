@@ -150,30 +150,31 @@ Objetivo: reemplazar el modelo MySQL por un schema PostgreSQL normalizado.
 
 Checklist:
 
-- [ ] Convertir tablas por empresa a tablas compartidas con `company_id`.
-- [ ] Crear tabla `companies`.
-- [ ] Crear tabla `profiles` relacionada con `auth.users`.
-- [ ] Crear tabla `user_companies` para permisos multiempresa.
-- [ ] Crear tabla `campaigns`.
-- [ ] Crear tabla `media_files`.
-- [ ] Crear tabla `locations` o `ticket_booths`.
-- [ ] Crear tabla `screens` o `players`.
-- [ ] Crear tabla de asignaciones entre campanas, pantallas y/o ubicaciones.
-- [ ] Usar UUIDs como primary keys.
-- [ ] Agregar `created_at` y `updated_at`.
-- [ ] Agregar constraints para estados y tipos permitidos.
-- [ ] Agregar indices para:
+- [x] Convertir tablas por empresa a tablas compartidas con `company_id`.
+- [x] Crear tabla `companies`.
+- [x] Crear tabla `profiles` relacionada con `auth.users`.
+- [x] Crear tabla `user_companies` para permisos multiempresa.
+- [x] Crear tabla `campaigns`.
+- [x] Crear tabla `media_files`.
+- [x] Crear tabla `locations` o `ticket_booths`.
+- [x] Crear tabla `screens` o `players`.
+- [x] Crear tabla de asignaciones entre campanas, pantallas y/o ubicaciones.
+- [x] Usar UUIDs como primary keys.
+- [x] Agregar `created_at` y `updated_at`.
+- [x] Agregar constraints para estados y tipos permitidos.
+- [x] Agregar indices para:
   - `company_id`.
   - `campaign_id`.
   - `created_at`.
   - `screen_id` o `location_id`.
-- [ ] Crear migraciones SQL versionadas.
-- [ ] Crear seed minimo de desarrollo.
-- [ ] Documentar modelo en `specs/modelo-datos.md`.
+- [x] Crear migraciones SQL versionadas.
+- [x] Crear seed minimo de desarrollo.
+- [x] Documentar modelo en `specs/modelo-datos.md`.
+- [ ] Aplicar migraciones en Supabase cloud con acceso administrativo.
 
 Criterio de salida:
 
-- El schema existe en Supabase cloud y puede reconstruirse desde migraciones versionadas.
+- El schema esta definido en migraciones versionadas y queda pendiente aplicarlo en Supabase cloud con acceso administrativo.
 
 ## Fase 5: Autenticacion real
 
@@ -375,7 +376,7 @@ Este MVP prueba lo mas importante: autenticacion, autorizacion, base de datos, a
 - [x] `fase-0-preparacion.md`
 - [x] `convenciones-specs.md`
 - [x] `arquitectura-objetivo.md`
-- [ ] `modelo-datos.md`
+- [x] `modelo-datos.md`
 - [x] `supabase-configuracion.md`
 - [ ] `rls-politicas.md`
 - [ ] `datos-iniciales.md`
