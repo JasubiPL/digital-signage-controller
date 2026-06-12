@@ -196,6 +196,7 @@ Guarda metadata de archivos almacenados en Supabase Storage.
 Campos principales:
 
 - `company_id`
+- `campaign_id`
 - `uploaded_by`
 - `bucket`
 - `storage_path`
@@ -219,6 +220,12 @@ Estados:
 - `active`
 - `archived`
 - `deleted`
+
+Nota:
+
+- La migracion de Storage agrega `campaign_id` a `media_files`.
+- `storage_path` usa el formato `company_id/campaign_id/file_id.ext`.
+- `original_name` es solo metadata; no se usa para construir rutas.
 
 ## Timestamps
 

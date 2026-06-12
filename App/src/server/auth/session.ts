@@ -152,18 +152,16 @@ export async function getUserCompanyAccess(userId: string) {
 export async function getBootstrapState() {
   const supabase = await createClient();
 
-  const [{ count: adminCount, error: adminError }, { count: companyCount, error: companyError }] =
+  const [{ data: hasAdmin, error: adminError }, { count: companyCount, error: companyError }] =
     await Promise.all([
-      supabase
-        .from("profiles")
-        .select("id", { count: "exact", head: true })
-        .eq("global_role", "super_admin"),
+      supabase.rpc("has_any_super_admin"),
       supabase.from("companies").select("id", { count: "exact", head: true }),
     ]);
+  const hasSuperAdmin = hasAdmin === true;
 
   return {
-    canBootstrap: !adminError && !companyError && adminCount === 0 && (companyCount ?? 0) > 0,
-    accessCount: adminCount ?? 0,
+    canBootstrap: !adminError && !companyError && !hasSuperAdmin && (companyCount ?? 0) > 0,
+    accessCount: hasSuperAdmin ? 1 : 0,
     companyCount: companyCount ?? 0,
     error: adminError?.message ?? companyError?.message ?? null,
   };

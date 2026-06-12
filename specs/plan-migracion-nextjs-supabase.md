@@ -214,17 +214,18 @@ Objetivo: proteger los datos desde la base de datos.
 
 Checklist:
 
-- [ ] Activar RLS en todas las tablas publicas del sistema.
-- [ ] Crear politicas SELECT por compania.
-- [ ] Crear politicas INSERT por rol.
-- [ ] Crear politicas UPDATE por rol.
-- [ ] Crear politicas DELETE por rol.
-- [ ] Evitar que usuarios de una compania lean datos de otra.
-- [ ] Evitar que operadores cambien `company_id`.
-- [ ] Crear funciones SQL helper si simplifican politicas repetidas.
-- [ ] Agregar indices para columnas usadas en politicas.
+- [x] Activar RLS en todas las tablas publicas del sistema.
+- [x] Crear politicas SELECT por compania.
+- [x] Crear politicas INSERT por rol.
+- [x] Crear politicas UPDATE por rol.
+- [x] Crear politicas DELETE por rol.
+- [x] Evitar que usuarios de una compania lean datos de otra.
+- [x] Evitar que operadores cambien `company_id`.
+- [x] Crear funciones SQL helper si simplifican politicas repetidas.
+- [x] Agregar indices para columnas usadas en politicas.
 - [ ] Probar politicas con usuarios de distintos roles.
-- [ ] Documentar politicas en `specs/rls-politicas.md`.
+- [x] Documentar politicas en `specs/rls-politicas.md`.
+- [ ] Aplicar migracion RLS en Supabase cloud.
 
 Criterio de salida:
 
@@ -236,18 +237,19 @@ Objetivo: reemplazar Multer y el filesystem local.
 
 Checklist:
 
-- [ ] Crear bucket `campaign-media`.
-- [ ] Decidir si el bucket sera privado o publico.
-- [ ] Definir limite maximo de archivo.
-- [ ] Definir tipos MIME permitidos.
-- [ ] Crear paths seguros:
+- [x] Crear bucket `campaign-media`.
+- [x] Decidir si el bucket sera privado o publico.
+- [x] Definir limite maximo de archivo.
+- [x] Definir tipos MIME permitidos.
+- [x] Crear paths seguros:
   - `company_id/campaign_id/file_id.ext`
-- [ ] Guardar metadata en `media_files`.
-- [ ] Implementar upload desde Next.js.
-- [ ] Implementar delete con validacion de permisos.
-- [ ] Implementar signed URLs si el bucket es privado.
-- [ ] Bloquear nombres de archivo usados como rutas.
+- [x] Guardar metadata en `media_files`.
+- [x] Implementar upload desde Next.js.
+- [x] Implementar delete con validacion de permisos.
+- [x] Implementar signed URLs si el bucket es privado.
+- [x] Bloquear nombres de archivo usados como rutas.
 - [ ] Probar archivos invalidos, grandes o con nombres maliciosos.
+- [ ] Aplicar migracion Storage en Supabase cloud.
 
 Criterio de salida:
 
@@ -386,10 +388,11 @@ Este MVP prueba lo mas importante: autenticacion, autorizacion, base de datos, a
 - [x] `arquitectura-objetivo.md`
 - [x] `modelo-datos.md`
 - [x] `supabase-configuracion.md`
-- [ ] `rls-politicas.md`
+- [x] `rls-politicas.md`
 - [ ] `datos-iniciales.md`
 - [x] `autenticacion.md`
 - [x] `crear-admin-supabase.md`
+- [x] `storage-archivos.md`
 - [x] `decision-package-manager.md`
 - [x] `decision-estructura-proyecto.md`
 - [x] `fase-2-nextjs-app.md`
