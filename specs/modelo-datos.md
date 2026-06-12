@@ -2,7 +2,7 @@
 
 ## Estado
 
-Modelo implementado como migracion SQL versionada. Pendiente aplicar en Supabase cloud con acceso administrativo.
+Modelo implementado como migracion SQL versionada y schema verificado en Supabase cloud. Pendiente aplicar o verificar seed en cloud.
 
 Archivos:
 
@@ -278,6 +278,21 @@ supabase db push
 supabase db seed
 ```
 
+## Verificacion cloud
+
+Se verifico por REST que `public.companies` existe y responde en el proyecto Supabase:
+
+```text
+GET /rest/v1/companies?select=slug
+HTTP 200
+```
+
+La respuesta observada fue `[]` con conteo `0`, por lo que el schema esta aplicado pero el seed no aparece cargado desde la publishable key.
+
+Accion pendiente:
+
+- Ejecutar o verificar `supabase/seed.sql` desde SQL Editor o Supabase CLI con acceso administrativo.
+
 ## Fuera de alcance
 
 No se implementa en esta fase:
@@ -290,4 +305,3 @@ No se implementa en esta fase:
 - Creacion de usuarios de Supabase Auth.
 
 Estos puntos pertenecen a fases posteriores.
-

@@ -109,6 +109,7 @@ Checklist:
 - [x] Configurar variables de entorno:
   - `NEXT_PUBLIC_SUPABASE_URL`
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  - `NEXT_PUBLIC_SITE_URL`
   - `SUPABASE_SERVICE_ROLE_KEY`
 - [x] Agregar `.env.example` sin secretos reales.
 - [x] Agregar scripts:
@@ -170,11 +171,12 @@ Checklist:
 - [x] Crear migraciones SQL versionadas.
 - [x] Crear seed minimo de desarrollo.
 - [x] Documentar modelo en `specs/modelo-datos.md`.
-- [ ] Aplicar migraciones en Supabase cloud con acceso administrativo.
+- [x] Aplicar migraciones en Supabase cloud con acceso administrativo.
+- [ ] Aplicar/verificar seed en Supabase cloud.
 
 Criterio de salida:
 
-- El schema esta definido en migraciones versionadas y queda pendiente aplicarlo en Supabase cloud con acceso administrativo.
+- El schema esta definido en migraciones versionadas y ya responde desde Supabase cloud. Queda pendiente verificar seed en cloud.
 
 ## Fase 5: Autenticacion real
 
@@ -183,18 +185,21 @@ Objetivo: eliminar login solo por email y reemplazarlo por Supabase Auth.
 Checklist:
 
 - [ ] Activar proveedor email/password o magic link en Supabase.
-- [ ] Crear pantalla `/login`.
-- [ ] Crear flujo de logout real.
-- [ ] Crear perfil automaticamente al crear usuario.
-- [ ] Implementar proteccion de rutas privadas desde servidor.
-- [ ] Quitar dependencia de `localStorage` para saber si el usuario esta autenticado.
-- [ ] Crear layout privado para dashboard.
-- [ ] Crear bootstrap del primer admin.
-- [ ] Validar estados:
+- [x] Crear pantalla `/login`.
+- [x] Crear flujo de logout real.
+- [x] Crear perfil automaticamente al crear usuario.
+- [x] Implementar proteccion de rutas privadas desde servidor.
+- [x] Quitar dependencia de `localStorage` para saber si el usuario esta autenticado.
+- [x] Crear layout privado para dashboard.
+- [x] Crear bootstrap del primer admin.
+- [x] Sanitizar redirects `next` para evitar redirects externos.
+- [x] Validar estados:
   - Usuario no autenticado.
   - Usuario autenticado sin perfil.
   - Usuario autenticado sin compania.
   - Usuario autenticado con permisos validos.
+- [x] Verificar lint, typecheck, build y redirect de `/dashboard` sin sesion.
+- [x] Documentar autenticacion en `specs/autenticacion.md`.
 
 Criterio de salida:
 
@@ -380,6 +385,7 @@ Este MVP prueba lo mas importante: autenticacion, autorizacion, base de datos, a
 - [x] `supabase-configuracion.md`
 - [ ] `rls-politicas.md`
 - [ ] `datos-iniciales.md`
+- [x] `autenticacion.md`
 - [x] `decision-package-manager.md`
 - [x] `decision-estructura-proyecto.md`
 - [x] `fase-2-nextjs-app.md`
