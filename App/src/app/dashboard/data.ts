@@ -4,6 +4,8 @@ import {
   getUserCompanyAccess,
   requireUser,
 } from "@/server/auth/session";
+import { createAdminClient } from "@/server/supabase/admin";
+import { supabaseServerEnv } from "@/server/supabase/env";
 
 export async function getDashboardContext(next = "/dashboard") {
   const user = await requireUser(next);
@@ -15,7 +17,7 @@ export async function getDashboardContext(next = "/dashboard") {
     companies: access.data
       .map((item) => item.companies)
       .filter((company): company is NonNullable<typeof company> => Boolean(company)),
-    supabase: await createClient(),
+    supabase: supabaseServerEnv.hasSecretKey ? createAdminClient() : await createClient(),
     user,
   };
 }
@@ -31,4 +33,3 @@ export function formatBytes(value: number | null) {
   if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`;
   return `${(value / 1024 / 1024).toFixed(1)} MB`;
 }
-

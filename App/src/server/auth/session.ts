@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/server/supabase/admin";
+import { supabaseServerEnv } from "@/server/supabase/env";
 
 type SupabaseUser = {
   id: string;
@@ -89,6 +91,7 @@ export async function ensureProfile(user: SupabaseUser) {
 
 export async function getUserCompanyAccess(userId: string) {
   const supabase = await createClient();
+  const dataClient = supabaseServerEnv.hasSecretKey ? createAdminClient() : supabase;
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
@@ -104,50 +107,28 @@ export async function getUserCompanyAccess(userId: string) {
     };
   }
 
-  if ((profile?.global_role as ProfileRole | undefined) === "super_admin") {
-    const { data, error } = await supabase
-      .from("companies")
-      .select("id, slug, legacy_code, name")
-      .eq("status", "active")
-      .order("slug", { ascending: true });
-
-    if (error) {
-      return {
-        data: [],
-        error: error.message,
-        isGlobalAdmin: true,
-      };
-    }
-
-    return {
-      data: (data ?? []).map((company) => ({
-        role: "super_admin",
-        companies: company,
-      })),
-      error: null,
-      isGlobalAdmin: true,
-    };
-  }
-
-  const { data, error } = await supabase
-    .from("user_companies")
-    .select("role, companies!inner(id, slug, legacy_code, name)")
-    .eq("user_id", userId)
-    .eq("companies.status", "active")
-    .order("created_at", { ascending: true });
+  const globalRole = (profile?.global_role as ProfileRole | undefined) ?? "user";
+  const { data, error } = await dataClient
+    .from("companies")
+    .select("id, slug, legacy_code, name")
+    .eq("status", "active")
+    .order("slug", { ascending: true });
 
   if (error) {
     return {
       data: [],
       error: error.message,
-      isGlobalAdmin: false,
+      isGlobalAdmin: globalRole === "super_admin",
     };
   }
 
   return {
-    data: (data ?? []) as unknown as CompanyAccess[],
+    data: (data ?? []).map((company) => ({
+      role: globalRole,
+      companies: company,
+    })),
     error: null,
-    isGlobalAdmin: false,
+    isGlobalAdmin: globalRole === "super_admin",
   };
 }
 

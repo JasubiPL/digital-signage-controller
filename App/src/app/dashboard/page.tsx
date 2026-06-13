@@ -91,14 +91,14 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       ) : null}
 
       {profile.ok && !access.error && access.data.length === 0 && bootstrap.canBootstrap ? (
-        <StateCard title="Bootstrap del primer admin">
+        <StateCard title="Bootstrap del primer super usuario">
           <p>
-            No existe ningun `super_admin`. Puedes convertir este usuario en
-            admin global de todas las companias.
+            No existe ningun super usuario. Puedes convertir este usuario en
+            super usuario de todas las companias.
           </p>
           <form action={bootstrapFirstAdmin} className="mt-4">
             <button className="rounded bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-800">
-              Crear primer admin
+              Crear primer super usuario
             </button>
           </form>
         </StateCard>
@@ -116,7 +116,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       ) : null}
 
       {profile.ok && access.isGlobalAdmin ? (
-        <StateCard title="Admin global">
+        <StateCard title="Super usuario">
           Este usuario tiene acceso administrativo a todas las companias activas.
         </StateCard>
       ) : null}

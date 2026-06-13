@@ -60,13 +60,7 @@ export async function CampaignListPage({
 
   const availableCompanies = selectedCompany ? [selectedCompany] : companies;
   const companyIds = availableCompanies.map((company) => company.id);
-  const isAdmin =
-    access.isGlobalAdmin ||
-    access.data.some((item) =>
-      availableCompanies.some(
-        (company) => item.companies?.id === company.id && item.role === "admin",
-      ),
-    );
+  const isAdmin = access.isGlobalAdmin;
   const [{ data: campaigns }, { data: locations }, { data: assignments }] =
     await Promise.all([
       companyIds.length

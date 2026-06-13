@@ -14,6 +14,7 @@ Rutas:
 - `App/src/app/logout/route.ts`
 - `App/src/app/dashboard/layout.tsx`
 - `App/src/app/dashboard/page.tsx`
+- `App/src/app/dashboard/users/page.tsx`
 - `App/src/proxy.ts`
 
 Helpers:
@@ -38,7 +39,18 @@ Nota: Supabase Auth usa email para `signInWithPassword()`. El campo de UI se mue
 
 ### Creacion de usuarios
 
-No hay registro publico desde `/login`. Las cuentas se crean desde Supabase Dashboard o desde una operacion server-side con `supabase.auth.admin.createUser()`.
+No hay registro publico desde `/login`. Las cuentas se crean desde Supabase Dashboard o desde `/dashboard/users`, que ejecuta una operacion server-side con `supabase.auth.admin.createUser()`.
+
+La pantalla `/dashboard/users` solo aparece en el menu cuando el usuario actual es:
+
+- `super_admin`
+
+Requiere `SUPABASE_SECRET_KEY` o `SUPABASE_SERVICE_ROLE_KEY` para poder crear usuarios reales en Supabase Auth y sincronizar `public.profiles`.
+
+Alcance de gestion:
+
+- `super_admin`: super usuario; puede ver, crear y modificar usuarios.
+- `user`: usuario consulta; solo puede consultar informacion y no ve `/dashboard/users`.
 
 ### Logout
 
@@ -63,6 +75,7 @@ Rutas protegidas:
 - `/dashboard`
 - `/dashboard/locations/[companySlug]`
 - `/dashboard/campaigns/[companySlug]`
+- `/dashboard/users`
 
 Comportamiento:
 
@@ -102,10 +115,11 @@ bootstrapFirstAdmin()
 Resultado:
 
 - Actualiza el perfil del usuario actual a `global_role = 'super_admin'`.
-- El admin global ve todas las companias activas.
+- El super usuario ve todas las companias activas.
 - Despues del primer `super_admin`, el bootstrap deja de estar disponible.
 
-`user_companies` queda para permisos acotados por compania. No es necesario para el admin global.
+El modelo vigente solo usa `profiles.global_role` con dos valores:
+`super_admin` y `user`.
 
 ## Estados validados en UI
 
@@ -114,8 +128,9 @@ El dashboard contempla:
 - Usuario no autenticado: redireccion a login.
 - Usuario autenticado sin perfil: intenta crearlo y muestra error si falla.
 - Usuario autenticado sin compania: muestra estado de permisos pendientes.
-- Usuario autenticado con `global_role = 'super_admin'`: muestra acceso global.
-- Usuario autenticado con permisos: muestra companias y roles.
+- Usuario autenticado con `global_role = 'super_admin'`: muestra acceso de super usuario y opcion `Usuarios`.
+- Usuario autenticado con `global_role = 'user'`: puede consultar informacion y no ve `Usuarios`.
+- Usuario normal: `/dashboard/users` responde como no encontrado.
 - Schema sin companias: muestra pendiente de seed.
 
 ## Pendientes externos
@@ -124,7 +139,7 @@ En Supabase Dashboard se debe confirmar:
 
 - Email/password habilitado para login con usuario/email y contrasena.
 - Email signup publico deshabilitado si no se permitira autoregistro.
-- Los usuarios admin creados manualmente deben tener email confirmado.
+- Los super usuarios creados manualmente deben tener email confirmado.
 
 `/auth/callback` queda disponible para flujos futuros de confirmacion/invitacion, pero el login principal no depende de magic link ni registro publico.
 
@@ -158,5 +173,4 @@ Observacion:
 
 - Generar tipos TypeScript desde Supabase.
 - Implementar RLS y politicas de autorizacion.
-- Crear UI formal de administracion de usuarios.
-- Reemplazar bootstrap por flujo administrativo una vez existan admins.
+- Reemplazar bootstrap por flujo administrativo una vez existan admins en ambientes nuevos.

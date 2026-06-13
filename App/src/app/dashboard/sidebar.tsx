@@ -11,11 +11,13 @@ type Company = {
 };
 
 type DashboardSidebarProps = {
+  canManageUsers: boolean;
   companies: Company[];
   mobile?: boolean;
 };
 
 export function DashboardSidebar({
+  canManageUsers,
   companies,
   mobile = false,
 }: Readonly<DashboardSidebarProps>) {
@@ -49,6 +51,15 @@ export function DashboardSidebar({
         >
           Dashboard
         </MobileLink>
+        {canManageUsers ? (
+          <MobileLink
+            active={pathname === "/dashboard/users"}
+            href="/dashboard/users"
+            onNavigate={navigate}
+          >
+            Usuarios
+          </MobileLink>
+        ) : null}
         {orderedCompanies.map((company) => (
           <MobileLink
             active={pathname === `/dashboard/locations/${company.slug}`}
@@ -97,7 +108,19 @@ export function DashboardSidebar({
               Dashboard
             </SidebarLink>
 
+            {canManageUsers ? (
+              <SidebarLink
+                active={pathname === "/dashboard/users"}
+                href="/dashboard/users"
+                icon={<UsersIcon />}
+                onNavigate={navigate}
+              >
+                Usuarios
+              </SidebarLink>
+            ) : null}
+
             <SidebarGroup
+              active={pathname.startsWith("/dashboard/locations")}
               companies={orderedCompanies}
               icon={<TicketOfficeIcon />}
               isOpen={openGroups.locations}
@@ -114,6 +137,7 @@ export function DashboardSidebar({
             />
 
             <SidebarGroup
+              active={pathname.startsWith("/dashboard/campaigns")}
               companies={orderedCompanies}
               icon={<CampaignIcon />}
               isOpen={openGroups.campaigns}
@@ -144,6 +168,7 @@ export function DashboardSidebar({
 }
 
 function SidebarGroup({
+  active,
   companies,
   icon,
   isOpen,
@@ -153,6 +178,7 @@ function SidebarGroup({
   routeBase,
   title,
 }: Readonly<{
+  active: boolean;
   companies: Company[];
   icon: React.ReactNode;
   isOpen: boolean;
@@ -167,7 +193,7 @@ function SidebarGroup({
       <button
         aria-expanded={isOpen}
         className={`flex w-full items-center justify-between border-l-4 px-8 py-2 text-left text-lg transition ${
-          isOpen
+          active
             ? "border-red-600 bg-red-50 text-red-600"
             : "border-white text-zinc-600 hover:border-gray-300 hover:bg-gray-100 hover:text-red-600"
         }`}
@@ -275,6 +301,17 @@ function DashboardIcon() {
   return (
     <svg aria-hidden="true" className="h-6 w-6" fill="none" viewBox="0 0 24 24">
       <path d="M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Zm10 0h6v6h-6v-6Z" stroke="currentColor" strokeWidth="2" />
+    </svg>
+  );
+}
+
+function UsersIcon() {
+  return (
+    <svg aria-hidden="true" className="h-6 w-6" fill="none" viewBox="0 0 24 24">
+      <path d="M8.5 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" stroke="currentColor" strokeWidth="2" />
+      <path d="M3 20a5.5 5.5 0 0 1 11 0" stroke="currentColor" strokeLinecap="round" strokeWidth="2" />
+      <path d="M16 11a3 3 0 1 0 0-6" stroke="currentColor" strokeLinecap="round" strokeWidth="2" />
+      <path d="M17.5 20H21a4.5 4.5 0 0 0-4.5-4.5" stroke="currentColor" strokeLinecap="round" strokeWidth="2" />
     </svg>
   );
 }

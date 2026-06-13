@@ -58,18 +58,14 @@ Campos principales:
 - `created_at`
 - `updated_at`
 
-`global_role = 'super_admin'` da acceso global.
+Roles globales:
 
-### `user_companies`
+- `super_admin`: super usuario con administracion completa.
+- `user`: usuario de consulta, solo lectura.
 
-Relaciona usuarios con empresas y roles por compania.
-
-Roles:
-
-- `admin`
-- `operator`
-- `designer`
-- `viewer`
+La migracion `202606120006_two_global_roles.sql` elimina el modelo de roles por
+compania. Las marcas visibles se resuelven desde `companies` activas para ambos
+roles; solo `super_admin` puede crear, editar o eliminar informacion.
 
 ### `locations`
 

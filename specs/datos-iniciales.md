@@ -63,7 +63,7 @@ datos base.
 Los usuarios no se crean en `seed.sql` porque dependen de Supabase Auth y viven
 en `auth.users`.
 
-Proceso recomendado:
+Proceso recomendado inicial:
 
 1. En Supabase Dashboard, abrir `Authentication` > `Users`.
 2. Crear usuarios con email y contrasena.
@@ -72,11 +72,15 @@ Proceso recomendado:
 5. Reemplazar emails y nombres.
 6. Ejecutar el SQL en Supabase SQL Editor.
 
+Despues de tener al menos un super usuario, tambien se pueden crear y editar
+usuarios desde `/dashboard/users`. Esta pantalla requiere configurar
+`SUPABASE_SECRET_KEY` o `SUPABASE_SERVICE_ROLE_KEY` en la app, porque usa el API
+admin de Supabase Auth para crear cuentas reales.
+
 Roles sugeridos para pruebas:
 
-- `super_admin`: acceso global.
-- `admin` de `etn`: puede crear, editar y borrar datos de ETN.
-- `viewer` de `gho`: solo lectura de GHO.
+- `super_admin`: super usuario con administracion completa.
+- `user`: usuario consulta, solo lectura.
 
 ## Archivos de prueba
 
@@ -92,7 +96,7 @@ Se dejo un archivo inicial en Supabase Storage:
 
 Proceso recomendado:
 
-1. Iniciar sesion en `/login` con un usuario admin.
+1. Iniciar sesion en `/login` con un super usuario.
 2. Entrar a `/dashboard/files`.
 3. Seleccionar compania y campania.
 4. Subir imagen valida menor a 50 MB.
@@ -200,10 +204,12 @@ Desde la app:
 - `/dashboard/locations/costaline` debe listar solo taquillas de Costaline.
 - `/dashboard/screens` debe listar pantallas.
 - `/dashboard/assignments` debe listar asignaciones.
-- `/dashboard/files` debe permitir subir un archivo con usuario admin.
+- `/dashboard/files` debe permitir subir un archivo con super usuario.
+- `/dashboard/users` debe aparecer solo para `super_admin`.
+- `/dashboard/users` debe permitir crear usuarios `super_admin` o `user` cuando existe service key.
 
 ## Pendientes
 
-- Crear usuarios reales de prueba y asignar roles.
+- Crear usuarios reales de prueba adicionales y asignar roles.
 - Subir archivos reales adicionales desde la UI.
 - Si aparecen datos historicos, crear un proceso separado de importacion.

@@ -119,6 +119,8 @@ export function StatusBadge({ children }: Readonly<{ children: React.ReactNode }
     incident: "Pantalla con incidente",
     ok: "OK",
     remodeling: "Remodelacion",
+    super_admin: "Super usuario",
+    user: "Usuario consulta",
   };
   const color =
     value === "ok" || value === "active"

@@ -2,12 +2,13 @@
 
 ## Estado
 
-RLS esta implementado como migracion SQL versionada:
+RLS queda versionado en migraciones SQL:
 
 - `supabase/migrations/202606120002_rls_policies.sql`
+- `supabase/migrations/202606120006_two_global_roles.sql`
 
-La configuracion RLS ya fue aplicada en Supabase cloud. Queda pendiente ejecutar
-pruebas manuales con usuarios reales de distintos roles.
+La migracion `202606120006_two_global_roles.sql` simplifica el modelo a dos
+roles globales y deja fuera los roles por compania.
 
 ## Modelo de roles
 
@@ -19,72 +20,36 @@ Origen:
 
 Alcance:
 
-- Admin global.
-- Equivalente al admin global del sistema anterior.
-- No requiere filas en `public.user_companies`.
+- Super usuario.
 - Puede leer, crear, actualizar y borrar datos de todas las companias.
+- Puede gestionar usuarios desde `/dashboard/users`.
 
-### `admin`
+### `user`
 
 Origen:
 
-- `public.user_companies.role = 'admin'`
+- `public.profiles.global_role = 'user'`
 
 Alcance:
 
-- Admin limitado a las companias donde tiene registro en `user_companies`.
-- Puede leer datos de sus companias.
-- Puede crear, actualizar y borrar:
-  - `locations`
-  - `campaigns`
-  - `screens`
-  - `campaign_locations`
-  - `campaign_screens`
-  - `media_files`
-- Puede administrar registros en `user_companies` para sus companias.
-
-### `operator`
-
-Origen:
-
-- `public.user_companies.role = 'operator'`
-
-Alcance inicial:
-
-- Lectura de datos de sus companias.
-- Sin permisos de escritura hasta confirmar flujos operativos concretos.
-
-### `designer`
-
-Origen:
-
-- `public.user_companies.role = 'designer'`
-
-Alcance inicial:
-
-- Lectura de datos de sus companias.
-- Sin permisos de upload o escritura hasta confirmar el flujo formal de contenido.
-
-### `viewer`
-
-Origen:
-
-- `public.user_companies.role = 'viewer'`
-
-Alcance:
-
-- Solo lectura de datos de sus companias.
+- Usuario normal de consulta.
+- Puede leer informacion de companias activas.
+- No puede crear, editar ni eliminar datos.
+- No ve la opcion `Usuarios`.
 
 ## Funciones helper
-
-La configuracion crea funciones `security definer` para evitar recursividad de RLS al resolver roles:
 
 - `public.current_global_role()`
 - `public.is_super_admin()`
 - `public.has_any_super_admin()`
+- `public.can_read_company(company_id uuid)`
 - `public.has_company_role(company_id uuid, allowed_roles text[])`
 
-Estas funciones se usan dentro de politicas y tambien permiten que la app sepa si ya existe un primer `super_admin`.
+`has_company_role()` se mantiene como compatibilidad para codigo y politicas de
+Storage existentes, pero internamente ya traduce el modelo nuevo:
+
+- Checks de escritura con `array['admin']` solo pasan si el usuario es `super_admin`.
+- Checks de lectura pasan para `super_admin` o `user` cuando la compania esta activa.
 
 ## Politicas por tabla
 
@@ -95,21 +60,10 @@ Estas funciones se usan dentro de politicas y tambien permiten que la app sepa s
 - `UPDATE`: el propio usuario sin escalar rol, `super_admin`, o bootstrap del primer `super_admin` cuando aun no existe ninguno.
 - `DELETE`: solo `super_admin`.
 
-Nota: `ensureProfile()` no sobreescribe `global_role`; esto evita degradar admins globales durante login.
-
 ### `companies`
 
-- `SELECT`: `super_admin`, usuarios con rol en esa compania o cualquier autenticado antes de que exista el primer `super_admin`.
+- `SELECT`: `super_admin`, usuarios `user` para companias activas o cualquier autenticado antes de que exista el primer `super_admin`.
 - `INSERT`, `UPDATE`, `DELETE`: solo `super_admin`.
-
-El acceso temporal antes del primer `super_admin` permite que el bootstrap detecte companias existentes.
-
-### `user_companies`
-
-- `SELECT`: el propio usuario, `super_admin` o `admin` de esa compania.
-- `INSERT`, `UPDATE`, `DELETE`: `super_admin` o `admin` de esa compania.
-
-Esto permite que admins por compania administren permisos dentro de su alcance, sin tocar otras companias.
 
 ### Tablas con `company_id`
 
@@ -125,49 +79,37 @@ Tablas:
 Lectura:
 
 - `super_admin`
-- `admin`
-- `operator`
-- `designer`
-- `viewer`
+- `user` para companias activas.
 
 Escritura:
 
-- `super_admin`
-- `admin` de la compania correspondiente
-
-Los roles `operator`, `designer` y `viewer` quedan sin escritura por defecto.
+- Solo `super_admin`.
 
 ## Garantias
 
-- Usuarios sin rol no pueden leer datos de companias cuando ya existe un `super_admin`.
-- Usuarios con rol en una compania no pueden leer datos de otra.
-- Mutaciones requieren `super_admin` o `admin` de la compania.
-- Cambiar `company_id` no permite escalar privilegios porque las politicas de `UPDATE` validan tanto la fila original como el estado nuevo.
-- `service_role` queda reservado para operaciones server-side administrativas.
+- Solo existen dos roles operativos: `super_admin` y `user`.
+- Usuarios normales pueden consultar informacion, pero no mutar datos.
+- Solo `super_admin` ve y puede abrir `/dashboard/users`.
+- Cambiar `company_id` no permite escalar privilegios porque las politicas de escritura requieren `super_admin`.
+- `service_role` queda reservado para operaciones server-side administrativas despues de verificar que el usuario actual sea `super_admin`.
 
 ## Pruebas manuales recomendadas
 
 Crear al menos:
 
 - Un usuario `super_admin`.
-- Un usuario `admin` en `etn`.
-- Un usuario `operator` en `etn`.
-- Un usuario `viewer` en `gho`.
-- Un usuario autenticado sin registros en `user_companies`.
+- Un usuario `user`.
 
 Validar:
 
 - `super_admin` puede leer companias activas.
-- `admin` de `etn` puede leer y escribir datos `etn`.
-- `admin` de `etn` no puede leer ni escribir datos `gho`.
-- `operator` de `etn` puede leer datos `etn`.
-- `operator` de `etn` no puede insertar, actualizar ni borrar datos.
-- `viewer` de `gho` solo puede leer datos `gho`.
-- Usuario sin compania no puede leer datos de companias cuando ya existe `super_admin`.
+- `super_admin` puede crear, editar y borrar taquillas, campanias, archivos y usuarios.
+- `user` puede leer dashboard, taquillas, campanias y archivos visibles.
+- `user` no ve botones de crear, editar ni eliminar.
+- `user` no ve el menu `Usuarios`.
+- `user` no puede abrir `/dashboard/users` aunque escriba la URL directa.
 
 ## Pendientes
 
 - Ejecutar pruebas con sesiones reales.
 - Generar tipos TypeScript desde Supabase despues de aplicar migraciones.
-- Revisar si `designer` debe poder subir archivos en Fase 7.
-- Revisar si `operator` debe poder editar operaciones diarias cuando se definan esos flujos.

@@ -6,15 +6,20 @@ export default async function DashboardLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { companies, user } = await getDashboardContext("/dashboard");
+  const { access, companies, user } = await getDashboardContext("/dashboard");
+  const canManageUsers = access.isGlobalAdmin;
 
   return (
     <div className="flex min-h-screen bg-gray-100 text-zinc-950">
-      <DashboardSidebar companies={companies} />
+      <DashboardSidebar canManageUsers={canManageUsers} companies={companies} />
 
       <section className="flex min-h-screen flex-1 flex-col">
         <header className="flex items-center justify-between bg-white px-6 py-2">
-          <DashboardSidebar companies={companies} mobile />
+          <DashboardSidebar
+            canManageUsers={canManageUsers}
+            companies={companies}
+            mobile
+          />
           <div className="hidden lg:block" />
           <div className="flex items-center gap-3">
             <p className="flex flex-col items-end text-sm font-semibold">

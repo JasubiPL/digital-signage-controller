@@ -3,17 +3,18 @@
 import { randomUUID } from "node:crypto";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 import { sanitizeNextPath } from "@/lib/auth/redirect";
-import { requireUser } from "@/server/auth/session";
+import { getUserCompanyAccess, requireUser } from "@/server/auth/session";
 import {
   buildCampaignMediaPath,
   CAMPAIGN_MEDIA_BUCKET,
   CAMPAIGN_MEDIA_MAX_BYTES,
   getExtensionForMimeType,
 } from "@/server/media/storage";
+import { createAdminClient } from "@/server/supabase/admin";
 
 type ActionState = "success" | "error";
 
@@ -36,6 +37,23 @@ function returnPath(formData: FormData, fallback: string) {
   return value ? sanitizeNextPath(value) : fallback;
 }
 
+async function getUserManagementScope(path = "/dashboard/users") {
+  const user = await requireUser(path);
+  const access = await getUserCompanyAccess(user.id);
+
+  if (access.error) {
+    throw new Error(access.error);
+  }
+
+  if (!access.isGlobalAdmin) {
+    throw new Error("No tienes permisos para gestionar usuarios.");
+  }
+
+  return {
+    user,
+  };
+}
+
 async function assertCanManageCompany(companyId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("has_company_role", {
@@ -45,6 +63,158 @@ async function assertCanManageCompany(companyId: string) {
 
   if (error || data !== true) {
     throw new Error(error?.message ?? "No tienes permisos de administracion para esta compania.");
+  }
+}
+
+export async function createManagedUser(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/users");
+
+  try {
+    await getUserManagementScope(path);
+    const email = field(formData, "email").toLowerCase();
+    const fullName = field(formData, "fullName");
+    const password = field(formData, "password");
+    const globalRole =
+      field(formData, "globalRole") === "super_admin"
+        ? "super_admin"
+        : "user";
+
+    if (!email) throw new Error("Captura el email del usuario.");
+    if (password.length < 8) {
+      throw new Error("La contrasena temporal debe tener al menos 8 caracteres.");
+    }
+
+    const admin = createAdminClient();
+    const { data, error: authError } = await admin.auth.admin.createUser({
+      email,
+      email_confirm: true,
+      password,
+      user_metadata: {
+        full_name: fullName || email,
+      },
+    });
+
+    if (authError) throw authError;
+    if (!data.user) throw new Error("Supabase no devolvio el usuario creado.");
+
+    const { error: profileError } = await admin.from("profiles").upsert(
+      {
+        email,
+        full_name: fullName || email,
+        global_role: globalRole,
+        id: data.user.id,
+      },
+      { onConflict: "id" },
+    );
+
+    if (profileError) throw profileError;
+
+    revalidatePath(path);
+    finish(path, "success", "Usuario creado.");
+  } catch (error) {
+    unstable_rethrow(error);
+    finish(path, "error", error instanceof Error ? error.message : "No se pudo crear el usuario.");
+  }
+}
+
+export async function updateManagedUser(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/users");
+
+  try {
+    const scope = await getUserManagementScope(path);
+    const userId = field(formData, "userId");
+    const email = field(formData, "email").toLowerCase();
+    const fullName = field(formData, "fullName");
+    const globalRole =
+      field(formData, "globalRole") === "super_admin"
+        ? "super_admin"
+        : "user";
+
+    if (!userId) throw new Error("Usuario invalido.");
+    if (!email) throw new Error("Captura el email del usuario.");
+    if (scope.user.id === userId && globalRole !== "super_admin") {
+      throw new Error("No puedes quitarte tu propio rol de super usuario.");
+    }
+
+    const admin = createAdminClient();
+    const { error: authError } = await admin.auth.admin.updateUserById(userId, {
+      email: email || undefined,
+      user_metadata: {
+        full_name: fullName || email,
+      },
+    });
+
+    if (authError) throw authError;
+
+    const profileUpdate: {
+      email: string;
+      full_name: string;
+      global_role?: string;
+    } = {
+      email,
+      full_name: fullName || email,
+    };
+
+    profileUpdate.global_role = globalRole;
+
+    const { error: profileError } = await admin
+      .from("profiles")
+      .update(profileUpdate)
+      .eq("id", userId);
+
+    if (profileError) throw profileError;
+
+    revalidatePath(path);
+    finish(path, "success", "Usuario actualizado.");
+  } catch (error) {
+    unstable_rethrow(error);
+    finish(path, "error", error instanceof Error ? error.message : "No se pudo actualizar el usuario.");
+  }
+}
+
+export async function deleteManagedUser(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/users");
+
+  try {
+    const scope = await getUserManagementScope(path);
+    const userId = field(formData, "userId");
+
+    if (!userId) throw new Error("Usuario invalido.");
+    if (scope.user.id === userId) {
+      throw new Error("No puedes eliminar tu propia cuenta.");
+    }
+
+    const admin = createAdminClient();
+    const { data: profile, error: profileError } = await admin
+      .from("profiles")
+      .select("global_role")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (profileError) throw profileError;
+    if (!profile) throw new Error("Usuario no encontrado.");
+
+    if (profile.global_role === "super_admin") {
+      const { count, error: countError } = await admin
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("global_role", "super_admin");
+
+      if (countError) throw countError;
+      if ((count ?? 0) <= 1) {
+        throw new Error("No puedes eliminar el ultimo super usuario.");
+      }
+    }
+
+    const { error: authError } = await admin.auth.admin.deleteUser(userId);
+
+    if (authError) throw authError;
+
+    revalidatePath(path);
+    finish(path, "success", "Usuario eliminado.");
+  } catch (error) {
+    unstable_rethrow(error);
+    finish(path, "error", error instanceof Error ? error.message : "No se pudo eliminar el usuario.");
   }
 }
 
@@ -70,6 +240,7 @@ export async function createCampaign(formData: FormData) {
     revalidatePath(path);
     finish(path, "success", "Campania creada.");
   } catch (error) {
+    unstable_rethrow(error);
     finish(path, "error", error instanceof Error ? error.message : "No se pudo crear la campania.");
   }
 }
@@ -90,6 +261,7 @@ export async function deleteCampaign(formData: FormData) {
     revalidatePath(path);
     finish(path, "success", "Campania eliminada.");
   } catch (error) {
+    unstable_rethrow(error);
     finish(path, "error", error instanceof Error ? error.message : "No se pudo eliminar la campania.");
   }
 }
@@ -119,6 +291,7 @@ export async function updateCampaign(formData: FormData) {
     revalidatePath(path);
     finish(path, "success", "Campania actualizada.");
   } catch (error) {
+    unstable_rethrow(error);
     finish(path, "error", error instanceof Error ? error.message : "No se pudo actualizar la campania.");
   }
 }
@@ -159,6 +332,7 @@ export async function syncCampaignLocations(formData: FormData) {
     revalidatePath(path);
     finish(path, "success", "Taquillas asignadas.");
   } catch (error) {
+    unstable_rethrow(error);
     finish(path, "error", error instanceof Error ? error.message : "No se pudieron asignar las taquillas.");
   }
 }
@@ -185,6 +359,7 @@ export async function createLocation(formData: FormData) {
     revalidatePath(path);
     finish(path, "success", "Ubicacion creada.");
   } catch (error) {
+    unstable_rethrow(error);
     finish(path, "error", error instanceof Error ? error.message : "No se pudo crear la ubicacion.");
   }
 }
@@ -205,6 +380,7 @@ export async function deleteLocation(formData: FormData) {
     revalidatePath(path);
     finish(path, "success", "Ubicacion eliminada.");
   } catch (error) {
+    unstable_rethrow(error);
     finish(path, "error", error instanceof Error ? error.message : "No se pudo eliminar la ubicacion.");
   }
 }
@@ -234,6 +410,7 @@ export async function updateLocation(formData: FormData) {
     revalidatePath(path);
     finish(path, "success", "Taquilla actualizada.");
   } catch (error) {
+    unstable_rethrow(error);
     finish(path, "error", error instanceof Error ? error.message : "No se pudo actualizar la taquilla.");
   }
 }
@@ -274,6 +451,7 @@ export async function syncLocationCampaigns(formData: FormData) {
     revalidatePath(path);
     finish(path, "success", "Campanias asignadas.");
   } catch (error) {
+    unstable_rethrow(error);
     finish(path, "error", error instanceof Error ? error.message : "No se pudieron asignar las campanias.");
   }
 }
@@ -299,6 +477,7 @@ export async function createScreen(formData: FormData) {
     revalidatePath(path);
     finish(path, "success", "Pantalla creada.");
   } catch (error) {
+    unstable_rethrow(error);
     finish(path, "error", error instanceof Error ? error.message : "No se pudo crear la pantalla.");
   }
 }
@@ -319,6 +498,7 @@ export async function deleteScreen(formData: FormData) {
     revalidatePath(path);
     finish(path, "success", "Pantalla eliminada.");
   } catch (error) {
+    unstable_rethrow(error);
     finish(path, "error", error instanceof Error ? error.message : "No se pudo eliminar la pantalla.");
   }
 }
@@ -344,6 +524,7 @@ export async function assignCampaignToLocation(formData: FormData) {
     revalidatePath(path);
     finish(path, "success", "Campania asignada a ubicacion.");
   } catch (error) {
+    unstable_rethrow(error);
     finish(path, "error", error instanceof Error ? error.message : "No se pudo asignar la campania.");
   }
 }
@@ -369,6 +550,7 @@ export async function assignCampaignToScreen(formData: FormData) {
     revalidatePath(path);
     finish(path, "success", "Campania asignada a pantalla.");
   } catch (error) {
+    unstable_rethrow(error);
     finish(path, "error", error instanceof Error ? error.message : "No se pudo asignar la campania.");
   }
 }
@@ -391,6 +573,7 @@ export async function deleteCampaignLocation(formData: FormData) {
     revalidatePath(path);
     finish(path, "success", "Asignacion eliminada.");
   } catch (error) {
+    unstable_rethrow(error);
     finish(path, "error", error instanceof Error ? error.message : "No se pudo eliminar la asignacion.");
   }
 }
@@ -413,6 +596,7 @@ export async function deleteCampaignScreen(formData: FormData) {
     revalidatePath(path);
     finish(path, "success", "Asignacion eliminada.");
   } catch (error) {
+    unstable_rethrow(error);
     finish(path, "error", error instanceof Error ? error.message : "No se pudo eliminar la asignacion.");
   }
 }
@@ -480,6 +664,7 @@ export async function uploadCampaignMedia(formData: FormData) {
     revalidatePath(path);
     finish(path, "success", "Archivo subido.");
   } catch (error) {
+    unstable_rethrow(error);
     finish(path, "error", error instanceof Error ? error.message : "No se pudo subir el archivo.");
   }
 }
@@ -511,6 +696,7 @@ export async function deleteMediaFile(formData: FormData) {
     revalidatePath(path);
     finish(path, "success", "Archivo eliminado.");
   } catch (error) {
+    unstable_rethrow(error);
     finish(path, "error", error instanceof Error ? error.message : "No se pudo eliminar el archivo.");
   }
 }
