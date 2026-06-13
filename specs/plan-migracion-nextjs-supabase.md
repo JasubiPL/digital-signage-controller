@@ -310,15 +310,15 @@ Objetivo: poblar Supabase sin depender de MySQL local.
 
 Checklist:
 
-- [ ] Definir si existen dumps, capturas o datos viejos recuperables.
-- [ ] Si no existen datos recuperables, crear seed limpio.
-- [ ] Crear empresas iniciales.
+- [x] Definir si existen dumps, capturas o datos viejos recuperables.
+- [x] Si no existen datos recuperables, crear seed limpio.
+- [x] Crear empresas iniciales.
 - [ ] Crear usuarios iniciales en Supabase Auth.
-- [ ] Crear perfiles y roles.
-- [ ] Crear campanas de prueba.
-- [ ] Subir archivos de prueba a Storage.
-- [ ] Crear ubicaciones/pantallas de prueba.
-- [ ] Documentar proceso en `specs/datos-iniciales.md`.
+- [x] Crear perfiles y roles.
+- [x] Crear campanas de prueba.
+- [x] Subir archivos de prueba a Storage.
+- [x] Crear ubicaciones/pantallas de prueba.
+- [x] Documentar proceso en `specs/datos-iniciales.md`.
 
 Criterio de salida:
 
@@ -390,7 +390,7 @@ Este MVP prueba lo mas importante: autenticacion, autorizacion, base de datos, a
 - [x] `modelo-datos.md`
 - [x] `supabase-configuracion.md`
 - [x] `rls-politicas.md`
-- [ ] `datos-iniciales.md`
+- [x] `datos-iniciales.md`
 - [x] `autenticacion.md`
 - [x] `crear-admin-supabase.md`
 - [x] `storage-archivos.md`

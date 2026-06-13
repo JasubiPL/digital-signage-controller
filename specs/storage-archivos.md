@@ -221,3 +221,9 @@ Se valido contra Supabase cloud:
 - Generacion de signed URL.
 - Lectura exitosa del archivo firmado.
 - Limpieza de la fila temporal y del objeto de Storage.
+
+En Fase 10 se dejo ademas un archivo activo de ejemplo:
+
+- `sample-verano-etn.png`
+- Asociado a la campania `Verano ETN 2026`.
+- Visible desde `/dashboard/files` para usuarios con acceso.

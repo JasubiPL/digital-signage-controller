@@ -2,7 +2,7 @@
 
 ## Estado
 
-Modelo implementado como migracion SQL versionada y schema verificado en Supabase cloud. Pendiente aplicar o verificar seed en cloud.
+Modelo implementado como migracion SQL versionada y schema verificado en Supabase cloud. El seed fue ampliado en Fase 10 para cubrir datos representativos.
 
 Archivos:
 
@@ -265,8 +265,11 @@ company_id, lower(campaigns.name)
 `supabase/seed.sql` crea:
 
 - Empresas iniciales.
-- Una ubicacion de prueba por empresa principal.
-- Una campania draft de prueba por empresa principal.
+- Ubicaciones de prueba por empresa principal.
+- Campanias activas, inactivas y draft.
+- Pantallas/dispositivos.
+- Asignaciones campania-ubicacion.
+- Asignaciones campania-pantalla.
 
 No crea usuarios porque `profiles.id` depende de `auth.users.id`.
 
@@ -295,11 +298,9 @@ GET /rest/v1/companies?select=slug
 HTTP 200
 ```
 
-La respuesta observada fue `[]` con conteo `0`, por lo que el schema esta aplicado pero el seed no aparece cargado desde la publishable key.
-
-Accion pendiente:
-
-- Ejecutar o verificar `supabase/seed.sql` desde SQL Editor o Supabase CLI con acceso administrativo.
+En Fase 10 se amplio el seed. Aplicarlo desde SQL Editor o Supabase CLI debe
+poblar companias, ubicaciones, campanias, pantallas y asignaciones para probar
+el dashboard.
 
 ## Fuera de alcance
 
