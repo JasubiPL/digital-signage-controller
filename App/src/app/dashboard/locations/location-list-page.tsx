@@ -184,7 +184,7 @@ export async function LocationListPage({
 
                 return (
                   <tr className={listingRowClass} key={location.id}>
-                    <td className={`${listingCellClass} font-semibold text-slate-700`}>
+                    <td className={`${listingCellClass} font-semibold text-slate-700 theme-dark:text-slate-100`}>
                       {location.name}
                     </td>
                     {!selectedCompany ? (
@@ -323,42 +323,45 @@ function LocationForm({
   returnPath: string;
   submitLabel: string;
 }>) {
+  const singleCompany = companies.length === 1 ? companies[0] : null;
+
   return (
     <form action={action} className="grid gap-4 md:grid-cols-2">
       <input name="returnPath" type="hidden" value={returnPath} />
       {location ? <input name="id" type="hidden" value={location.id} /> : null}
-      <Field label="Marca">
-        <select
-          className={inputClass}
-          defaultValue={location?.company_id}
-          name="companyId"
-          required
-        >
-          {companies.map((company) => (
-            <option key={company.id} value={company.id}>
-              {brandLabel(company)}
-            </option>
-          ))}
-        </select>
-      </Field>
+      {singleCompany ? (
+        <input name="companyId" type="hidden" value={singleCompany.id} />
+      ) : (
+        <Field label="Marca">
+          <select
+            className={inputClass}
+            defaultValue={location?.company_id}
+            name="companyId"
+            required
+          >
+            {companies.map((company) => (
+              <option key={company.id} value={company.id}>
+                {brandLabel(company)}
+              </option>
+            ))}
+          </select>
+        </Field>
+      )}
       <Field label="Nombre">
         <input className={inputClass} defaultValue={location?.name} name="name" required />
       </Field>
       <Field label="Dispositivo">
-        <input
-          className={inputClass}
-          defaultValue={location?.device ?? ""}
-          name="device"
-          placeholder="Pantallas, LED..."
-        />
+        <select className={inputClass} defaultValue={location?.device ?? "Pantallas"} name="device">
+          <option value="Pantallas">Pantallas</option>
+          <option value="Panel Led">Panel Led</option>
+        </select>
       </Field>
       <Field label="Proyeccion por">
-        <input
-          className={inputClass}
-          defaultValue={location?.projection ?? ""}
-          name="projection"
-          placeholder="Player, USB..."
-        />
+        <select className={inputClass} defaultValue={location?.projection ?? "Players"} name="projection">
+          <option value="Players">Players</option>
+          <option value="USB">USB</option>
+          <option value="Streaming">Streaming</option>
+        </select>
       </Field>
       <Field label="Estatus">
         <select className={inputClass} defaultValue={locationStatusValue(location?.status)} name="status">

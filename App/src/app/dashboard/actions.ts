@@ -77,7 +77,7 @@ function assignmentStatus(formData: FormData) {
   const status = field(formData, "status");
 
   if (!assignmentStatuses.includes(status as AssignmentStatus)) {
-    throw new Error("Estatus de asignacion invalido.");
+    throw new Error("Estatus de asignación inválido.");
   }
 
   return status as AssignmentStatus;
@@ -108,7 +108,7 @@ async function assertCanManageCompany(companyId: string) {
   });
 
   if (error || data !== true) {
-    throw new Error(error?.message ?? "No tienes permisos de administracion para esta compania.");
+    throw new Error(error?.message ?? "No tienes permisos de administración para esta compañía.");
   }
 }
 
@@ -127,7 +127,7 @@ export async function createManagedUser(formData: FormData) {
 
     if (!email) throw new Error("Captura el email del usuario.");
     if (password.length < 8) {
-      throw new Error("La contrasena temporal debe tener al menos 8 caracteres.");
+      throw new Error("La contraseña temporal debe tener al menos 8 caracteres.");
     }
 
     const admin = createAdminClient();
@@ -284,10 +284,10 @@ export async function createCampaign(formData: FormData) {
 
     if (error) throw error;
     revalidatePath(path);
-    finish(path, "success", "Campania creada.");
+    finish(path, "success", "Campaña creada.");
   } catch (error) {
     unstable_rethrow(error);
-    finish(path, "error", error instanceof Error ? error.message : "No se pudo crear la campania.");
+    finish(path, "error", error instanceof Error ? error.message : "No se pudo crear la campaña.");
   }
 }
 
@@ -305,10 +305,10 @@ export async function deleteCampaign(formData: FormData) {
 
     if (error) throw error;
     revalidatePath(path);
-    finish(path, "success", "Campania eliminada.");
+    finish(path, "success", "Campaña eliminada.");
   } catch (error) {
     unstable_rethrow(error);
-    finish(path, "error", error instanceof Error ? error.message : "No se pudo eliminar la campania.");
+    finish(path, "error", error instanceof Error ? error.message : "No se pudo eliminar la campaña.");
   }
 }
 
@@ -335,10 +335,10 @@ export async function updateCampaign(formData: FormData) {
 
     if (error) throw error;
     revalidatePath(path);
-    finish(path, "success", "Campania actualizada.");
+    finish(path, "success", "Campaña actualizada.");
   } catch (error) {
     unstable_rethrow(error);
-    finish(path, "error", error instanceof Error ? error.message : "No se pudo actualizar la campania.");
+    finish(path, "error", error instanceof Error ? error.message : "No se pudo actualizar la campaña.");
   }
 }
 
@@ -417,10 +417,10 @@ export async function createLocation(formData: FormData) {
 
     if (error) throw error;
     revalidatePath(path);
-    finish(path, "success", "Ubicacion creada.");
+    finish(path, "success", "Ubicación creada.");
   } catch (error) {
     unstable_rethrow(error);
-    finish(path, "error", error instanceof Error ? error.message : "No se pudo crear la ubicacion.");
+    finish(path, "error", error instanceof Error ? error.message : "No se pudo crear la ubicación.");
   }
 }
 
@@ -454,10 +454,10 @@ export async function deleteLocation(formData: FormData) {
     if (!data) throw new Error("No se encontro la taquilla para eliminar.");
 
     revalidatePath(path);
-    finish(path, "success", "Ubicacion eliminada.");
+    finish(path, "success", "Ubicación eliminada.");
   } catch (error) {
     unstable_rethrow(error);
-    finish(path, "error", errorMessage(error, "No se pudo eliminar la ubicacion."));
+    finish(path, "error", errorMessage(error, "No se pudo eliminar la ubicación."));
   }
 }
 
@@ -543,10 +543,10 @@ export async function syncLocationCampaigns(formData: FormData) {
     }
 
     revalidatePath(path);
-    finish(path, "success", "Campanias asignadas.");
+    finish(path, "success", "Campañas asignadas.");
   } catch (error) {
     unstable_rethrow(error);
-    finish(path, "error", error instanceof Error ? error.message : "No se pudieron asignar las campanias.");
+    finish(path, "error", error instanceof Error ? error.message : "No se pudieron asignar las campañas.");
   }
 }
 
@@ -569,13 +569,13 @@ export async function updateCampaignLocationStatus(formData: FormData) {
       .maybeSingle();
 
     if (error) throw error;
-    if (!data) throw new Error("No se encontro la asignacion de esta campania en la taquilla.");
+    if (!data) throw new Error("No se encontró la asignación de esta campaña en la taquilla.");
 
     revalidatePath(path);
-    finish(path, "success", "Estatus de campania actualizado para esta taquilla.");
+    finish(path, "success", "Estatus de campaña actualizado para esta taquilla.");
   } catch (error) {
     unstable_rethrow(error);
-    finish(path, "error", errorMessage(error, "No se pudo actualizar el estatus de la campania."));
+    finish(path, "error", errorMessage(error, "No se pudo actualizar el estatus de la campaña."));
   }
 }
 
@@ -645,10 +645,10 @@ export async function assignCampaignToLocation(formData: FormData) {
 
     if (error) throw error;
     revalidatePath(path);
-    finish(path, "success", "Campania asignada a ubicacion.");
+    finish(path, "success", "Campaña asignada a ubicación.");
   } catch (error) {
     unstable_rethrow(error);
-    finish(path, "error", error instanceof Error ? error.message : "No se pudo asignar la campania.");
+    finish(path, "error", error instanceof Error ? error.message : "No se pudo asignar la campaña.");
   }
 }
 
@@ -671,10 +671,10 @@ export async function assignCampaignToScreen(formData: FormData) {
 
     if (error) throw error;
     revalidatePath(path);
-    finish(path, "success", "Campania asignada a pantalla.");
+    finish(path, "success", "Campaña asignada a pantalla.");
   } catch (error) {
     unstable_rethrow(error);
-    finish(path, "error", error instanceof Error ? error.message : "No se pudo asignar la campania.");
+    finish(path, "error", error instanceof Error ? error.message : "No se pudo asignar la campaña.");
   }
 }
 
@@ -697,7 +697,7 @@ export async function deleteCampaignLocation(formData: FormData) {
     finish(path, "success", "Asignacion eliminada.");
   } catch (error) {
     unstable_rethrow(error);
-    finish(path, "error", error instanceof Error ? error.message : "No se pudo eliminar la asignacion.");
+    finish(path, "error", error instanceof Error ? error.message : "No se pudo eliminar la asignación.");
   }
 }
 
@@ -720,7 +720,7 @@ export async function deleteCampaignScreen(formData: FormData) {
     finish(path, "success", "Asignacion eliminada.");
   } catch (error) {
     unstable_rethrow(error);
-    finish(path, "error", error instanceof Error ? error.message : "No se pudo eliminar la asignacion.");
+    finish(path, "error", error instanceof Error ? error.message : "No se pudo eliminar la asignación.");
   }
 }
 

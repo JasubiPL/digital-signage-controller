@@ -134,7 +134,7 @@ export default async function UsersPage({ searchParams }: Readonly<UsersPageProp
             <tbody>
               {typedProfiles.map((profile) => (
                 <tr className={listingRowClass} key={profile.id}>
-                  <td className={`${listingCellClass} font-semibold text-slate-700`}>
+                  <td className={`${listingCellClass} font-semibold text-slate-700 theme-dark:text-slate-100`}>
                     {profile.full_name || "Sin nombre"}
                   </td>
                   <td className={listingCellClass}>{profile.email}</td>

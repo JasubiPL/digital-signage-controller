@@ -167,7 +167,7 @@ export async function CampaignListPage({
 
                 return (
                   <tr className={listingRowClass} key={campaign.id}>
-                    <td className={`${listingCellClass} font-semibold text-slate-700`}>
+                    <td className={`${listingCellClass} font-semibold text-slate-700 theme-dark:text-slate-100`}>
                       {campaign.name}
                     </td>
                     {!selectedCompany ? (
@@ -279,24 +279,30 @@ function CampaignForm({
   returnPath: string;
   submitLabel: string;
 }>) {
+  const singleCompany = companies.length === 1 ? companies[0] : null;
+
   return (
     <form action={action} className="grid gap-4 md:grid-cols-2">
       <input name="returnPath" type="hidden" value={returnPath} />
       {campaign ? <input name="id" type="hidden" value={campaign.id} /> : null}
-      <Field label="Marca">
-        <select
-          className={inputClass}
-          defaultValue={campaign?.company_id}
-          name="companyId"
-          required
-        >
-          {companies.map((company) => (
-            <option key={company.id} value={company.id}>
-              {brandLabel(company)}
-            </option>
-          ))}
-        </select>
-      </Field>
+      {singleCompany ? (
+        <input name="companyId" type="hidden" value={singleCompany.id} />
+      ) : (
+        <Field label="Marca">
+          <select
+            className={inputClass}
+            defaultValue={campaign?.company_id}
+            name="companyId"
+            required
+          >
+            {companies.map((company) => (
+              <option key={company.id} value={company.id}>
+                {brandLabel(company)}
+              </option>
+            ))}
+          </select>
+        </Field>
+      )}
       <Field label="Nombre">
         <input className={inputClass} defaultValue={campaign?.name} name="name" required />
       </Field>

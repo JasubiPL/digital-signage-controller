@@ -89,14 +89,14 @@ export default async function AssignmentsPage({ searchParams }: PageProps) {
 
   return (
     <div className="mx-auto flex w-full flex-col gap-8">
-      <PageHeader eyebrow="Asignaciones" title="Campanas por ubicacion y pantalla" />
+      <PageHeader eyebrow="Asignaciones" title="Campañas por ubicación y pantalla" />
       <Feedback error={error} success={success} />
 
       <section className="grid gap-6 lg:grid-cols-2">
-        <Panel title="Asignar campania a ubicacion">
+        <Panel title="Asignar campaña a ubicación">
           <form action={assignCampaignToLocation} className="grid gap-4">
             <AssignmentCompanySelect companies={companies} />
-            <Field label="Campania">
+            <Field label="Campaña">
               <select className={inputClass} name="campaignId" required>
                 {(campaigns ?? []).map((campaign) => (
                   <option key={campaign.id} value={campaign.id}>
@@ -105,7 +105,7 @@ export default async function AssignmentsPage({ searchParams }: PageProps) {
                 ))}
               </select>
             </Field>
-            <Field label="Ubicacion">
+            <Field label="Ubicación">
               <select className={inputClass} name="locationId" required>
                 {(locations ?? []).map((location) => (
                   <option key={location.id} value={location.id}>
@@ -115,15 +115,15 @@ export default async function AssignmentsPage({ searchParams }: PageProps) {
               </select>
             </Field>
             <SubmitButton className={buttonClass} pendingLabel="Asignando...">
-              Asignar a ubicacion
+              Asignar a ubicación
             </SubmitButton>
           </form>
         </Panel>
 
-        <Panel title="Asignar campania a pantalla">
+        <Panel title="Asignar campaña a pantalla">
           <form action={assignCampaignToScreen} className="grid gap-4">
             <AssignmentCompanySelect companies={companies} />
-            <Field label="Campania">
+            <Field label="Campaña">
               <select className={inputClass} name="campaignId" required>
                 {(campaigns ?? []).map((campaign) => (
                   <option key={campaign.id} value={campaign.id}>
@@ -150,18 +150,18 @@ export default async function AssignmentsPage({ searchParams }: PageProps) {
 
       <section className="grid gap-4">
         <h2 className="text-2xl font-extrabold tracking-tight text-slate-800 theme-dark:text-slate-100">
-          Campanas en ubicaciones ({campaignLocations?.length ?? 0})
+          Campañas en ubicaciones ({campaignLocations?.length ?? 0})
         </h2>
         {!campaignLocations?.length ? (
-          <EmptyState>No hay campanas asignadas a ubicaciones.</EmptyState>
+          <EmptyState>No hay campañas asignadas a ubicaciones.</EmptyState>
         ) : (
           <ListingTableShell>
             <table className={listingTableClass}>
               <thead className={listingHeadClass}>
                 <tr>
-                  <th className={listingHeaderCellClass}>Campania</th>
-                  <th className={listingHeaderCellClass}>Ubicacion</th>
-                  <th className={listingHeaderCellClass}>Compania</th>
+                  <th className={listingHeaderCellClass}>Campaña</th>
+                  <th className={listingHeaderCellClass}>Ubicación</th>
+                  <th className={listingHeaderCellClass}>Compañia</th>
                   <th className={listingHeaderCellClass}>Estatus</th>
                   <th className={`${listingHeaderCellClass} text-center`}>Acciones</th>
                 </tr>
@@ -169,11 +169,11 @@ export default async function AssignmentsPage({ searchParams }: PageProps) {
               <tbody>
                 {campaignLocations.map((assignment) => (
                   <tr className={listingRowClass} key={assignment.id}>
-                    <td className={`${listingCellClass} font-semibold text-slate-700`}>
-                      {campaignById.get(assignment.campaign_id)?.name ?? "Sin campania"}
+                    <td className={`${listingCellClass} font-semibold text-slate-700 theme-dark:text-slate-100`}>
+                      {campaignById.get(assignment.campaign_id)?.name ?? "Sin campaña"}
                     </td>
                     <td className={listingCellClass}>
-                      {locationById.get(assignment.location_id)?.name ?? "Sin ubicacion"}
+                      {locationById.get(assignment.location_id)?.name ?? "Sin ubicación"}
                     </td>
                     <td className={listingCellClass}>{companyById.get(assignment.company_id)?.name}</td>
                     <td className={listingCellClass}>
@@ -196,18 +196,18 @@ export default async function AssignmentsPage({ searchParams }: PageProps) {
 
       <section className="grid gap-4">
         <h2 className="text-2xl font-extrabold tracking-tight text-slate-800 theme-dark:text-slate-100">
-          Campanas en pantallas ({campaignScreens?.length ?? 0})
+          Campañas en pantallas ({campaignScreens?.length ?? 0})
         </h2>
         {!campaignScreens?.length ? (
-          <EmptyState>No hay campanas asignadas a pantallas.</EmptyState>
+          <EmptyState>No hay campañas asignadas a pantallas.</EmptyState>
         ) : (
           <ListingTableShell>
             <table className={listingTableClass}>
               <thead className={listingHeadClass}>
                 <tr>
-                  <th className={listingHeaderCellClass}>Campania</th>
+                  <th className={listingHeaderCellClass}>Campaña</th>
                   <th className={listingHeaderCellClass}>Pantalla</th>
-                  <th className={listingHeaderCellClass}>Compania</th>
+                  <th className={listingHeaderCellClass}>Compañia</th>
                   <th className={listingHeaderCellClass}>Estatus</th>
                   <th className={`${listingHeaderCellClass} text-center`}>Acciones</th>
                 </tr>
@@ -215,8 +215,8 @@ export default async function AssignmentsPage({ searchParams }: PageProps) {
               <tbody>
                 {campaignScreens.map((assignment) => (
                   <tr className={listingRowClass} key={assignment.id}>
-                    <td className={`${listingCellClass} font-semibold text-slate-700`}>
-                      {campaignById.get(assignment.campaign_id)?.name ?? "Sin campania"}
+                    <td className={`${listingCellClass} font-semibold text-slate-700 theme-dark:text-slate-100`}>
+                      {campaignById.get(assignment.campaign_id)?.name ?? "Sin campaña"}
                     </td>
                     <td className={listingCellClass}>
                       {screenById.get(assignment.screen_id)?.name ?? "Sin pantalla"}
@@ -249,7 +249,7 @@ function AssignmentCompanySelect({
   companies: Array<{ id: string; name: string }>;
 }>) {
   return (
-    <Field label="Compania">
+    <Field label="Compañía">
       <select className={inputClass} name="companyId" required>
         {companies.map((company) => (
           <option key={company.id} value={company.id}>

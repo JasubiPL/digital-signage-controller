@@ -15,7 +15,7 @@ export async function signInWithPassword(formData: FormData) {
   const next = sanitizeNextPath(formData.get("next"));
 
   if (!email || !password) {
-    loginError("Usuario/email y contrasena son requeridos.", next);
+    loginError("Usuario/email y contraseña son requeridos.", next);
   }
 
   const supabase = await createClient();

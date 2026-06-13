@@ -36,7 +36,7 @@ export async function GET(_request: Request, context: RouteContext) {
     throwIfSupabaseError(error);
 
     if (!data) {
-      throw new ApiError(404, "Ubicacion no encontrada.");
+      throw new ApiError(404, "Ubicación no encontrada.");
     }
 
     return NextResponse.json({ location: data });
@@ -66,7 +66,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     throwIfSupabaseError(existingError);
 
     if (!existing) {
-      throw new ApiError(404, "Ubicacion no encontrada.");
+      throw new ApiError(404, "Ubicación no encontrada.");
     }
 
     await assertCanManageCompany(supabase, existing.company_id);
@@ -110,7 +110,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
     throwIfSupabaseError(existingError);
 
     if (!existing) {
-      throw new ApiError(404, "Ubicacion no encontrada.");
+      throw new ApiError(404, "Ubicación no encontrada.");
     }
 
     await assertCanManageCompany(supabase, existing.company_id);

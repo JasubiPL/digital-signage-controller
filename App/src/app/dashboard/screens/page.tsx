@@ -60,7 +60,7 @@ export default async function ScreensPage({ searchParams }: PageProps) {
 
       <Panel title="Nueva pantalla">
         <form action={createScreen} className="grid gap-4 md:grid-cols-5">
-          <Field label="Compania">
+          <Field label="Compañía">
             <select className={inputClass} name="companyId" required>
               {companies.map((company) => (
                 <option key={company.id} value={company.id}>
@@ -69,9 +69,9 @@ export default async function ScreensPage({ searchParams }: PageProps) {
               ))}
             </select>
           </Field>
-          <Field label="Ubicacion">
+          <Field label="Ubicación">
             <select className={inputClass} name="locationId">
-              <option value="">Sin ubicacion</option>
+              <option value="">Sin ubicación</option>
               {(locations ?? []).map((location) => (
                 <option key={location.id} value={location.id}>
                   {location.name}
@@ -106,15 +106,15 @@ export default async function ScreensPage({ searchParams }: PageProps) {
           Pantallas ({screens?.length ?? 0})
         </h2>
         {!screens?.length ? (
-          <EmptyState>No hay pantallas disponibles para tus companias.</EmptyState>
+          <EmptyState>No hay pantallas disponibles para tus compañías.</EmptyState>
         ) : (
           <ListingTableShell>
             <table className={listingTableClass}>
               <thead className={listingHeadClass}>
                 <tr>
                   <th className={listingHeaderCellClass}>Pantalla</th>
-                  <th className={listingHeaderCellClass}>Compania</th>
-                  <th className={listingHeaderCellClass}>Ubicacion</th>
+                  <th className={listingHeaderCellClass}>Compañía</th>
+                  <th className={listingHeaderCellClass}>Ubicación</th>
                   <th className={listingHeaderCellClass}>Identificador</th>
                   <th className={listingHeaderCellClass}>Estatus</th>
                   <th className={`${listingHeaderCellClass} text-center`}>Acciones</th>
@@ -123,12 +123,12 @@ export default async function ScreensPage({ searchParams }: PageProps) {
               <tbody>
                 {screens.map((screen) => (
                   <tr className={listingRowClass} key={screen.id}>
-                    <td className={`${listingCellClass} font-semibold text-slate-700`}>{screen.name}</td>
+                    <td className={`${listingCellClass} font-semibold text-slate-700 theme-dark:text-slate-100`}>{screen.name}</td>
                     <td className={listingCellClass}>{companyById.get(screen.company_id)?.name}</td>
                     <td className={listingCellClass}>
                       {screen.location_id
                         ? locationById.get(screen.location_id)?.name ?? "Sin dato"
-                        : "Sin ubicacion"}
+                        : "Sin ubicación"}
                     </td>
                     <td className={listingCellClass}>{screen.device_identifier ?? "Sin dato"}</td>
                     <td className={listingCellClass}>

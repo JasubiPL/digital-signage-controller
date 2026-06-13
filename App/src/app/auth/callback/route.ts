@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.redirect(
-    new URL("/login?error=No se pudo completar la autenticacion.", request.url),
+    new URL("/login?error=No se pudo completar la autenticación.", request.url),
   );
 }
 

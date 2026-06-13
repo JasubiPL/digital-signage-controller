@@ -36,7 +36,7 @@ export async function resolveCompanyId(
   }
 
   if (!data) {
-    throw new ApiError(404, "Compania no encontrada.");
+    throw new ApiError(404, "Compañía no encontrada.");
   }
 
   return data.id as string;
@@ -69,7 +69,7 @@ export async function assertCanManageCompany(
   }
 
   if (data !== true) {
-    throw new ApiError(403, "No tienes permisos para administrar esta compania.");
+    throw new ApiError(403, "No tienes permisos para administrar esta compañía.");
   }
 }
 

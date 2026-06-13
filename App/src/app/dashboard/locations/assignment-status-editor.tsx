@@ -119,7 +119,7 @@ export function AssignmentStatusEditor({
           <form action={submitStatus} className="grid gap-4 px-6 py-5">
             <label className="grid gap-2 text-sm">
               <span className="font-extrabold text-slate-600 theme-dark:text-slate-300">
-                Estatus de la campania en esta taquilla
+                Estatus de la campaña en esta taquilla
               </span>
               <select className={inputClass} defaultValue={status} name="status">
                 <option value="active">Activa</option>
