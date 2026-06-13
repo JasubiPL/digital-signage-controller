@@ -1,8 +1,9 @@
 @echo off
+setlocal
 
-cd C:/dev/digital-signage/Interface
-start cmd /k "yarn start --host"
+set "ROOT=%~dp0"
 
+cd /d "%ROOT%App"
+start "Digital Signage Controller" cmd /k "npm run dev -- --hostname 0.0.0.0"
 
-cd C:/dev/digital-signage/Server
-start cmd /k "npm run dev"
+endlocal
