@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 import { bootstrapFirstAdmin } from "@/server/auth/bootstrap";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -7,7 +9,7 @@ import {
   requireUser,
 } from "@/server/auth/session";
 
-import { DashboardLink, Feedback, PageHeader, StatusBadge } from "./components";
+import { Feedback, PageHeader, StatusBadge } from "./components";
 
 type DashboardPageProps = {
   searchParams: Promise<{
@@ -26,6 +28,17 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     getUserCompanyAccess(user.id),
     getBootstrapState(),
   ]);
+
+  if (!access.isGlobalAdmin) {
+    const firstCompany = access.data.find((item) => item.companies)?.companies;
+
+    if (firstCompany) {
+      redirect(`/dashboard/locations/${firstCompany.slug}`);
+    }
+
+    redirect("/dashboard/locations");
+  }
+
   const companyIds = access.data
     .map((item) => item.companies?.id)
     .filter((id): id is string => Boolean(id));
@@ -56,10 +69,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   return (
     <div className="mx-auto flex h-full w-full flex-col gap-8">
       <PageHeader eyebrow="Dashboard" title="Panel privado">
-        <div className="flex gap-2">
-          <DashboardLink href="/dashboard/campaigns">Campanas</DashboardLink>
-          <DashboardLink href="/dashboard/files">Archivos</DashboardLink>
-        </div>
       </PageHeader>
 
       <Feedback error={error} />
