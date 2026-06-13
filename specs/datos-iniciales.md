@@ -23,11 +23,11 @@ Supabase cloud sin depender de datos externos.
   - `etn`
   - `gho`
   - `costaline`
-  - `iamsa`
 - Ubicaciones/taquillas:
   - 3 para ETN.
   - 3 para GHO.
   - 3 para Costaline.
+  - Estatus operativos `ok`, `remodeling` e `incident`.
 - Campanias:
   - 3 para ETN.
   - 3 para GHO.
@@ -40,6 +40,21 @@ Supabase cloud sin depender de datos externos.
   - Campanias a ubicaciones.
   - Campanias a pantallas.
 
+Las marcas activas del seed son las mismas que alimentan el routing interno:
+
+```text
+/dashboard/locations/etn
+/dashboard/locations/gho
+/dashboard/locations/costaline
+/dashboard/campaigns/etn
+/dashboard/campaigns/gho
+/dashboard/campaigns/costaline
+```
+
+Si una base existente conserva `iamsa`, la migracion
+`supabase/migrations/202606120004_brand_routing.sql` la deja como `archived`
+para que no aparezca como marca navegable.
+
 El seed usa `on conflict` para poder ejecutarse mas de una vez sin duplicar los
 datos base.
 
@@ -48,7 +63,7 @@ datos base.
 Los usuarios no se crean en `seed.sql` porque dependen de Supabase Auth y viven
 en `auth.users`.
 
-Proceso recomendado:
+Proceso recomendado inicial:
 
 1. En Supabase Dashboard, abrir `Authentication` > `Users`.
 2. Crear usuarios con email y contrasena.
@@ -57,11 +72,15 @@ Proceso recomendado:
 5. Reemplazar emails y nombres.
 6. Ejecutar el SQL en Supabase SQL Editor.
 
+Despues de tener al menos un super usuario, tambien se pueden crear y editar
+usuarios desde `/dashboard/users`. Esta pantalla requiere configurar
+`SUPABASE_SECRET_KEY` o `SUPABASE_SERVICE_ROLE_KEY` en la app, porque usa el API
+admin de Supabase Auth para crear cuentas reales.
+
 Roles sugeridos para pruebas:
 
-- `super_admin`: acceso global.
-- `admin` de `etn`: puede crear, editar y borrar datos de ETN.
-- `viewer` de `gho`: solo lectura de GHO.
+- `super_admin`: super usuario con administracion completa.
+- `user`: usuario consulta, solo lectura.
 
 ## Archivos de prueba
 
@@ -77,7 +96,7 @@ Se dejo un archivo inicial en Supabase Storage:
 
 Proceso recomendado:
 
-1. Iniciar sesion en `/login` con un usuario admin.
+1. Iniciar sesion en `/login` con un super usuario.
 2. Entrar a `/dashboard/files`.
 3. Seleccionar compania y campania.
 4. Subir imagen valida menor a 50 MB.
@@ -103,6 +122,8 @@ Desde Supabase SQL Editor:
    - `supabase/migrations/202606120001_initial_schema.sql`
    - `supabase/migrations/202606120002_rls_policies.sql`
    - `supabase/migrations/202606120003_storage.sql`
+   - `supabase/migrations/202606120004_brand_routing.sql`
+   - `supabase/migrations/202606120005_location_operational_status.sql`
 2. Ejecutar `supabase/seed.sql`.
 3. Crear usuarios en Supabase Auth.
 4. Ejecutar una copia editada de `supabase/user-roles.example.sql`.
@@ -126,7 +147,7 @@ Seed aplicado en Supabase cloud con service key.
 
 Conteos observados despues de aplicar datos iniciales:
 
-- `companies`: 4
+- `companies` activas: 3
 - `locations`: 9
 - `campaigns`: 12
 - `screens`: 7
@@ -142,6 +163,7 @@ Consultas rapidas en SQL Editor:
 ```sql
 select slug, name, status
 from public.companies
+where status = 'active'
 order by slug;
 ```
 
@@ -173,13 +195,21 @@ Desde la app:
 
 - `/dashboard` debe mostrar metricas con datos.
 - `/dashboard/campaigns` debe listar campanias.
+- `/dashboard/campaigns/etn` debe listar solo campanias de ETN.
+- `/dashboard/campaigns/gho` debe listar solo campanias de GHO.
+- `/dashboard/campaigns/costaline` debe listar solo campanias de Costaline.
 - `/dashboard/locations` debe listar taquillas.
+- `/dashboard/locations/etn` debe listar solo taquillas de ETN.
+- `/dashboard/locations/gho` debe listar solo taquillas de GHO.
+- `/dashboard/locations/costaline` debe listar solo taquillas de Costaline.
 - `/dashboard/screens` debe listar pantallas.
 - `/dashboard/assignments` debe listar asignaciones.
-- `/dashboard/files` debe permitir subir un archivo con usuario admin.
+- `/dashboard/files` debe permitir subir un archivo con super usuario.
+- `/dashboard/users` debe aparecer solo para `super_admin`.
+- `/dashboard/users` debe permitir crear usuarios `super_admin` o `user` cuando existe service key.
 
 ## Pendientes
 
-- Crear usuarios reales de prueba y asignar roles.
+- Crear usuarios reales de prueba adicionales y asignar roles.
 - Subir archivos reales adicionales desde la UI.
 - Si aparecen datos historicos, crear un proceso separado de importacion.

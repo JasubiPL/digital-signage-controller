@@ -120,7 +120,7 @@ Validaciones:
 - Usuario autenticado.
 - `companyId` y `campaignId` son UUID.
 - La campania pertenece a la compania.
-- El usuario es `super_admin` o `admin` de la compania.
+- El usuario es `super_admin`.
 - MIME permitido.
 - Tamano menor o igual a 50 MB.
 
@@ -156,7 +156,7 @@ DELETE /api/media/:id
 Validaciones:
 
 - Usuario autenticado.
-- El usuario es `super_admin` o `admin` de la compania del archivo.
+- El usuario es `super_admin`.
 - El archivo no esta marcado como `deleted`.
 
 Resultado:
@@ -168,10 +168,10 @@ Resultado:
 
 La configuracion crea politicas sobre `storage.objects` para el bucket `campaign-media`:
 
-- `SELECT`: `super_admin`, `admin`, `operator`, `designer`, `viewer` de la compania del path.
-- `INSERT`: `super_admin` o `admin`.
-- `UPDATE`: `super_admin` o `admin`.
-- `DELETE`: `super_admin` o `admin`.
+- `SELECT`: `super_admin` o `user` cuando la compania del path esta activa.
+- `INSERT`: solo `super_admin`.
+- `UPDATE`: solo `super_admin`.
+- `DELETE`: solo `super_admin`.
 
 La compania se obtiene con:
 
@@ -183,18 +183,18 @@ La funcion lee el primer segmento del path y lo convierte a UUID de forma segura
 
 ## Pruebas manuales recomendadas
 
-Probar con usuario `admin`:
+Probar con usuario `super_admin`:
 
 - Subir imagen valida.
 - Subir video valido menor a 50 MB.
 - Pedir signed URL de archivo activo.
-- Borrar archivo propio o de su compania.
+- Borrar archivo.
 
 Probar rechazos:
 
 - Archivo sin sesion.
-- Usuario `viewer` intentando subir.
-- Usuario `operator` intentando borrar.
+- Usuario `user` intentando subir.
+- Usuario `user` intentando borrar.
 - MIME no permitido, por ejemplo `.exe`.
 - Archivo mayor a 50 MB.
 - Nombre malicioso como `../../x.png`.
@@ -206,7 +206,6 @@ Probar rechazos:
 - Probar upload desde UI con sesion real.
 - Probar archivos reales.
 - Probar archivos invalidos, grandes o con nombres maliciosos.
-- Definir en Fase 7/8 si `designer` puede subir contenido de campania.
 - Crear UI para administrar archivos desde el dashboard.
 
 ## Verificacion cloud realizada

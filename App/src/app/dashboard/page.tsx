@@ -7,7 +7,7 @@ import {
   requireUser,
 } from "@/server/auth/session";
 
-import { DashboardLink, Feedback, PageHeader, Panel, StatusBadge } from "./components";
+import { DashboardLink, Feedback, PageHeader, StatusBadge } from "./components";
 
 type DashboardPageProps = {
   searchParams: Promise<{
@@ -54,7 +54,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   ]);
 
   return (
-    <div className="mx-auto flex h-full w-[95%] flex-col gap-6">
+    <div className="mx-auto flex h-full w-full flex-col gap-8">
       <PageHeader eyebrow="Dashboard" title="Panel privado">
         <div className="flex gap-2">
           <DashboardLink href="/dashboard/campaigns">Campanas</DashboardLink>
@@ -64,8 +64,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
       <Feedback error={error} />
 
-      <section className="grid gap-4 md:grid-cols-4">
-        <MetricCard helper="Activas y borrador" label="Campanas" value={campaignCount ?? 0} />
+      <section className="grid gap-5 md:grid-cols-4">
+        <MetricCard helper="Activas y pendientes" label="Campanas" value={campaignCount ?? 0} />
         <MetricCard helper="Taquillas/puntos" label="Taquillas" value={locationCount ?? 0} />
         <MetricCard helper="Players y pantallas" label="Pantallas" value={screenCount ?? 0} />
         <MetricCard helper="Storage privado" label="Archivos" value={mediaCount ?? 0} />
@@ -91,14 +91,14 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       ) : null}
 
       {profile.ok && !access.error && access.data.length === 0 && bootstrap.canBootstrap ? (
-        <StateCard title="Bootstrap del primer admin">
+        <StateCard title="Bootstrap del primer super usuario">
           <p>
-            No existe ningun `super_admin`. Puedes convertir este usuario en
-            admin global de todas las companias.
+            No existe ningun super usuario. Puedes convertir este usuario en
+            super usuario de todas las companias.
           </p>
           <form action={bootstrapFirstAdmin} className="mt-4">
-            <button className="rounded bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-800">
-              Crear primer admin
+            <button className="inline-flex min-h-12 items-center justify-center rounded-md bg-red-600 px-6 py-2.5 text-sm font-extrabold text-white shadow-[0_18px_36px_rgba(220,38,38,0.20)] transition-all hover:-translate-y-0.5 hover:bg-red-700">
+              Crear primer super usuario
             </button>
           </form>
         </StateCard>
@@ -116,30 +116,33 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       ) : null}
 
       {profile.ok && access.isGlobalAdmin ? (
-        <StateCard title="Admin global">
+        <StateCard title="Super usuario">
           Este usuario tiene acceso administrativo a todas las companias activas.
         </StateCard>
       ) : null}
 
       {profile.ok && access.data.length > 0 ? (
-        <Panel title="Companias disponibles">
+        <section className="grid gap-4">
+          <h2 className="text-2xl font-extrabold tracking-tight text-slate-800 theme-dark:text-slate-100">
+            Companias disponibles
+          </h2>
           <section className="grid gap-4 md:grid-cols-2">
             {access.data.map((item) => (
               <article
-                className="rounded border border-zinc-200 bg-white p-4"
+                className="rounded-lg border border-slate-100 bg-white p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] theme-dark:border-slate-800 theme-dark:bg-slate-900"
                 key={`${item.companies?.id}-${item.role}`}
               >
                 <StatusBadge>{item.role}</StatusBadge>
-                <h2 className="mt-3 text-lg font-semibold">
+                <h2 className="mt-4 text-lg font-extrabold text-slate-800 theme-dark:text-slate-100">
                   {item.companies?.name ?? "Compania sin nombre"}
                 </h2>
-                <p className="mt-1 text-sm text-zinc-600">
+                <p className="mt-1 text-sm font-semibold text-slate-500 theme-dark:text-slate-400">
                   Slug: {item.companies?.slug ?? "sin-slug"}
                 </p>
               </article>
             ))}
           </section>
-        </Panel>
+        </section>
       ) : null}
     </div>
   );
@@ -155,11 +158,11 @@ function MetricCard({
   value: number;
 }>) {
   return (
-    <article className="bg-white px-8 py-4">
-      <p className="text-xl text-red-600">{label}</p>
-      <div className="mt-2 flex items-center justify-between">
-        <p className="text-6xl font-semibold text-zinc-950">{value}</p>
-        <p className="max-w-24 text-right text-sm text-zinc-500">{helper}</p>
+    <article className="rounded-lg border border-slate-100 bg-white px-7 py-6 shadow-[0_24px_70px_rgba(15,23,42,0.10)] theme-dark:border-slate-800 theme-dark:bg-slate-900 theme-dark:shadow-[0_24px_70px_rgba(0,0,0,0.30)]">
+      <p className="text-lg font-extrabold text-red-600">{label}</p>
+      <div className="mt-4 flex items-end justify-between gap-4">
+        <p className="text-6xl font-extrabold tracking-tight text-slate-900 theme-dark:text-slate-100">{value}</p>
+        <p className="max-w-28 pb-2 text-right text-sm font-semibold leading-5 text-slate-500 theme-dark:text-slate-400">{helper}</p>
       </div>
     </article>
   );
@@ -176,13 +179,13 @@ function StateCard({
 }>) {
   const styles =
     tone === "error"
-      ? "border-red-200 bg-red-50 text-red-950"
-      : "border-zinc-200 bg-white text-zinc-950";
+      ? "border-red-100 bg-red-50 text-red-950 theme-dark:border-red-900/50 theme-dark:bg-red-950/35 theme-dark:text-red-200"
+      : "border-slate-100 bg-white text-slate-800 theme-dark:border-slate-800 theme-dark:bg-slate-900 theme-dark:text-slate-100";
 
   return (
-    <section className={`rounded border p-5 shadow-sm ${styles}`}>
-      <h2 className="text-lg font-semibold">{title}</h2>
-      <div className="mt-2 text-sm leading-6">{children}</div>
+    <section className={`rounded-lg border p-6 shadow-[0_18px_42px_rgba(15,23,42,0.06)] ${styles}`}>
+      <h2 className="text-lg font-extrabold">{title}</h2>
+      <div className="mt-3 text-sm font-semibold leading-6 text-slate-600 theme-dark:text-slate-300">{children}</div>
     </section>
   );
 }

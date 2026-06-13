@@ -34,3 +34,8 @@ out
 
 # Environment
 .env.local
+
+# Local AI agent skills
+.agents/
+.codex/skills/
+skills-lock.json

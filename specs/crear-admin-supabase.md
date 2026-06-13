@@ -1,18 +1,19 @@
-# Crear usuario admin en Supabase
+# Crear super usuario en Supabase
 
 ## Objetivo
 
-Crear un usuario en Supabase Auth y darle permisos de administrador global dentro del schema de la aplicacion.
+Crear un usuario en Supabase Auth y darle permisos de super usuario dentro del
+schema de la aplicacion.
 
-El login de la app no permite autoregistro. Las cuentas se crean manualmente en Supabase y despues se relacionan con `public.profiles`.
+El login de la app no permite autoregistro. Las cuentas se crean desde
+Supabase Dashboard o desde `/dashboard/users` cuando ya existe un super usuario.
 
-El rol legado `admin` era global. En el modelo nuevo eso corresponde a:
+El modelo vigente solo tiene dos roles:
 
 ```text
 public.profiles.global_role = 'super_admin'
+public.profiles.global_role = 'user'
 ```
-
-`public.user_companies` queda para roles limitados a una compania, como `operator`, `designer`, `viewer` o admins no globales.
 
 ## Paso 1: crear usuario en Supabase Auth
 
@@ -24,21 +25,22 @@ En Supabase Dashboard:
 4. Usar email y contrasena.
 5. Dejar el email confirmado, o confirmar el usuario desde el Dashboard.
 
-Supabase Auth guarda el usuario real en `auth.users`. La app usa ese `id` para relacionarlo con `public.profiles`.
+Supabase Auth guarda el usuario real en `auth.users`. La app usa ese `id` para
+relacionarlo con `public.profiles`.
 
-## Paso 2: crear o actualizar el profile como admin global
+## Paso 2: crear o actualizar el profile como super usuario
 
-En `SQL Editor`, reemplazar `admin@example.com` y `Admin Principal`:
+En `SQL Editor`, reemplazar `super.usuario@example.com` y `Super Usuario`:
 
 ```sql
 insert into public.profiles (id, email, full_name, global_role)
 select
   u.id,
   u.email,
-  'Admin Principal',
+  'Super Usuario',
   'super_admin'
 from auth.users u
-where u.email = 'admin@example.com'
+where u.email = 'super.usuario@example.com'
 on conflict (id) do update
 set
   email = excluded.email,
@@ -57,16 +59,16 @@ select
   p.full_name,
   p.global_role
 from public.profiles p
-where p.email = 'admin@example.com'
+where p.email = 'super.usuario@example.com'
   and p.global_role = 'super_admin';
 ```
 
-Despues de esto, el usuario puede iniciar sesion en `/login` con email y contrasena.
-
-El dashboard resolvera sus accesos como admin global y mostrara todas las companias activas sin requerir filas en `public.user_companies`.
+Despues de esto, el usuario puede iniciar sesion en `/login` con email y
+contrasena. El dashboard resolvera sus accesos como super usuario y mostrara
+todas las companias activas.
 
 ## Notas
 
 - Si `companies` esta vacia, primero aplicar `supabase/seed.sql`.
-- `global_role = 'super_admin'` es el equivalente del admin global del proyecto anterior.
-- No insertar filas en `user_companies` para este caso global. Esa tabla se usara cuando una cuenta deba estar limitada a una o varias companias concretas.
+- `super_admin` es el unico rol con permisos de escritura.
+- `user` es el rol normal de consulta.

@@ -6,8 +6,7 @@ insert into public.companies (slug, legacy_code, name, status)
 values
   ('etn', 'ETN', 'ETN Turistar', 'active'),
   ('gho', 'GHO', 'Grupo Herradura Occidente', 'active'),
-  ('costaline', 'COSTA', 'Costaline', 'active'),
-  ('iamsa', 'IAMSA', 'Grupo IAMSA', 'active')
+  ('costaline', 'COSTA', 'Costaline', 'active')
 on conflict (slug) do update
 set
   legacy_code = excluded.legacy_code,
@@ -16,15 +15,15 @@ set
 
 with location_seed (company_slug, name, device, projection, status) as (
   values
-    ('etn', 'Mexico Norte TQ1', 'PANTALLAS', 'PLAYER', 'active'),
-    ('etn', 'Queretaro TQ2', 'PANEL LED', 'PLAYER', 'active'),
-    ('etn', 'Morelia TQ1', 'LED Y PANTALLAS', 'USB', 'maintenance'),
-    ('gho', 'Guadalajara Central TQ1', 'PANTALLAS', 'PLAYER', 'active'),
-    ('gho', 'Zapopan TQ2', 'PANTALLAS', 'USB', 'active'),
-    ('gho', 'Tepic TQ1', 'PANEL LED', 'PLAYER', 'inactive'),
-    ('costaline', 'Acapulco TQ1', 'PANTALLAS', 'PLAYER', 'active'),
-    ('costaline', 'Taxquena TQ3', 'LED Y PANTALLAS', 'PLAYER', 'active'),
-    ('costaline', 'Cuernavaca TQ1', 'PANTALLAS', 'USB', 'maintenance')
+    ('etn', 'Mexico Norte TQ1', 'PANTALLAS', 'PLAYER', 'ok'),
+    ('etn', 'Queretaro TQ2', 'PANEL LED', 'PLAYER', 'ok'),
+    ('etn', 'Morelia TQ1', 'LED Y PANTALLAS', 'USB', 'remodeling'),
+    ('gho', 'Guadalajara Central TQ1', 'PANTALLAS', 'PLAYER', 'ok'),
+    ('gho', 'Zapopan TQ2', 'PANTALLAS', 'USB', 'ok'),
+    ('gho', 'Tepic TQ1', 'PANEL LED', 'PLAYER', 'incident'),
+    ('costaline', 'Acapulco TQ1', 'PANTALLAS', 'PLAYER', 'ok'),
+    ('costaline', 'Taxquena TQ3', 'LED Y PANTALLAS', 'PLAYER', 'ok'),
+    ('costaline', 'Cuernavaca TQ1', 'PANTALLAS', 'USB', 'remodeling')
 )
 insert into public.locations (company_id, name, device, projection, status)
 select

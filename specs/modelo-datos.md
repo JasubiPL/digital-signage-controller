@@ -18,6 +18,22 @@ Archivos principales:
 
 Empresas o marcas operativas.
 
+La navegacion interna por marca se resuelve desde esta tabla. Solo las
+companias con `status = 'active'` deben aparecer como marcas navegables en el
+sidebar. El campo `slug` es parte del contrato de routing y se usa en rutas
+como:
+
+```text
+/dashboard/locations/[companySlug]
+/dashboard/campaigns/[companySlug]
+```
+
+Ejemplos de slugs activos esperados:
+
+- `etn`
+- `gho`
+- `costaline`
+
 Campos principales:
 
 - `id`
@@ -42,18 +58,14 @@ Campos principales:
 - `created_at`
 - `updated_at`
 
-`global_role = 'super_admin'` da acceso global.
+Roles globales:
 
-### `user_companies`
+- `super_admin`: super usuario con administracion completa.
+- `user`: usuario de consulta, solo lectura.
 
-Relaciona usuarios con empresas y roles por compania.
-
-Roles:
-
-- `admin`
-- `operator`
-- `designer`
-- `viewer`
+La migracion `202606120006_two_global_roles.sql` elimina el modelo de roles por
+compania. Las marcas visibles se resuelven desde `companies` activas para ambos
+roles; solo `super_admin` puede crear, editar o eliminar informacion.
 
 ### `locations`
 
@@ -67,6 +79,13 @@ Campos principales:
 - `projection`
 - `status`
 - `created_by`
+
+Estados operativos:
+
+- `ok`: se muestra como `OK`.
+- `remodeling`: se muestra como `Remodelacion`.
+- `incident`: se muestra como `Pantalla con incidente`.
+- `archived`: oculto/retirado operativo.
 
 ### `campaigns`
 

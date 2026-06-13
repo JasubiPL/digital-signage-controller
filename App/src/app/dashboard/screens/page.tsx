@@ -2,16 +2,25 @@ import { createScreen, deleteScreen } from "@/app/dashboard/actions";
 
 import {
   buttonClass,
-  dangerButtonClass,
   EmptyState,
   Feedback,
   Field,
   inputClass,
   PageHeader,
   Panel,
-  StatusBadge,
 } from "../components";
 import { getDashboardContext } from "../data";
+import {
+  DeleteActionButton,
+  ListingStatusBadge,
+  ListingTableShell,
+  listingActionCellClass,
+  listingCellClass,
+  listingHeadClass,
+  listingHeaderCellClass,
+  listingRowClass,
+  listingTableClass,
+} from "../list-ui";
 
 type PageProps = {
   searchParams: Promise<{
@@ -44,7 +53,7 @@ export default async function ScreensPage({ searchParams }: PageProps) {
   const locationById = new Map((locations ?? []).map((location) => [location.id, location]));
 
   return (
-    <div className="mx-auto flex w-[95%] flex-col gap-6">
+    <div className="mx-auto flex w-full flex-col gap-8">
       <PageHeader eyebrow="Pantallas" title="Dispositivos y players" />
       <Feedback error={error} success={success} />
 
@@ -89,50 +98,53 @@ export default async function ScreensPage({ searchParams }: PageProps) {
         </form>
       </Panel>
 
-      <Panel title={`Pantallas (${screens?.length ?? 0})`}>
+      <section className="grid gap-4">
+        <h2 className="text-2xl font-extrabold tracking-tight text-slate-800 theme-dark:text-slate-100">
+          Pantallas ({screens?.length ?? 0})
+        </h2>
         {!screens?.length ? (
           <EmptyState>No hay pantallas disponibles para tus companias.</EmptyState>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-center text-sm">
-              <thead className="border-b border-gray-200 font-semibold text-zinc-950">
+          <ListingTableShell>
+            <table className={listingTableClass}>
+              <thead className={listingHeadClass}>
                 <tr>
-                  <th className="py-2 pr-4 text-left">Pantalla</th>
-                  <th className="py-2 pr-4">Compania</th>
-                  <th className="py-2 pr-4">Ubicacion</th>
-                  <th className="py-2 pr-4">Identificador</th>
-                  <th className="py-2 pr-4">Estatus</th>
-                  <th className="py-2">Acciones</th>
+                  <th className={listingHeaderCellClass}>Pantalla</th>
+                  <th className={listingHeaderCellClass}>Compania</th>
+                  <th className={listingHeaderCellClass}>Ubicacion</th>
+                  <th className={listingHeaderCellClass}>Identificador</th>
+                  <th className={listingHeaderCellClass}>Estatus</th>
+                  <th className={`${listingHeaderCellClass} text-center`}>Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody>
                 {screens.map((screen) => (
-                  <tr key={screen.id}>
-                    <td className="py-3 pr-4 text-left font-medium text-zinc-950">{screen.name}</td>
-                    <td className="py-3 pr-4">{companyById.get(screen.company_id)?.name}</td>
-                    <td className="py-3 pr-4">
+                  <tr className={listingRowClass} key={screen.id}>
+                    <td className={`${listingCellClass} font-semibold text-slate-700`}>{screen.name}</td>
+                    <td className={listingCellClass}>{companyById.get(screen.company_id)?.name}</td>
+                    <td className={listingCellClass}>
                       {screen.location_id
                         ? locationById.get(screen.location_id)?.name ?? "Sin dato"
                         : "Sin ubicacion"}
                     </td>
-                    <td className="py-3 pr-4">{screen.device_identifier ?? "Sin dato"}</td>
-                    <td className="py-3 pr-4">
-                      <StatusBadge>{screen.status}</StatusBadge>
+                    <td className={listingCellClass}>{screen.device_identifier ?? "Sin dato"}</td>
+                    <td className={listingCellClass}>
+                      <ListingStatusBadge>{screen.status}</ListingStatusBadge>
                     </td>
-                    <td className="py-3">
+                    <td className={listingActionCellClass}>
                       <form action={deleteScreen}>
                         <input name="id" type="hidden" value={screen.id} />
                         <input name="companyId" type="hidden" value={screen.company_id} />
-                        <button className={dangerButtonClass}>Eliminar</button>
+                        <DeleteActionButton />
                       </form>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
+          </ListingTableShell>
         )}
-      </Panel>
+      </section>
     </div>
   );
 }
