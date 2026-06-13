@@ -16,6 +16,7 @@ export type CompanyAccess = {
   role: string;
   companies: {
     id: string;
+    legacy_code?: string | null;
     slug: string;
     name: string;
   } | null;
@@ -106,7 +107,7 @@ export async function getUserCompanyAccess(userId: string) {
   if ((profile?.global_role as ProfileRole | undefined) === "super_admin") {
     const { data, error } = await supabase
       .from("companies")
-      .select("id, slug, name")
+      .select("id, slug, legacy_code, name")
       .eq("status", "active")
       .order("slug", { ascending: true });
 
@@ -130,8 +131,9 @@ export async function getUserCompanyAccess(userId: string) {
 
   const { data, error } = await supabase
     .from("user_companies")
-    .select("role, companies(id, slug, name)")
+    .select("role, companies!inner(id, slug, legacy_code, name)")
     .eq("user_id", userId)
+    .eq("companies.status", "active")
     .order("created_at", { ascending: true });
 
   if (error) {

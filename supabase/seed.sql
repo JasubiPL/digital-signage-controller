@@ -6,8 +6,7 @@ insert into public.companies (slug, legacy_code, name, status)
 values
   ('etn', 'ETN', 'ETN Turistar', 'active'),
   ('gho', 'GHO', 'Grupo Herradura Occidente', 'active'),
-  ('costaline', 'COSTA', 'Costaline', 'active'),
-  ('iamsa', 'IAMSA', 'Grupo IAMSA', 'active')
+  ('costaline', 'COSTA', 'Costaline', 'active')
 on conflict (slug) do update
 set
   legacy_code = excluded.legacy_code,

@@ -61,10 +61,13 @@ Next.js 16 usa `proxy.ts` para checks tempranos.
 Rutas protegidas:
 
 - `/dashboard`
+- `/dashboard/locations/[companySlug]`
+- `/dashboard/campaigns/[companySlug]`
 
 Comportamiento:
 
 - Usuario sin sesion en `/dashboard` se redirige a `/login?next=/dashboard`.
+- Usuario sin sesion en rutas por marca se redirige a `/login?next=...`.
 - Usuario autenticado en `/login` se redirige a `/dashboard`.
 - El proxy usa `@supabase/ssr` para refrescar cookies de sesion.
 

@@ -23,7 +23,6 @@ Supabase cloud sin depender de datos externos.
   - `etn`
   - `gho`
   - `costaline`
-  - `iamsa`
 - Ubicaciones/taquillas:
   - 3 para ETN.
   - 3 para GHO.
@@ -39,6 +38,21 @@ Supabase cloud sin depender de datos externos.
 - Asignaciones:
   - Campanias a ubicaciones.
   - Campanias a pantallas.
+
+Las marcas activas del seed son las mismas que alimentan el routing interno:
+
+```text
+/dashboard/locations/etn
+/dashboard/locations/gho
+/dashboard/locations/costaline
+/dashboard/campaigns/etn
+/dashboard/campaigns/gho
+/dashboard/campaigns/costaline
+```
+
+Si una base existente conserva `iamsa`, la migracion
+`supabase/migrations/202606120004_brand_routing.sql` la deja como `archived`
+para que no aparezca como marca navegable.
 
 El seed usa `on conflict` para poder ejecutarse mas de una vez sin duplicar los
 datos base.
@@ -103,6 +117,7 @@ Desde Supabase SQL Editor:
    - `supabase/migrations/202606120001_initial_schema.sql`
    - `supabase/migrations/202606120002_rls_policies.sql`
    - `supabase/migrations/202606120003_storage.sql`
+   - `supabase/migrations/202606120004_brand_routing.sql`
 2. Ejecutar `supabase/seed.sql`.
 3. Crear usuarios en Supabase Auth.
 4. Ejecutar una copia editada de `supabase/user-roles.example.sql`.
@@ -126,7 +141,7 @@ Seed aplicado en Supabase cloud con service key.
 
 Conteos observados despues de aplicar datos iniciales:
 
-- `companies`: 4
+- `companies` activas: 3
 - `locations`: 9
 - `campaigns`: 12
 - `screens`: 7
@@ -142,6 +157,7 @@ Consultas rapidas en SQL Editor:
 ```sql
 select slug, name, status
 from public.companies
+where status = 'active'
 order by slug;
 ```
 
@@ -173,7 +189,13 @@ Desde la app:
 
 - `/dashboard` debe mostrar metricas con datos.
 - `/dashboard/campaigns` debe listar campanias.
+- `/dashboard/campaigns/etn` debe listar solo campanias de ETN.
+- `/dashboard/campaigns/gho` debe listar solo campanias de GHO.
+- `/dashboard/campaigns/costaline` debe listar solo campanias de Costaline.
 - `/dashboard/locations` debe listar taquillas.
+- `/dashboard/locations/etn` debe listar solo taquillas de ETN.
+- `/dashboard/locations/gho` debe listar solo taquillas de GHO.
+- `/dashboard/locations/costaline` debe listar solo taquillas de Costaline.
 - `/dashboard/screens` debe listar pantallas.
 - `/dashboard/assignments` debe listar asignaciones.
 - `/dashboard/files` debe permitir subir un archivo con usuario admin.

@@ -123,6 +123,18 @@ body {
   width: 1.15rem;
 }
 
+.dashboard-spinner {
+  animation: login-spin 0.72s linear infinite;
+  background:
+    radial-gradient(circle at 50% 0.18rem, #d40000 0 0.18rem, transparent 0.19rem),
+    conic-gradient(from 35deg, #d40000 0 86deg, rgba(212, 0, 0, 0.16) 86deg 360deg);
+  border-radius: 999px;
+  display: inline-block;
+  height: 3.25rem;
+  mask: radial-gradient(circle, transparent 0 44%, black 45%);
+  width: 3.25rem;
+}
+
 @keyframes login-spin {
   to {
     transform: rotate(360deg);

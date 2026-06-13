@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { sanitizeNextPath } from "@/lib/auth/redirect";
 import { requireUser } from "@/server/auth/session";
 import {
   buildCampaignMediaPath,
@@ -29,6 +30,12 @@ function finish(path: string, state: ActionState, message: string): never {
   redirect(`${path}?${new URLSearchParams({ [state]: message }).toString()}`);
 }
 
+function returnPath(formData: FormData, fallback: string) {
+  const value = formData.get("returnPath");
+
+  return value ? sanitizeNextPath(value) : fallback;
+}
+
 async function assertCanManageCompany(companyId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("has_company_role", {
@@ -42,7 +49,7 @@ async function assertCanManageCompany(companyId: string) {
 }
 
 export async function createCampaign(formData: FormData) {
-  const path = "/dashboard/campaigns";
+  const path = returnPath(formData, "/dashboard/campaigns");
 
   try {
     const user = await requireUser(path);
@@ -68,7 +75,7 @@ export async function createCampaign(formData: FormData) {
 }
 
 export async function deleteCampaign(formData: FormData) {
-  const path = "/dashboard/campaigns";
+  const path = returnPath(formData, "/dashboard/campaigns");
 
   try {
     await requireUser(path);
@@ -88,7 +95,7 @@ export async function deleteCampaign(formData: FormData) {
 }
 
 export async function createLocation(formData: FormData) {
-  const path = "/dashboard/locations";
+  const path = returnPath(formData, "/dashboard/locations");
 
   try {
     const user = await requireUser(path);
@@ -114,7 +121,7 @@ export async function createLocation(formData: FormData) {
 }
 
 export async function deleteLocation(formData: FormData) {
-  const path = "/dashboard/locations";
+  const path = returnPath(formData, "/dashboard/locations");
 
   try {
     await requireUser(path);
@@ -369,4 +376,3 @@ export async function deleteMediaFile(formData: FormData) {
     finish(path, "error", error instanceof Error ? error.message : "No se pudo eliminar el archivo.");
   }
 }
-

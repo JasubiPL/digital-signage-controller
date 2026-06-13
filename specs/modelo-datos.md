@@ -18,6 +18,22 @@ Archivos principales:
 
 Empresas o marcas operativas.
 
+La navegacion interna por marca se resuelve desde esta tabla. Solo las
+companias con `status = 'active'` deben aparecer como marcas navegables en el
+sidebar. El campo `slug` es parte del contrato de routing y se usa en rutas
+como:
+
+```text
+/dashboard/locations/[companySlug]
+/dashboard/campaigns/[companySlug]
+```
+
+Ejemplos de slugs activos esperados:
+
+- `etn`
+- `gho`
+- `costaline`
+
 Campos principales:
 
 - `id`
