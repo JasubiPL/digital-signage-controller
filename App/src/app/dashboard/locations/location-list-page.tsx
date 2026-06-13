@@ -31,6 +31,7 @@ import {
   listingTableClass,
 } from "../list-ui";
 import { AssignmentStatusEditor } from "./assignment-status-editor";
+import { SubmitButton } from "../submit-button";
 
 type LocationListPageProps = {
   companySlug?: string;
@@ -239,7 +240,9 @@ export async function LocationListPage({
                                   }))}
                                   name="campaignIds"
                                 />
-                                <button className={buttonClass}>Guardar asignaciones</button>
+                                <SubmitButton className={buttonClass} pendingLabel="Guardando...">
+                                  Guardar asignaciones
+                                </SubmitButton>
                               </form>
                             </section>
                           </DashboardDialog>
@@ -365,7 +368,7 @@ function LocationForm({
         </select>
       </Field>
       <div className="flex items-end">
-        <button className={buttonClass}>{submitLabel}</button>
+        <SubmitButton className={buttonClass}>{submitLabel}</SubmitButton>
       </div>
     </form>
   );

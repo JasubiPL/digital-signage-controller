@@ -136,7 +136,13 @@ export function AssignmentStatusEditor({
 
             <div className="flex justify-end">
               <button className={buttonClass} disabled={isPending}>
-                {isPending ? "Guardando..." : "Guardar estatus"}
+                {isPending ? (
+                  <span
+                    aria-hidden="true"
+                    className="mr-2 inline-block h-4 w-4 rounded-full border-2 border-current border-r-transparent motion-safe:animate-spin"
+                  />
+                ) : null}
+                <span>{isPending ? "Guardando..." : "Guardar estatus"}</span>
               </button>
             </div>
           </form>

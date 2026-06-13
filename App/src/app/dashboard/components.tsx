@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { FeedbackToast } from "./feedback-toast";
+
 export type SearchFeedback = {
   error?: string;
   success?: string;
@@ -33,17 +35,7 @@ export function PageHeader({
 }
 
 export function Feedback({ error, success }: Readonly<SearchFeedback>) {
-  if (!error && !success) return null;
-
-  const tone = error
-    ? "border-red-100 bg-red-50 text-red-950 theme-dark:border-red-900/50 theme-dark:bg-red-950/35 theme-dark:text-red-200"
-    : "border-emerald-100 bg-emerald-50 text-emerald-950 theme-dark:border-emerald-900/50 theme-dark:bg-emerald-950/35 theme-dark:text-emerald-200";
-
-  return (
-    <div className={`rounded-lg border px-5 py-4 text-sm font-semibold shadow-[0_18px_42px_rgba(15,23,42,0.06)] ${tone}`}>
-      {error ?? success}
-    </div>
-  );
+  return <FeedbackToast error={error} success={success} />;
 }
 
 export function Panel({

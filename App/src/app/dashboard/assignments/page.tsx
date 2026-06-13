@@ -26,6 +26,7 @@ import {
   listingRowClass,
   listingTableClass,
 } from "../list-ui";
+import { SubmitButton } from "../submit-button";
 
 type PageProps = {
   searchParams: Promise<{
@@ -113,7 +114,9 @@ export default async function AssignmentsPage({ searchParams }: PageProps) {
                 ))}
               </select>
             </Field>
-            <button className={buttonClass}>Asignar a ubicacion</button>
+            <SubmitButton className={buttonClass} pendingLabel="Asignando...">
+              Asignar a ubicacion
+            </SubmitButton>
           </form>
         </Panel>
 
@@ -138,7 +141,9 @@ export default async function AssignmentsPage({ searchParams }: PageProps) {
                 ))}
               </select>
             </Field>
-            <button className={buttonClass}>Asignar a pantalla</button>
+            <SubmitButton className={buttonClass} pendingLabel="Asignando...">
+              Asignar a pantalla
+            </SubmitButton>
           </form>
         </Panel>
       </section>

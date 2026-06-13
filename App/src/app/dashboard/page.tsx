@@ -10,6 +10,7 @@ import {
 } from "@/server/auth/session";
 
 import { Feedback, PageHeader, StatusBadge } from "./components";
+import { SubmitButton } from "./submit-button";
 
 type DashboardPageProps = {
   searchParams: Promise<{
@@ -106,9 +107,12 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             super usuario de todas las companias.
           </p>
           <form action={bootstrapFirstAdmin} className="mt-4">
-            <button className="inline-flex min-h-12 items-center justify-center rounded-md bg-red-600 px-6 py-2.5 text-sm font-extrabold text-white shadow-[0_18px_36px_rgba(220,38,38,0.20)] transition-all hover:-translate-y-0.5 hover:bg-red-700">
+            <SubmitButton
+              className="inline-flex min-h-12 items-center justify-center rounded-md bg-red-600 px-6 py-2.5 text-sm font-extrabold text-white shadow-[0_18px_36px_rgba(220,38,38,0.20)] transition-all hover:-translate-y-0.5 hover:bg-red-700 active:scale-95"
+              pendingLabel="Creando..."
+            >
               Crear primer super usuario
-            </button>
+            </SubmitButton>
           </form>
         </StateCard>
       ) : null}

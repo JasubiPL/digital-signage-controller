@@ -21,6 +21,7 @@ import {
   listingRowClass,
   listingTableClass,
 } from "../list-ui";
+import { SubmitButton } from "../submit-button";
 
 type PageProps = {
   searchParams: Promise<{
@@ -93,7 +94,9 @@ export default async function ScreensPage({ searchParams }: PageProps) {
             </select>
           </Field>
           <div className="md:col-span-5">
-            <button className={buttonClass}>Crear pantalla</button>
+            <SubmitButton className={buttonClass} pendingLabel="Creando...">
+              Crear pantalla
+            </SubmitButton>
           </div>
         </form>
       </Panel>
