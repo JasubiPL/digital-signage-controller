@@ -15,7 +15,7 @@ import {
   requireUuid,
 } from "@/server/api/validation";
 
-const locationStatuses = ["active", "inactive", "maintenance", "archived"] as const;
+const locationStatuses = ["ok", "remodeling", "incident"] as const;
 
 export async function GET(request: Request) {
   try {
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     const name = requireString(payload, "name", { maxLength: 160 });
     const device = optionalString(payload, "device", { maxLength: 120, nullable: true });
     const projection = optionalString(payload, "projection", { maxLength: 80, nullable: true });
-    const status = optionalEnum(payload, "status", locationStatuses) ?? "active";
+    const status = optionalEnum(payload, "status", locationStatuses) ?? "ok";
     const supabase = await createApiClient();
 
     await assertCanManageCompany(supabase, companyId);

@@ -18,6 +18,9 @@ import { createAdminClient } from "@/server/supabase/admin";
 
 type ActionState = "success" | "error";
 
+const assignmentStatuses = ["active", "draft", "inactive"] as const;
+type AssignmentStatus = (typeof assignmentStatuses)[number];
+
 function field(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
 }
@@ -35,6 +38,49 @@ function returnPath(formData: FormData, fallback: string) {
   const value = formData.get("returnPath");
 
   return value ? sanitizeNextPath(value) : fallback;
+}
+
+function errorMessage(error: unknown, fallback: string) {
+  if (error instanceof Error) return error.message;
+
+  if (typeof error === "object" && error !== null) {
+    const maybeError = error as {
+      code?: unknown;
+      details?: unknown;
+      message?: unknown;
+    };
+
+    if (
+      maybeError.code === "23514" &&
+      typeof maybeError.message === "string" &&
+      maybeError.message.includes("campaign_locations_status_check")
+    ) {
+      return "Falta aplicar la migracion de estatus por taquilla. Ejecuta la migracion 202606130001_campaign_location_operational_status.sql en Supabase.";
+    }
+
+    if (
+      maybeError.code === "23514" &&
+      typeof maybeError.message === "string" &&
+      maybeError.message.includes("locations_status_check")
+    ) {
+      return "Falta aplicar la migracion de estatus de taquillas. Ejecuta la migracion 202606120005_location_operational_status.sql en Supabase.";
+    }
+
+    if (typeof maybeError.message === "string") return maybeError.message;
+    if (typeof maybeError.details === "string") return maybeError.details;
+  }
+
+  return fallback;
+}
+
+function assignmentStatus(formData: FormData) {
+  const status = field(formData, "status");
+
+  if (!assignmentStatuses.includes(status as AssignmentStatus)) {
+    throw new Error("Estatus de asignacion invalido.");
+  }
+
+  return status as AssignmentStatus;
 }
 
 async function getUserManagementScope(path = "/dashboard/users") {
@@ -307,6 +353,20 @@ export async function syncCampaignLocations(formData: FormData) {
     await assertCanManageCompany(companyId);
 
     const supabase = await createClient();
+    const { data: existingAssignments, error: existingError } = await supabase
+      .from("campaign_locations")
+      .select("location_id, status")
+      .eq("campaign_id", campaignId)
+      .eq("company_id", companyId);
+
+    if (existingError) throw existingError;
+
+    const statusByLocation = new Map(
+      (existingAssignments ?? []).map((assignment) => [
+        assignment.location_id,
+        assignment.status,
+      ]),
+    );
     const { error: deleteError } = await supabase
       .from("campaign_locations")
       .delete()
@@ -322,7 +382,7 @@ export async function syncCampaignLocations(formData: FormData) {
           company_id: companyId,
           created_by: user.id,
           location_id: locationId,
-          status: "active",
+          status: statusByLocation.get(locationId) ?? "active",
         })),
       );
 
@@ -374,14 +434,30 @@ export async function deleteLocation(formData: FormData) {
     await assertCanManageCompany(companyId);
 
     const supabase = await createClient();
-    const { error } = await supabase.from("locations").delete().eq("id", id);
+    const { error: screensError } = await supabase
+      .from("screens")
+      .update({ location_id: null })
+      .eq("location_id", id)
+      .eq("company_id", companyId);
+
+    if (screensError) throw screensError;
+
+    const { data, error } = await supabase
+      .from("locations")
+      .delete()
+      .eq("id", id)
+      .eq("company_id", companyId)
+      .select("id")
+      .maybeSingle();
 
     if (error) throw error;
+    if (!data) throw new Error("No se encontro la taquilla para eliminar.");
+
     revalidatePath(path);
     finish(path, "success", "Ubicacion eliminada.");
   } catch (error) {
     unstable_rethrow(error);
-    finish(path, "error", error instanceof Error ? error.message : "No se pudo eliminar la ubicacion.");
+    finish(path, "error", errorMessage(error, "No se pudo eliminar la ubicacion."));
   }
 }
 
@@ -395,7 +471,7 @@ export async function updateLocation(formData: FormData) {
     await assertCanManageCompany(companyId);
 
     const supabase = await createClient();
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("locations")
       .update({
         device: optionalField(formData, "device"),
@@ -404,14 +480,18 @@ export async function updateLocation(formData: FormData) {
         status: field(formData, "status") || "ok",
       })
       .eq("id", id)
-      .eq("company_id", companyId);
+      .eq("company_id", companyId)
+      .select("id")
+      .maybeSingle();
 
     if (error) throw error;
+    if (!data) throw new Error("No se encontro la taquilla para actualizar.");
+
     revalidatePath(path);
     finish(path, "success", "Taquilla actualizada.");
   } catch (error) {
     unstable_rethrow(error);
-    finish(path, "error", error instanceof Error ? error.message : "No se pudo actualizar la taquilla.");
+    finish(path, "error", errorMessage(error, "No se pudo actualizar la taquilla."));
   }
 }
 
@@ -426,6 +506,20 @@ export async function syncLocationCampaigns(formData: FormData) {
     await assertCanManageCompany(companyId);
 
     const supabase = await createClient();
+    const { data: existingAssignments, error: existingError } = await supabase
+      .from("campaign_locations")
+      .select("campaign_id, status")
+      .eq("location_id", locationId)
+      .eq("company_id", companyId);
+
+    if (existingError) throw existingError;
+
+    const statusByCampaign = new Map(
+      (existingAssignments ?? []).map((assignment) => [
+        assignment.campaign_id,
+        assignment.status,
+      ]),
+    );
     const { error: deleteError } = await supabase
       .from("campaign_locations")
       .delete()
@@ -441,7 +535,7 @@ export async function syncLocationCampaigns(formData: FormData) {
           company_id: companyId,
           created_by: user.id,
           location_id: locationId,
-          status: "active",
+          status: statusByCampaign.get(campaignId) ?? "active",
         })),
       );
 
@@ -453,6 +547,35 @@ export async function syncLocationCampaigns(formData: FormData) {
   } catch (error) {
     unstable_rethrow(error);
     finish(path, "error", error instanceof Error ? error.message : "No se pudieron asignar las campanias.");
+  }
+}
+
+export async function updateCampaignLocationStatus(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/locations");
+
+  try {
+    await requireUser(path);
+    const id = field(formData, "id");
+    const companyId = field(formData, "companyId");
+    await assertCanManageCompany(companyId);
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("campaign_locations")
+      .update({ status: assignmentStatus(formData) })
+      .eq("id", id)
+      .eq("company_id", companyId)
+      .select("id")
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) throw new Error("No se encontro la asignacion de esta campania en la taquilla.");
+
+    revalidatePath(path);
+    finish(path, "success", "Estatus de campania actualizado para esta taquilla.");
+  } catch (error) {
+    unstable_rethrow(error);
+    finish(path, "error", errorMessage(error, "No se pudo actualizar el estatus de la campania."));
   }
 }
 
