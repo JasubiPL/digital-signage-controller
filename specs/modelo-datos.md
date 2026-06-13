@@ -84,6 +84,13 @@ Campos principales:
 - `status`
 - `created_by`
 
+Estados operativos:
+
+- `ok`: se muestra como `OK`.
+- `remodeling`: se muestra como `Remodelacion`.
+- `incident`: se muestra como `Pantalla con incidente`.
+- `archived`: oculto/retirado operativo.
+
 ### `campaigns`
 
 Campanias de contenido.

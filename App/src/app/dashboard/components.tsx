@@ -111,17 +111,27 @@ export function DashboardLink({
 
 export function StatusBadge({ children }: Readonly<{ children: React.ReactNode }>) {
   const value = String(children).toLowerCase();
-  const color = value.includes("active") || value.includes("ok")
-    ? "bg-lime-500 text-white"
-    : value.includes("maintenance") || value.includes("draft")
-      ? "bg-orange-400 text-white"
-      : value.includes("archived") || value.includes("inactive")
-        ? "bg-red-600 text-white"
-        : "bg-sky-400 text-white";
+  const labelByStatus: Record<string, string> = {
+    active: "Activa",
+    archived: "Archivada",
+    draft: "Borrador",
+    inactive: "Inactiva",
+    incident: "Pantalla con incidente",
+    ok: "OK",
+    remodeling: "Remodelacion",
+  };
+  const color =
+    value === "ok" || value === "active"
+      ? "bg-lime-500 text-white"
+      : value === "remodeling" || value === "draft"
+        ? "bg-orange-400 text-white"
+        : value === "incident" || value === "archived" || value === "inactive"
+          ? "bg-red-600 text-white"
+          : "bg-sky-400 text-white";
 
   return (
     <span className={`inline-flex px-5 py-1 text-xs font-medium ${color}`}>
-      {children}
+      {labelByStatus[value] ?? children}
     </span>
   );
 }

@@ -94,6 +94,75 @@ export async function deleteCampaign(formData: FormData) {
   }
 }
 
+export async function updateCampaign(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/campaigns");
+
+  try {
+    await requireUser(path);
+    const id = field(formData, "id");
+    const companyId = field(formData, "companyId");
+    await assertCanManageCompany(companyId);
+
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from("campaigns")
+      .update({
+        ends_on: optionalField(formData, "endsOn"),
+        name: field(formData, "name"),
+        starts_on: optionalField(formData, "startsOn"),
+        status: field(formData, "status") || "draft",
+      })
+      .eq("id", id)
+      .eq("company_id", companyId);
+
+    if (error) throw error;
+    revalidatePath(path);
+    finish(path, "success", "Campania actualizada.");
+  } catch (error) {
+    finish(path, "error", error instanceof Error ? error.message : "No se pudo actualizar la campania.");
+  }
+}
+
+export async function syncCampaignLocations(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/campaigns");
+
+  try {
+    const user = await requireUser(path);
+    const campaignId = field(formData, "campaignId");
+    const companyId = field(formData, "companyId");
+    const locationIds = formData.getAll("locationIds").map(String);
+    await assertCanManageCompany(companyId);
+
+    const supabase = await createClient();
+    const { error: deleteError } = await supabase
+      .from("campaign_locations")
+      .delete()
+      .eq("campaign_id", campaignId)
+      .eq("company_id", companyId);
+
+    if (deleteError) throw deleteError;
+
+    if (locationIds.length) {
+      const { error: insertError } = await supabase.from("campaign_locations").insert(
+        locationIds.map((locationId) => ({
+          campaign_id: campaignId,
+          company_id: companyId,
+          created_by: user.id,
+          location_id: locationId,
+          status: "active",
+        })),
+      );
+
+      if (insertError) throw insertError;
+    }
+
+    revalidatePath(path);
+    finish(path, "success", "Taquillas asignadas.");
+  } catch (error) {
+    finish(path, "error", error instanceof Error ? error.message : "No se pudieron asignar las taquillas.");
+  }
+}
+
 export async function createLocation(formData: FormData) {
   const path = returnPath(formData, "/dashboard/locations");
 
@@ -109,7 +178,7 @@ export async function createLocation(formData: FormData) {
       device: optionalField(formData, "device"),
       name: field(formData, "name"),
       projection: optionalField(formData, "projection"),
-      status: field(formData, "status") || "active",
+      status: field(formData, "status") || "ok",
     });
 
     if (error) throw error;
@@ -137,6 +206,75 @@ export async function deleteLocation(formData: FormData) {
     finish(path, "success", "Ubicacion eliminada.");
   } catch (error) {
     finish(path, "error", error instanceof Error ? error.message : "No se pudo eliminar la ubicacion.");
+  }
+}
+
+export async function updateLocation(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/locations");
+
+  try {
+    await requireUser(path);
+    const id = field(formData, "id");
+    const companyId = field(formData, "companyId");
+    await assertCanManageCompany(companyId);
+
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from("locations")
+      .update({
+        device: optionalField(formData, "device"),
+        name: field(formData, "name"),
+        projection: optionalField(formData, "projection"),
+        status: field(formData, "status") || "ok",
+      })
+      .eq("id", id)
+      .eq("company_id", companyId);
+
+    if (error) throw error;
+    revalidatePath(path);
+    finish(path, "success", "Taquilla actualizada.");
+  } catch (error) {
+    finish(path, "error", error instanceof Error ? error.message : "No se pudo actualizar la taquilla.");
+  }
+}
+
+export async function syncLocationCampaigns(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/locations");
+
+  try {
+    const user = await requireUser(path);
+    const companyId = field(formData, "companyId");
+    const locationId = field(formData, "locationId");
+    const campaignIds = formData.getAll("campaignIds").map(String);
+    await assertCanManageCompany(companyId);
+
+    const supabase = await createClient();
+    const { error: deleteError } = await supabase
+      .from("campaign_locations")
+      .delete()
+      .eq("location_id", locationId)
+      .eq("company_id", companyId);
+
+    if (deleteError) throw deleteError;
+
+    if (campaignIds.length) {
+      const { error: insertError } = await supabase.from("campaign_locations").insert(
+        campaignIds.map((campaignId) => ({
+          campaign_id: campaignId,
+          company_id: companyId,
+          created_by: user.id,
+          location_id: locationId,
+          status: "active",
+        })),
+      );
+
+      if (insertError) throw insertError;
+    }
+
+    revalidatePath(path);
+    finish(path, "success", "Campanias asignadas.");
+  } catch (error) {
+    finish(path, "error", error instanceof Error ? error.message : "No se pudieron asignar las campanias.");
   }
 }
 

@@ -27,6 +27,7 @@ Supabase cloud sin depender de datos externos.
   - 3 para ETN.
   - 3 para GHO.
   - 3 para Costaline.
+  - Estatus operativos `ok`, `remodeling` e `incident`.
 - Campanias:
   - 3 para ETN.
   - 3 para GHO.
@@ -118,6 +119,7 @@ Desde Supabase SQL Editor:
    - `supabase/migrations/202606120002_rls_policies.sql`
    - `supabase/migrations/202606120003_storage.sql`
    - `supabase/migrations/202606120004_brand_routing.sql`
+   - `supabase/migrations/202606120005_location_operational_status.sql`
 2. Ejecutar `supabase/seed.sql`.
 3. Crear usuarios en Supabase Auth.
 4. Ejecutar una copia editada de `supabase/user-roles.example.sql`.
