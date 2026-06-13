@@ -9,7 +9,7 @@ import {
 } from "@/server/api/supabase";
 import { optionalEnum, validateUuid } from "@/server/api/validation";
 
-const assignmentStatuses = ["active", "inactive"] as const;
+const assignmentStatuses = ["active", "draft", "inactive"] as const;
 
 type RouteContext = {
   params: Promise<{

@@ -22,7 +22,6 @@ import {
   DeleteActionButton,
   ListingHeader,
   ListingPrimaryAction,
-  ListingStatusBadge,
   ListingTableShell,
   listingActionCellClass,
   listingCellClass,
@@ -31,6 +30,8 @@ import {
   listingRowClass,
   listingTableClass,
 } from "../list-ui";
+import { AssignmentStatusEditor } from "./assignment-status-editor";
+import { SubmitButton } from "../submit-button";
 
 type LocationListPageProps = {
   companySlug?: string;
@@ -47,9 +48,20 @@ type CampaignOption = {
 };
 
 type LocationAssignment = {
+  id: string;
   campaign_id: string;
   campaigns: CampaignOption | CampaignOption[] | null;
+  company_id: string;
   location_id: string;
+  status: string;
+};
+
+type AssignedCampaign = {
+  assignmentId: string;
+  campaignId: string;
+  companyId: string;
+  name: string;
+  status: string;
 };
 
 export async function LocationListPage({
@@ -93,21 +105,27 @@ export async function LocationListPage({
       companyIds.length
         ? supabase
             .from("campaign_locations")
-            .select("location_id, campaign_id, campaigns(id, name, status)")
+            .select("id, company_id, location_id, campaign_id, status, campaigns(id, name, status)")
             .in("company_id", companyIds)
         : Promise.resolve({ data: [] }),
     ]);
   const companyById = new Map(companies.map((company) => [company.id, company]));
   const brandName = selectedCompany ? brandLabel(selectedCompany) : "Todas";
   const campaignsById = new Map((campaigns ?? []).map((campaign) => [campaign.id, campaign]));
-  const campaignsByLocation = new Map<string, CampaignOption[]>();
+  const campaignsByLocation = new Map<string, AssignedCampaign[]>();
 
   for (const assignment of (assignments ?? []) as LocationAssignment[]) {
     const campaign =
       firstRelated(assignment.campaigns) ?? campaignsById.get(assignment.campaign_id);
     if (!campaign) continue;
     const current = campaignsByLocation.get(assignment.location_id) ?? [];
-    current.push(campaign);
+    current.push({
+      assignmentId: assignment.id,
+      campaignId: assignment.campaign_id,
+      companyId: assignment.company_id,
+      name: campaign.name,
+      status: assignment.status,
+    });
     campaignsByLocation.set(assignment.location_id, current);
   }
 
@@ -166,7 +184,7 @@ export async function LocationListPage({
 
                 return (
                   <tr className={listingRowClass} key={location.id}>
-                    <td className={`${listingCellClass} font-semibold text-slate-700`}>
+                    <td className={`${listingCellClass} font-semibold text-slate-700 theme-dark:text-slate-100`}>
                       {location.name}
                     </td>
                     {!selectedCompany ? (
@@ -177,7 +195,7 @@ export async function LocationListPage({
                     <td className={listingCellClass}>{location.device ?? "Sin dato"}</td>
                     <td className={listingCellClass}>{location.projection ?? "Sin dato"}</td>
                     <td className={listingCellClass}>
-                      <ListingStatusBadge>{location.status}</ListingStatusBadge>
+                      <LocationStatusBadge>{location.status}</LocationStatusBadge>
                     </td>
                     <td className={listingActionCellClass}>
                       <div className="flex items-center justify-center gap-3">
@@ -186,12 +204,9 @@ export async function LocationListPage({
                           trigger={<ActionIconTrigger label="Ver" tone="view" />}
                         >
                           <AssignmentList
+                            canEdit={isAdmin}
                             emptyText="Esta taquilla no tiene campañas asignadas."
-                            items={assignedCampaigns.map((campaign) => ({
-                              helper: campaign.status,
-                              id: campaign.id,
-                              name: campaign.name,
-                            }))}
+                            items={assignedCampaigns}
                           />
                         </DashboardDialog>
 
@@ -217,7 +232,7 @@ export async function LocationListPage({
                                 <input name="companyId" type="hidden" value={location.company_id} />
                                 <input name="locationId" type="hidden" value={location.id} />
                                 <CheckboxList
-                                  checkedIds={assignedCampaigns.map((campaign) => campaign.id)}
+                                  checkedIds={assignedCampaigns.map((campaign) => campaign.campaignId)}
                                   emptyText="No hay campañas disponibles para esta marca."
                                   items={(campaigns ?? []).map((campaign) => ({
                                     id: campaign.id,
@@ -225,7 +240,9 @@ export async function LocationListPage({
                                   }))}
                                   name="campaignIds"
                                 />
-                                <button className={buttonClass}>Guardar asignaciones</button>
+                                <SubmitButton className={buttonClass} pendingLabel="Guardando...">
+                                  Guardar asignaciones
+                                </SubmitButton>
                               </form>
                             </section>
                           </DashboardDialog>
@@ -256,6 +273,36 @@ function firstRelated<T>(value: T | T[] | null) {
   return Array.isArray(value) ? value[0] : value;
 }
 
+function locationStatusValue(status?: string | null) {
+  if (status === "active") return "ok";
+  if (status === "maintenance") return "remodeling";
+  if (status === "inactive") return "incident";
+  if (status === "remodeling" || status === "incident") return status;
+
+  return "ok";
+}
+
+function LocationStatusBadge({ children }: Readonly<{ children: React.ReactNode }>) {
+  const value = locationStatusValue(String(children));
+  const labelByStatus: Record<string, string> = {
+    incident: "Con Incidente",
+    ok: "OK",
+    remodeling: "Remodelacion",
+  };
+  const tone =
+    value === "ok"
+      ? "border-emerald-100 bg-emerald-50 text-emerald-600 theme-dark:border-emerald-900/50 theme-dark:bg-emerald-950/35 theme-dark:text-emerald-300"
+      : value === "remodeling"
+        ? "border-orange-100 bg-orange-50 text-orange-500 theme-dark:border-orange-900/50 theme-dark:bg-orange-950/35 theme-dark:text-orange-300"
+        : "border-red-100 bg-red-50 text-red-600 theme-dark:border-red-900/50 theme-dark:bg-red-950/35 theme-dark:text-red-300";
+
+  return (
+    <span className={`inline-flex min-w-36 items-center justify-center gap-2 rounded-md border px-4 py-2.5 text-base font-bold ${tone}`}>
+      {labelByStatus[value]}
+    </span>
+  );
+}
+
 function LocationForm({
   action,
   companies,
@@ -276,81 +323,104 @@ function LocationForm({
   returnPath: string;
   submitLabel: string;
 }>) {
+  const singleCompany = companies.length === 1 ? companies[0] : null;
+
   return (
     <form action={action} className="grid gap-4 md:grid-cols-2">
       <input name="returnPath" type="hidden" value={returnPath} />
       {location ? <input name="id" type="hidden" value={location.id} /> : null}
-      <Field label="Marca">
-        <select
-          className={inputClass}
-          defaultValue={location?.company_id}
-          name="companyId"
-          required
-        >
-          {companies.map((company) => (
-            <option key={company.id} value={company.id}>
-              {brandLabel(company)}
-            </option>
-          ))}
-        </select>
-      </Field>
+      {singleCompany ? (
+        <input name="companyId" type="hidden" value={singleCompany.id} />
+      ) : (
+        <Field label="Marca">
+          <select
+            className={inputClass}
+            defaultValue={location?.company_id}
+            name="companyId"
+            required
+          >
+            {companies.map((company) => (
+              <option key={company.id} value={company.id}>
+                {brandLabel(company)}
+              </option>
+            ))}
+          </select>
+        </Field>
+      )}
       <Field label="Nombre">
         <input className={inputClass} defaultValue={location?.name} name="name" required />
       </Field>
       <Field label="Dispositivo">
-        <input
-          className={inputClass}
-          defaultValue={location?.device ?? ""}
-          name="device"
-          placeholder="Pantallas, LED..."
-        />
+        <select className={inputClass} defaultValue={location?.device ?? "Pantallas"} name="device">
+          <option value="Pantallas">Pantallas</option>
+          <option value="Panel Led">Panel Led</option>
+        </select>
       </Field>
       <Field label="Proyeccion por">
-        <input
-          className={inputClass}
-          defaultValue={location?.projection ?? ""}
-          name="projection"
-          placeholder="Player, USB..."
-        />
+        <select className={inputClass} defaultValue={location?.projection ?? "Players"} name="projection">
+          <option value="Players">Players</option>
+          <option value="USB">USB</option>
+          <option value="Streaming">Streaming</option>
+        </select>
       </Field>
       <Field label="Estatus">
-        <select className={inputClass} defaultValue={location?.status ?? "ok"} name="status">
+        <select className={inputClass} defaultValue={locationStatusValue(location?.status)} name="status">
           <option value="ok">OK</option>
           <option value="remodeling">Remodelacion</option>
-          <option value="incident">Pantalla con incidente</option>
-          <option value="archived">Archivada</option>
+          <option value="incident">Con Incidente</option>
         </select>
       </Field>
       <div className="flex items-end">
-        <button className={buttonClass}>{submitLabel}</button>
+        <SubmitButton className={buttonClass}>{submitLabel}</SubmitButton>
       </div>
     </form>
   );
 }
 
 function AssignmentList({
+  canEdit,
   emptyText,
   items,
 }: Readonly<{
+  canEdit: boolean;
   emptyText: string;
-  items: Array<{ helper: string; id: string; name: string }>;
+  items: AssignedCampaign[];
 }>) {
   if (!items.length) {
     return <EmptyState>{emptyText}</EmptyState>;
   }
 
   return (
-    <ul className="grid gap-2">
+    <section className="overflow-hidden rounded-md border border-slate-200 theme-dark:border-slate-700">
+      <div className={`grid gap-3 border-b border-slate-200 bg-slate-50 px-3 py-2 text-xs font-extrabold uppercase tracking-wide text-slate-500 theme-dark:border-slate-700 theme-dark:bg-slate-950 theme-dark:text-slate-400 ${
+        canEdit ? "grid-cols-[1fr_12rem_4rem]" : "grid-cols-[1fr_12rem]"
+      }`}>
+        <span>Nombre de campaña</span>
+        <span>Estatus</span>
+        {canEdit ? <span className="text-center">Editar</span> : null}
+      </div>
       {items.map((item) => (
-        <li
-          className="flex items-center justify-between rounded-md border border-slate-200 px-3 py-2 theme-dark:border-slate-700"
-          key={item.id}
+        <div
+          className={`grid items-center gap-3 border-b border-slate-100 px-3 py-2 last:border-b-0 theme-dark:border-slate-800 ${
+            canEdit ? "grid-cols-[1fr_12rem_4rem]" : "grid-cols-[1fr_12rem]"
+          }`}
+          key={item.assignmentId}
         >
-          <span className="font-semibold text-slate-800 theme-dark:text-slate-200">{item.name}</span>
-          <StatusBadge>{item.helper}</StatusBadge>
-        </li>
+          <span className="font-semibold text-slate-800 theme-dark:text-slate-200">
+            {item.name}
+          </span>
+          {canEdit ? (
+            <AssignmentStatusEditor
+              assignmentId={item.assignmentId}
+              campaignName={item.name}
+              initialStatus={item.status}
+            />
+          ) : (
+            <StatusBadge>{item.status}</StatusBadge>
+          )}
+        </div>
       ))}
-    </ul>
+    </section>
   );
 }
 

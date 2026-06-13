@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 import { bootstrapFirstAdmin } from "@/server/auth/bootstrap";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -7,7 +9,8 @@ import {
   requireUser,
 } from "@/server/auth/session";
 
-import { DashboardLink, Feedback, PageHeader, StatusBadge } from "./components";
+import { Feedback, PageHeader, StatusBadge } from "./components";
+import { SubmitButton } from "./submit-button";
 
 type DashboardPageProps = {
   searchParams: Promise<{
@@ -26,6 +29,17 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     getUserCompanyAccess(user.id),
     getBootstrapState(),
   ]);
+
+  if (!access.isGlobalAdmin) {
+    const firstCompany = access.data.find((item) => item.companies)?.companies;
+
+    if (firstCompany) {
+      redirect(`/dashboard/locations/${firstCompany.slug}`);
+    }
+
+    redirect("/dashboard/locations");
+  }
+
   const companyIds = access.data
     .map((item) => item.companies?.id)
     .filter((id): id is string => Boolean(id));
@@ -56,16 +70,12 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   return (
     <div className="mx-auto flex h-full w-full flex-col gap-8">
       <PageHeader eyebrow="Dashboard" title="Panel privado">
-        <div className="flex gap-2">
-          <DashboardLink href="/dashboard/campaigns">Campanas</DashboardLink>
-          <DashboardLink href="/dashboard/files">Archivos</DashboardLink>
-        </div>
       </PageHeader>
 
       <Feedback error={error} />
 
       <section className="grid gap-5 md:grid-cols-4">
-        <MetricCard helper="Activas y pendientes" label="Campanas" value={campaignCount ?? 0} />
+        <MetricCard helper="Activas y pendientes" label="Campañas" value={campaignCount ?? 0} />
         <MetricCard helper="Taquillas/puntos" label="Taquillas" value={locationCount ?? 0} />
         <MetricCard helper="Players y pantallas" label="Pantallas" value={screenCount ?? 0} />
         <MetricCard helper="Storage privado" label="Archivos" value={mediaCount ?? 0} />
@@ -78,9 +88,9 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       ) : null}
 
       {profile.ok && bootstrap.companyCount === 0 ? (
-        <StateCard title="No hay companias configuradas">
+        <StateCard title="No hay compañías configuradas">
           El schema esta aplicado, pero falta ejecutar o verificar el seed de
-          companias antes de asignar permisos.
+          compañías antes de asignar permisos.
         </StateCard>
       ) : null}
 
@@ -94,12 +104,15 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         <StateCard title="Bootstrap del primer super usuario">
           <p>
             No existe ningun super usuario. Puedes convertir este usuario en
-            super usuario de todas las companias.
+            super usuario de todas las compañías.
           </p>
           <form action={bootstrapFirstAdmin} className="mt-4">
-            <button className="inline-flex min-h-12 items-center justify-center rounded-md bg-red-600 px-6 py-2.5 text-sm font-extrabold text-white shadow-[0_18px_36px_rgba(220,38,38,0.20)] transition-all hover:-translate-y-0.5 hover:bg-red-700">
+            <SubmitButton
+              className="inline-flex min-h-12 items-center justify-center rounded-md bg-red-600 px-6 py-2.5 text-sm font-extrabold text-white shadow-[0_18px_36px_rgba(220,38,38,0.20)] transition-all hover:-translate-y-0.5 hover:bg-red-700 active:scale-95"
+              pendingLabel="Creando..."
+            >
               Crear primer super usuario
-            </button>
+            </SubmitButton>
           </form>
         </StateCard>
       ) : null}
@@ -109,22 +122,22 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       access.data.length === 0 &&
       !bootstrap.canBootstrap &&
       bootstrap.companyCount > 0 ? (
-        <StateCard title="Usuario autenticado sin compania">
+        <StateCard title="Usuario autenticado sin compañía">
           Tu perfil existe, pero todavia no tienes permisos asignados en ninguna
-          compania ni rol global.
+          compañía ni rol global.
         </StateCard>
       ) : null}
 
       {profile.ok && access.isGlobalAdmin ? (
         <StateCard title="Super usuario">
-          Este usuario tiene acceso administrativo a todas las companias activas.
+          Este usuario tiene acceso administrativo a todas las compañías activas.
         </StateCard>
       ) : null}
 
       {profile.ok && access.data.length > 0 ? (
         <section className="grid gap-4">
           <h2 className="text-2xl font-extrabold tracking-tight text-slate-800 theme-dark:text-slate-100">
-            Companias disponibles
+            Compañías disponibles
           </h2>
           <section className="grid gap-4 md:grid-cols-2">
             {access.data.map((item) => (
@@ -134,7 +147,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               >
                 <StatusBadge>{item.role}</StatusBadge>
                 <h2 className="mt-4 text-lg font-extrabold text-slate-800 theme-dark:text-slate-100">
-                  {item.companies?.name ?? "Compania sin nombre"}
+                  {item.companies?.name ?? "Compañía sin nombre"}
                 </h2>
                 <p className="mt-1 text-sm font-semibold text-slate-500 theme-dark:text-slate-400">
                   Slug: {item.companies?.slug ?? "sin-slug"}

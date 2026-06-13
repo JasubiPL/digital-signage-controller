@@ -14,7 +14,7 @@ import {
   requireUuid,
 } from "@/server/api/validation";
 
-const assignmentStatuses = ["active", "inactive"] as const;
+const assignmentStatuses = ["active", "draft", "inactive"] as const;
 
 export async function GET(request: Request) {
   try {

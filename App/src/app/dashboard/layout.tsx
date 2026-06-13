@@ -9,21 +9,32 @@ export default async function DashboardLayout({
 }>) {
   const { access, companies, user } = await getDashboardContext("/dashboard");
   const canManageUsers = access.isGlobalAdmin;
+  const homeHref = canManageUsers
+    ? "/dashboard"
+    : companies[0]
+      ? `/dashboard/locations/${companies[0].slug}`
+      : "/dashboard/locations";
 
   return (
     <div className="flex min-h-screen bg-[linear-gradient(135deg,#f8fafc_0%,#ffffff_42%,#f3f6fb_100%)] font-['Avenir_Next','Aptos','Segoe_UI',sans-serif] text-slate-900 transition-colors theme-dark:bg-[linear-gradient(135deg,#020617_0%,#0f172a_46%,#111827_100%)] theme-dark:text-slate-100">
-      <DashboardSidebar canManageUsers={canManageUsers} companies={companies} />
+      <DashboardSidebar
+        canManageUsers={canManageUsers}
+        companies={companies}
+        homeHref={homeHref}
+      />
 
       <section className="flex min-h-screen flex-1 flex-col">
         <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-100 bg-white/90 px-6 py-3 shadow-[0_14px_42px_rgba(15,23,42,0.06)] backdrop-blur transition-colors theme-dark:border-slate-800 theme-dark:bg-slate-950/88 theme-dark:shadow-[0_14px_42px_rgba(0,0,0,0.22)]">
-          <DashboardSidebar
-            canManageUsers={canManageUsers}
-            companies={companies}
-            mobile
-          />
-          <div className="hidden lg:block" />
           <div className="flex items-center gap-3">
+            <DashboardSidebar
+              canManageUsers={canManageUsers}
+              companies={companies}
+              homeHref={homeHref}
+              mobile
+            />
             <ThemeToggle />
+          </div>
+          <div className="flex items-center gap-3">
             <p className="flex flex-col items-end text-sm font-extrabold text-slate-700 theme-dark:text-slate-200">
               <span>Hola {user.email?.split("@")[0] ?? "usuario"}</span>
               <small className="text-[10px] uppercase tracking-[0.18em] text-slate-400 theme-dark:text-slate-500">

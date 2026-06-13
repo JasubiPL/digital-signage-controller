@@ -30,6 +30,7 @@ import {
   listingRowClass,
   listingTableClass,
 } from "../list-ui";
+import { SubmitButton } from "../submit-button";
 
 type UsersPageProps = {
   searchParams: Promise<{
@@ -133,7 +134,7 @@ export default async function UsersPage({ searchParams }: Readonly<UsersPageProp
             <tbody>
               {typedProfiles.map((profile) => (
                 <tr className={listingRowClass} key={profile.id}>
-                  <td className={`${listingCellClass} font-semibold text-slate-700`}>
+                  <td className={`${listingCellClass} font-semibold text-slate-700 theme-dark:text-slate-100`}>
                     {profile.full_name || "Sin nombre"}
                   </td>
                   <td className={listingCellClass}>{profile.email}</td>
@@ -207,7 +208,9 @@ function CreateUserForm() {
         <input className={inputClass} minLength={8} name="password" required type="password" />
       </Field>
       <RoleField defaultValue="user" />
-      <button className={buttonClass}>Crear usuario</button>
+      <SubmitButton className={buttonClass} pendingLabel="Creando...">
+        Crear usuario
+      </SubmitButton>
     </form>
   );
 }
@@ -248,7 +251,9 @@ function EditUserForm({
           No puedes quitarte tu propio rol de super usuario desde esta pantalla.
         </p>
       ) : null}
-      <button className={buttonClass}>Guardar cambios</button>
+      <SubmitButton className={buttonClass} pendingLabel="Guardando...">
+        Guardar cambios
+      </SubmitButton>
     </form>
   );
 }
@@ -275,12 +280,22 @@ function DeleteUserForm({
           No puedes eliminar tu propia cuenta desde esta pantalla.
         </p>
       ) : null}
-      <button
-        className="inline-flex min-h-12 items-center justify-center rounded-md bg-red-600 px-6 py-2.5 text-sm font-extrabold text-white shadow-[0_18px_36px_rgba(220,38,38,0.20)] transition-all hover:-translate-y-0.5 hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none"
-        disabled={isDeletingSelf}
-      >
-        Eliminar usuario
-      </button>
+      {isDeletingSelf ? (
+        <button
+          className="inline-flex min-h-12 items-center justify-center rounded-md bg-slate-200 px-6 py-2.5 text-sm font-extrabold text-slate-500 shadow-none disabled:cursor-not-allowed"
+          disabled
+          type="button"
+        >
+          Eliminar usuario
+        </button>
+      ) : (
+        <SubmitButton
+          className="inline-flex min-h-12 items-center justify-center rounded-md bg-red-600 px-6 py-2.5 text-sm font-extrabold text-white shadow-[0_18px_36px_rgba(220,38,38,0.20)] transition-all hover:-translate-y-0.5 hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none"
+          pendingLabel="Eliminando..."
+        >
+          Eliminar usuario
+        </SubmitButton>
+      )}
     </form>
   );
 }

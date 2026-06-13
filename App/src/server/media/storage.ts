@@ -50,7 +50,7 @@ export async function assertCanManageCompanyMedia(
   if (error || data !== true) {
     return {
       ok: false,
-      message: error?.message ?? "No tienes permisos para administrar archivos de esta compania.",
+      message: error?.message ?? "No tienes permisos para administrar archivos de esta compañía.",
     };
   }
 
@@ -77,12 +77,12 @@ export async function assertCampaignBelongsToCompany(
   if (error || !data) {
     return {
       ok: false,
-      message: error?.message ?? "La campania no existe o no pertenece a la compania indicada.",
+      message: error?.message ?? "La campaña no existe o no pertenece a la compañía indicada.",
     };
   }
 
   return {
     ok: true,
-    message: "Campania validada.",
+    message: "Campaña validada.",
   };
 }

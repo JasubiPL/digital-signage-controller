@@ -13,7 +13,7 @@ import {
   validateUuid,
 } from "@/server/api/validation";
 
-const locationStatuses = ["active", "inactive", "maintenance", "archived"] as const;
+const locationStatuses = ["ok", "remodeling", "incident"] as const;
 
 type RouteContext = {
   params: Promise<{
@@ -36,7 +36,7 @@ export async function GET(_request: Request, context: RouteContext) {
     throwIfSupabaseError(error);
 
     if (!data) {
-      throw new ApiError(404, "Ubicacion no encontrada.");
+      throw new ApiError(404, "Ubicación no encontrada.");
     }
 
     return NextResponse.json({ location: data });
@@ -66,7 +66,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     throwIfSupabaseError(existingError);
 
     if (!existing) {
-      throw new ApiError(404, "Ubicacion no encontrada.");
+      throw new ApiError(404, "Ubicación no encontrada.");
     }
 
     await assertCanManageCompany(supabase, existing.company_id);
@@ -110,12 +110,25 @@ export async function DELETE(_request: Request, context: RouteContext) {
     throwIfSupabaseError(existingError);
 
     if (!existing) {
-      throw new ApiError(404, "Ubicacion no encontrada.");
+      throw new ApiError(404, "Ubicación no encontrada.");
     }
 
     await assertCanManageCompany(supabase, existing.company_id);
 
-    const { error } = await supabase.from("locations").delete().eq("id", locationId);
+    const { error: screensError } = await supabase
+      .from("screens")
+      .update({ location_id: null })
+      .eq("location_id", locationId)
+      .eq("company_id", existing.company_id);
+
+    throwIfSupabaseError(screensError);
+
+    const { error } = await supabase
+      .from("locations")
+      .delete()
+      .eq("id", locationId)
+      .eq("company_id", existing.company_id);
+
     throwIfSupabaseError(error);
 
     return NextResponse.json({ deleted: true, id: locationId });

@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { FeedbackToast } from "./feedback-toast";
+
 export type SearchFeedback = {
   error?: string;
   success?: string;
@@ -33,17 +35,7 @@ export function PageHeader({
 }
 
 export function Feedback({ error, success }: Readonly<SearchFeedback>) {
-  if (!error && !success) return null;
-
-  const tone = error
-    ? "border-red-100 bg-red-50 text-red-950 theme-dark:border-red-900/50 theme-dark:bg-red-950/35 theme-dark:text-red-200"
-    : "border-emerald-100 bg-emerald-50 text-emerald-950 theme-dark:border-emerald-900/50 theme-dark:bg-emerald-950/35 theme-dark:text-emerald-200";
-
-  return (
-    <div className={`rounded-lg border px-5 py-4 text-sm font-semibold shadow-[0_18px_42px_rgba(15,23,42,0.06)] ${tone}`}>
-      {error ?? success}
-    </div>
-  );
+  return <FeedbackToast error={error} success={success} />;
 }
 
 export function Panel({
@@ -88,7 +80,7 @@ export function Field({
 }
 
 export const inputClass =
-  "min-h-12 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 shadow-sm outline-none transition focus:border-red-200 focus:bg-red-50/40 focus:ring-4 focus:ring-red-100 theme-dark:border-slate-700 theme-dark:bg-slate-950 theme-dark:text-slate-100 theme-dark:focus:border-red-800 theme-dark:focus:bg-red-950/20 theme-dark:focus:ring-red-950/50";
+  "min-h-12 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 shadow-sm outline-none transition focus:border-red-200 focus:bg-red-50/40 focus:ring-4 focus:ring-red-100 theme-dark:border-slate-700 theme-dark:bg-slate-950 theme-dark:text-slate-100 theme-dark:focus:border-red-800 theme-dark:focus:bg-red-950/20 theme-dark:focus:ring-red-950/50 [&_option]:bg-white [&_option]:text-slate-900 theme-dark:[&_option]:bg-slate-950 theme-dark:[&_option]:text-slate-100";
 
 export const buttonClass =
   "inline-flex min-h-12 items-center justify-center rounded-md bg-red-600 px-6 py-2.5 text-sm font-extrabold text-white shadow-[0_18px_36px_rgba(220,38,38,0.20)] transition-all hover:-translate-y-0.5 hover:bg-red-700 active:scale-95 theme-dark:bg-red-500 theme-dark:hover:bg-red-400";

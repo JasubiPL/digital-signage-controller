@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Digital Signage Controller",
-  description: "Panel de control para senalizacion digital.",
+  description: "Panel de control para señalización digital.",
 };
 
 export default function RootLayout({

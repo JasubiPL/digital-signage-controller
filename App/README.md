@@ -1,6 +1,6 @@
 # Digital Signage Controller App
 
-Aplicacion Next.js activa del panel de senalizacion digital.
+Aplicación Next.js activa del panel de señalización digital.
 
 ## Stack
 

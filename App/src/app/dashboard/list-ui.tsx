@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { IconSubmitButton } from "./submit-button";
+
 type ListingHeaderProps = {
   action?: ReactNode;
   count: number;
@@ -131,13 +133,12 @@ export function ActionIconTrigger({
 
 export function DeleteActionButton({ label = "Eliminar" }: Readonly<{ label?: string }>) {
   return (
-    <button
+    <IconSubmitButton
       className={`inline-grid h-12 w-12 place-items-center rounded-md border shadow-sm transition hover:-translate-y-0.5 ${actionToneClass.delete}`}
-      title={label}
+      label={label}
     >
-      <span className="sr-only">{label}</span>
       <ActionGlyph tone="delete" />
-    </button>
+    </IconSubmitButton>
   );
 }
 

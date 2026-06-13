@@ -13,12 +13,14 @@ type Company = {
 type DashboardSidebarProps = {
   canManageUsers: boolean;
   companies: Company[];
+  homeHref?: string;
   mobile?: boolean;
 };
 
 export function DashboardSidebar({
   canManageUsers,
   companies,
+  homeHref,
   mobile = false,
 }: Readonly<DashboardSidebarProps>) {
   const pathname = usePathname();
@@ -29,6 +31,11 @@ export function DashboardSidebar({
       [...companies].sort((a, b) => brandLabel(a).localeCompare(brandLabel(b))),
     [companies],
   );
+  const defaultHref =
+    homeHref ??
+    (orderedCompanies[0]
+      ? `/dashboard/locations/${orderedCompanies[0].slug}`
+      : "/dashboard");
   const [openGroups, setOpenGroups] = useState({
     campaigns: pathname.startsWith("/dashboard/campaigns"),
     locations: pathname.startsWith("/dashboard/locations"),
@@ -44,13 +51,15 @@ export function DashboardSidebar({
   if (mobile) {
     return (
       <nav className="flex gap-2 overflow-x-auto lg:hidden">
-        <MobileLink
-          active={pathname === "/dashboard"}
-          href="/dashboard"
-          onNavigate={navigate}
-        >
-          Dashboard
-        </MobileLink>
+        {canManageUsers ? (
+          <MobileLink
+            active={pathname === "/dashboard"}
+            href="/dashboard"
+            onNavigate={navigate}
+          >
+            Dashboard
+          </MobileLink>
+        ) : null}
         {canManageUsers ? (
           <MobileLink
             active={pathname === "/dashboard/users"}
@@ -90,7 +99,7 @@ export function DashboardSidebar({
         <section>
           <button
             className="mt-10 block w-full px-8 text-center"
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate(defaultHref)}
             type="button"
           >
             <span className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-red-50 text-red-600 shadow-[0_16px_40px_rgba(220,38,38,0.08)] theme-dark:bg-red-950/40 theme-dark:text-red-300">
@@ -102,14 +111,16 @@ export function DashboardSidebar({
           </button>
 
           <nav className="mt-12 grid gap-2">
-            <SidebarLink
-              active={pathname === "/dashboard"}
-              href="/dashboard"
-              icon={<DashboardIcon />}
-              onNavigate={navigate}
-            >
-              Dashboard
-            </SidebarLink>
+            {canManageUsers ? (
+              <SidebarLink
+                active={pathname === "/dashboard"}
+                href="/dashboard"
+                icon={<DashboardIcon />}
+                onNavigate={navigate}
+              >
+                Dashboard
+              </SidebarLink>
+            ) : null}
 
             {canManageUsers ? (
               <SidebarLink
