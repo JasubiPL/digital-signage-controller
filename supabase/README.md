@@ -1,6 +1,6 @@
 # Supabase
 
-Esta carpeta contiene migraciones y seed data para la migracion a Supabase cloud.
+Esta carpeta contiene migraciones, seed data y ejemplos SQL para Supabase cloud.
 
 ## Archivos
 

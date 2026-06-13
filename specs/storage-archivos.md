@@ -2,7 +2,7 @@
 
 ## Estado
 
-Fase 7 implementada en codigo y migraciones.
+Storage esta implementado en codigo y migraciones.
 
 Archivos principales:
 
@@ -11,7 +11,7 @@ Archivos principales:
 - `App/src/app/api/media/route.ts`
 - `App/src/app/api/media/[id]/route.ts`
 
-La migracion ya fue aplicada en Supabase cloud y se valido Storage con una prueba
+La configuracion ya fue aplicada en Supabase cloud y se valido Storage con una prueba
 server-side reversible. Queda pendiente probar el flujo completo desde UI con un
 usuario autenticado y casos de rechazo.
 
@@ -93,7 +93,7 @@ La tabla `media_files` guarda:
 - `size_bytes`
 - `status`
 
-La migracion de Storage agrega `campaign_id` a `media_files` para poder filtrar archivos por campania sin depender de parsear paths.
+La configuracion de Storage agrega `campaign_id` a `media_files` para poder filtrar archivos por campania sin depender de parsear paths.
 
 ## Endpoints
 
@@ -166,7 +166,7 @@ Resultado:
 
 ## Politicas Storage
 
-La migracion crea politicas sobre `storage.objects` para el bucket `campaign-media`:
+La configuracion crea politicas sobre `storage.objects` para el bucket `campaign-media`:
 
 - `SELECT`: `super_admin`, `admin`, `operator`, `designer`, `viewer` de la compania del path.
 - `INSERT`: `super_admin` o `admin`.

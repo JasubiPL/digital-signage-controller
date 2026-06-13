@@ -2,7 +2,7 @@
 -- Replace emails and names before running this in Supabase SQL Editor.
 -- Run supabase/seed.sql first so companies exist.
 
--- Global admin, equivalent to the legacy Admin role.
+-- Global admin.
 insert into public.profiles (id, email, full_name, global_role)
 select
   u.id,
@@ -79,4 +79,3 @@ select
 from target_user, target_company
 on conflict (user_id, company_id) do update
 set role = excluded.role;
-

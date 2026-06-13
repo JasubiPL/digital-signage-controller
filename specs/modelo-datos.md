@@ -1,104 +1,63 @@
 # Modelo de datos
 
-## Estado
+## Resumen
 
-Modelo implementado como migracion SQL versionada y schema verificado en Supabase cloud. El seed fue ampliado en Fase 10 para cubrir datos representativos.
+El sistema usa Supabase Postgres con tablas multiempresa normalizadas. Todas las
+entidades operativas se relacionan con `companies` mediante `company_id`.
 
-Archivos:
+Archivos principales:
 
 - `supabase/migrations/202606120001_initial_schema.sql`
+- `supabase/migrations/202606120002_rls_policies.sql`
+- `supabase/migrations/202606120003_storage.sql`
 - `supabase/seed.sql`
-- `supabase/README.md`
-
-## Objetivo
-
-Reemplazar el modelo MySQL anterior basado en tablas por empresa por un modelo PostgreSQL multiempresa normalizado.
-
-## Mapeo desde el sistema anterior
-
-Tablas MySQL anteriores:
-
-- `taquillas_ETN`
-- `taquillas_GHO`
-- `taquillas_COSTA`
-- `campanias_ETN`
-- `campanias_GHO`
-- `campanias_COSTA`
-- `taquillas_campanias_ETN`
-- `taquillas_campanias_GHO`
-- `taquillas_campanias_COSTA`
-- `usuarios`, esperada por codigo pero ausente en `start_db.sql`
-
-Modelo nuevo:
-
-- `companies`: reemplaza el sufijo dinamico de empresa.
-- `locations`: reemplaza `taquillas_*`.
-- `campaigns`: reemplaza `campanias_*`.
-- `campaign_locations`: reemplaza `taquillas_campanias_*`.
-- `profiles`: reemplaza `usuarios` y se relaciona con `auth.users`.
-- `user_companies`: define permisos por empresa.
-- `screens`: representa pantallas o players.
-- `campaign_screens`: permite asignar campanias directamente a pantallas.
-- `media_files`: metadata para archivos en Supabase Storage.
 
 ## Entidades
 
 ### `companies`
 
-Representa empresas o marcas operativas.
+Empresas o marcas operativas.
 
 Campos principales:
 
-- `id`: UUID primary key.
-- `slug`: identificador estable para rutas y consultas.
-- `legacy_code`: codigo del sistema anterior, como `ETN`, `GHO`, `COSTA`.
-- `name`: nombre visible.
-- `status`: `active`, `inactive`, `archived`.
-- `created_at`, `updated_at`.
-
-Seed inicial:
-
-- `etn`
-- `gho`
-- `costaline`
-- `iamsa`
+- `id`
+- `slug`
+- `legacy_code`
+- `name`
+- `status`
+- `created_at`
+- `updated_at`
 
 ### `profiles`
 
-Extiende `auth.users` de Supabase.
+Perfil local asociado a `auth.users`.
 
 Campos principales:
 
-- `id`: UUID igual a `auth.users.id`.
+- `id`
 - `full_name`
 - `email`
 - `avatar_url`
-- `global_role`: `user` o `super_admin`.
-- `created_at`, `updated_at`.
+- `global_role`
+- `created_at`
+- `updated_at`
 
-Nota:
-
-- No se seedearon perfiles porque dependen de usuarios reales en Supabase Auth.
-- `super_admin` representa al admin global del sistema anterior y no requiere filas en `user_companies`.
+`global_role = 'super_admin'` da acceso global.
 
 ### `user_companies`
 
-Relaciona usuarios con empresas y roles cuando el permiso esta limitado a companias concretas.
+Relaciona usuarios con empresas y roles por compania.
 
-Campos principales:
+Roles:
 
-- `user_id`
-- `company_id`
-- `role`: `admin`, `operator`, `designer`, `viewer`.
-- `created_at`
-
-Constraint clave:
-
-- Un usuario solo puede tener un rol por empresa: `unique(user_id, company_id)`.
+- `admin`
+- `operator`
+- `designer`
+- `viewer`
 
 ### `locations`
 
-Reemplaza las tablas de taquillas.
+Ubicaciones, taquillas o puntos de reproduccion.
 
 Campos principales:
 
@@ -106,17 +65,12 @@ Campos principales:
 - `name`
 - `device`
 - `projection`
-- `status`: `active`, `inactive`, `maintenance`, `archived`.
+- `status`
 - `created_by`
-- `created_at`, `updated_at`.
-
-Constraint clave:
-
-- Una empresa no puede tener dos ubicaciones con el mismo nombre.
 
 ### `campaigns`
 
-Reemplaza las tablas de campanias.
+Campanias de contenido.
 
 Campos principales:
 
@@ -124,36 +78,19 @@ Campos principales:
 - `name`
 - `starts_on`
 - `ends_on`
-- `status`: `draft`, `active`, `inactive`, `archived`.
+- `status`
 - `created_by`
-- `created_at`, `updated_at`.
 
-Constraints clave:
+Estados:
 
-- `ends_on` no puede ser menor que `starts_on`.
-- Nombre unico por empresa, ignorando mayusculas/minusculas.
-
-### `campaign_locations`
-
-Relaciona campanias con ubicaciones.
-
-Campos principales:
-
-- `company_id`
-- `campaign_id`
-- `location_id`
-- `status`: `active`, `inactive`.
-- `created_by`
-- `created_at`, `updated_at`.
-
-Constraints clave:
-
-- Una campania solo puede asignarse una vez a la misma ubicacion.
-- `campaign_id` y `location_id` deben pertenecer a la misma empresa.
+- `draft`
+- `active`
+- `inactive`
+- `archived`
 
 ### `screens`
 
-Representa pantallas o players fisicos.
+Pantallas o players fisicos.
 
 Campos principales:
 
@@ -161,37 +98,21 @@ Campos principales:
 - `location_id`
 - `name`
 - `device_identifier`
-- `status`: `active`, `inactive`, `maintenance`, `archived`.
+- `status`
 - `last_seen_at`
 - `metadata`
-- `created_at`, `updated_at`.
 
-Constraints clave:
+### `campaign_locations`
 
-- `device_identifier` es unico por empresa cuando existe.
-- Si se asigna `location_id`, debe pertenecer a la misma empresa.
+Asignaciones de campanias a ubicaciones.
 
 ### `campaign_screens`
 
-Permite asignar campanias directamente a pantallas.
-
-Campos principales:
-
-- `company_id`
-- `campaign_id`
-- `screen_id`
-- `status`: `active`, `inactive`.
-- `created_by`
-- `created_at`, `updated_at`.
-
-Constraints clave:
-
-- Una campania solo puede asignarse una vez a la misma pantalla.
-- `campaign_id` y `screen_id` deben pertenecer a la misma empresa.
+Asignaciones de campanias a pantallas.
 
 ### `media_files`
 
-Guarda metadata de archivos almacenados en Supabase Storage.
+Metadata de archivos guardados en Supabase Storage.
 
 Campos principales:
 
@@ -205,112 +126,41 @@ Campos principales:
 - `mime_type`
 - `size_bytes`
 - `status`
-- `created_at`, `updated_at`
 
-Categorias:
+## Storage
 
-- `blueprint`
-- `template`
-- `price`
-- `campaign_media`
-- `software`
+Bucket:
 
-Estados:
-
-- `active`
-- `archived`
-- `deleted`
-
-Nota:
-
-- La migracion de Storage agrega `campaign_id` a `media_files`.
-- `storage_path` usa el formato `company_id/campaign_id/file_id.ext`.
-- `original_name` es solo metadata; no se usa para construir rutas.
-
-## Timestamps
-
-Todas las tablas operativas tienen:
-
-- `created_at`
-- `updated_at`
-
-La migracion crea la funcion:
-
-```sql
-public.set_updated_at()
+```text
+campaign-media
 ```
 
-y triggers `before update` para mantener `updated_at`.
+Path:
 
-## Indices
-
-La migracion agrega indices para:
-
-- `company_id`
-- `campaign_id`
-- `location_id`
-- `screen_id`
-- `created_at`
-- estados de entidades principales
-- categorias de archivos
-
-Tambien agrega unicidad funcional para:
-
-```sql
-company_id, lower(campaigns.name)
+```text
+company_id/campaign_id/file_id.ext
 ```
 
-## Seed minimo
+Los nombres originales no se usan como ruta; solo se guardan como metadata.
 
-`supabase/seed.sql` crea:
+## Seed
 
-- Empresas iniciales.
-- Ubicaciones de prueba por empresa principal.
-- Campanias activas, inactivas y draft.
-- Pantallas/dispositivos.
+`supabase/seed.sql` crea datos iniciales para:
+
+- Empresas.
+- Ubicaciones.
+- Campanias.
+- Pantallas.
 - Asignaciones campania-ubicacion.
 - Asignaciones campania-pantalla.
 
-No crea usuarios porque `profiles.id` depende de `auth.users.id`.
+Los usuarios no se seedearon porque dependen de Supabase Auth.
 
-## Aplicacion en Supabase
+## Aplicacion
 
-Opcion manual:
+Orden recomendado:
 
-1. Abrir Supabase SQL Editor.
-2. Ejecutar `supabase/migrations/202606120001_initial_schema.sql`.
-3. Ejecutar `supabase/seed.sql`.
-
-Opcion con Supabase CLI:
-
-```sh
-supabase link --project-ref hlpgjwoeiykcditbwtvq
-supabase db push
-supabase db seed
-```
-
-## Verificacion cloud
-
-Se verifico por REST que `public.companies` existe y responde en el proyecto Supabase:
-
-```text
-GET /rest/v1/companies?select=slug
-HTTP 200
-```
-
-En Fase 10 se amplio el seed. Aplicarlo desde SQL Editor o Supabase CLI debe
-poblar companias, ubicaciones, campanias, pantallas y asignaciones para probar
-el dashboard.
-
-## Fuera de alcance
-
-No se implementa en esta fase:
-
-- Row Level Security.
-- Politicas RLS.
-- Storage buckets.
-- Tipos TypeScript generados desde Supabase.
-- Migracion de datos reales desde MySQL.
-- Creacion de usuarios de Supabase Auth.
-
-Estos puntos pertenecen a fases posteriores.
+1. Ejecutar migraciones.
+2. Ejecutar `supabase/seed.sql`.
+3. Crear usuarios en Supabase Auth.
+4. Asignar roles con una copia editada de `supabase/user-roles.example.sql`.

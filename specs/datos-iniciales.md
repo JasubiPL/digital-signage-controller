@@ -1,4 +1,4 @@
-# Datos iniciales y migracion manual
+# Datos iniciales
 
 ## Estado
 
@@ -12,12 +12,8 @@ Archivos:
 
 ## Decision sobre datos viejos
 
-No hay dumps MySQL ni archivos historicos confiables en el repositorio para una
-migracion automatica. Para esta fase se usa un seed limpio y representativo que
-permite probar el sistema nuevo en Supabase cloud sin depender de MySQL local.
-
-Si despues aparecen dumps o capturas del sistema anterior, se deben transformar
-al modelo normalizado en una fase separada, sin reintroducir tablas por empresa.
+El repositorio incluye un seed limpio y representativo para probar el sistema en
+Supabase cloud sin depender de datos externos.
 
 ## Seed incluido
 
@@ -186,4 +182,4 @@ Desde la app:
 
 - Crear usuarios reales de prueba y asignar roles.
 - Subir archivos reales adicionales desde la UI.
-- Si aparecen datos historicos, crear una migracion manual de datos reales.
+- Si aparecen datos historicos, crear un proceso separado de importacion.

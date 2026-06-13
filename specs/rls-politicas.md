@@ -2,11 +2,11 @@
 
 ## Estado
 
-Fase 6 implementada como migracion SQL versionada:
+RLS esta implementado como migracion SQL versionada:
 
 - `supabase/migrations/202606120002_rls_policies.sql`
 
-La migracion RLS ya fue aplicada en Supabase cloud. Queda pendiente ejecutar
+La configuracion RLS ya fue aplicada en Supabase cloud. Queda pendiente ejecutar
 pruebas manuales con usuarios reales de distintos roles.
 
 ## Modelo de roles
@@ -77,7 +77,7 @@ Alcance:
 
 ## Funciones helper
 
-La migracion crea funciones `security definer` para evitar recursividad de RLS al resolver roles:
+La configuracion crea funciones `security definer` para evitar recursividad de RLS al resolver roles:
 
 - `public.current_global_role()`
 - `public.is_super_admin()`
