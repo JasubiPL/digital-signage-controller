@@ -86,19 +86,22 @@ export function DashboardSidebar({
 
   return (
     <>
-      <aside className="hidden min-h-screen w-[17%] min-w-64 flex-col justify-between bg-white shadow-[12px_0_30px_rgba(15,23,42,0.04)] lg:flex">
+      <aside className="hidden min-h-screen w-[17%] min-w-64 flex-col justify-between border-r border-slate-100 bg-white/95 shadow-[18px_0_50px_rgba(15,23,42,0.06)] transition-colors theme-dark:border-slate-800 theme-dark:bg-slate-950/95 theme-dark:shadow-[18px_0_50px_rgba(0,0,0,0.25)] lg:flex">
         <section>
           <button
             className="mt-10 block w-full px-8 text-center"
             onClick={() => navigate("/dashboard")}
             type="button"
           >
-            <span className="block text-xl font-semibold text-zinc-700">
+            <span className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-red-50 text-red-600 shadow-[0_16px_40px_rgba(220,38,38,0.08)] theme-dark:bg-red-950/40 theme-dark:text-red-300">
+              <DashboardIcon />
+            </span>
+            <span className="block text-xl font-extrabold tracking-tight text-slate-800 theme-dark:text-slate-100">
               Señalización Digital
             </span>
           </button>
 
-          <nav className="mt-14 grid gap-2">
+          <nav className="mt-12 grid gap-2">
             <SidebarLink
               active={pathname === "/dashboard"}
               href="/dashboard"
@@ -156,7 +159,7 @@ export function DashboardSidebar({
         </section>
 
         <form action="/logout" className="px-8 pb-8" method="post">
-          <button className="w-full bg-gray-200 py-2 text-sm font-medium text-zinc-700 transition hover:bg-red-600 hover:text-white">
+          <button className="w-full rounded-md border border-slate-200 bg-white py-3 text-sm font-extrabold text-slate-600 shadow-sm transition hover:border-red-100 hover:bg-red-50 hover:text-red-600 theme-dark:border-slate-700 theme-dark:bg-slate-900 theme-dark:text-slate-300 theme-dark:hover:border-red-900/60 theme-dark:hover:bg-red-950/30 theme-dark:hover:text-red-300">
             Logout
           </button>
         </form>
@@ -192,10 +195,10 @@ function SidebarGroup({
     <section>
       <button
         aria-expanded={isOpen}
-        className={`flex w-full items-center justify-between border-l-4 px-8 py-2 text-left text-lg transition ${
+        className={`mx-3 flex w-[calc(100%-1.5rem)] items-center justify-between rounded-md border-l-4 px-5 py-3 text-left text-base font-extrabold transition ${
           active
-            ? "border-red-600 bg-red-50 text-red-600"
-            : "border-white text-zinc-600 hover:border-gray-300 hover:bg-gray-100 hover:text-red-600"
+            ? "border-red-600 bg-red-50 text-red-600 shadow-[0_14px_30px_rgba(220,38,38,0.08)] theme-dark:bg-red-950/30 theme-dark:text-red-300"
+            : "border-transparent text-slate-500 hover:border-red-100 hover:bg-slate-50 hover:text-red-600 theme-dark:text-slate-400 theme-dark:hover:border-red-900/50 theme-dark:hover:bg-slate-900 theme-dark:hover:text-red-300"
         }`}
         onClick={onToggle}
         type="button"
@@ -208,17 +211,17 @@ function SidebarGroup({
       </button>
 
       {isOpen ? (
-        <div className="mt-1 grid gap-0.5 pb-1 pl-[4.5rem]">
+        <div className="mt-1 grid gap-1 pb-1 pl-[4.5rem]">
           {companies.map((company) => {
             const href = `${routeBase}/${company.slug}`;
             const active = pathname === href;
 
             return (
               <button
-                className={`relative py-1.5 text-left text-base transition before:absolute before:-left-[4.5rem] before:top-0 before:h-full before:w-1.5 ${
+                className={`relative rounded-md py-1.5 text-left text-base font-bold transition before:absolute before:-left-[4.5rem] before:top-0 before:h-full before:w-1.5 ${
                   active
-                    ? "font-semibold text-red-500 before:bg-red-600"
-                    : "text-zinc-500 hover:text-red-500 before:bg-transparent"
+                    ? "font-semibold text-red-500 before:bg-red-600 theme-dark:text-red-300"
+                    : "text-slate-500 hover:text-red-500 before:bg-transparent theme-dark:text-slate-400 theme-dark:hover:text-red-300"
                 }`}
                 key={company.id}
                 onClick={() => onNavigate(href)}
@@ -249,10 +252,10 @@ function SidebarLink({
 }>) {
   return (
     <button
-      className={`flex items-center gap-4 border-l-4 px-8 py-2 text-lg transition ${
+      className={`mx-3 flex w-[calc(100%-1.5rem)] items-center gap-4 rounded-md border-l-4 px-5 py-3 text-base font-extrabold transition ${
         active
-          ? "border-red-600 bg-red-50 text-red-600"
-          : "border-white text-zinc-600 hover:border-gray-300 hover:bg-gray-100 hover:text-red-600"
+          ? "border-red-600 bg-red-50 text-red-600 shadow-[0_14px_30px_rgba(220,38,38,0.08)] theme-dark:bg-red-950/30 theme-dark:text-red-300"
+          : "border-transparent text-slate-500 hover:border-red-100 hover:bg-slate-50 hover:text-red-600 theme-dark:text-slate-400 theme-dark:hover:border-red-900/50 theme-dark:hover:bg-slate-900 theme-dark:hover:text-red-300"
       }`}
       onClick={() => onNavigate(href)}
       type="button"
@@ -276,10 +279,10 @@ function MobileLink({
 }>) {
   return (
     <button
-      className={`whitespace-nowrap border-l-4 px-3 py-1 text-sm ${
+      className={`whitespace-nowrap rounded-md border px-3 py-2 text-sm font-extrabold ${
         active
-          ? "border-red-600 bg-red-50 text-red-600"
-          : "border-white hover:border-red-600 hover:bg-gray-200 hover:text-red-600"
+          ? "border-red-100 bg-red-50 text-red-600 theme-dark:border-red-900/50 theme-dark:bg-red-950/35 theme-dark:text-red-300"
+          : "border-slate-200 bg-white text-slate-500 hover:border-red-100 hover:bg-red-50 hover:text-red-600 theme-dark:border-slate-700 theme-dark:bg-slate-900 theme-dark:text-slate-300 theme-dark:hover:border-red-900/50 theme-dark:hover:bg-red-950/30 theme-dark:hover:text-red-300"
       }`}
       onClick={() => onNavigate(href)}
       type="button"
@@ -356,7 +359,7 @@ function DashboardLoadingOverlay() {
       className="fixed inset-0 z-50 grid place-items-center bg-zinc-950/45 backdrop-blur-[2px]"
       role="status"
     >
-      <div className="grid place-items-center gap-4 rounded-lg bg-white/92 px-9 py-7 shadow-[0_24px_80px_rgba(15,23,42,0.28)]">
+      <div className="grid place-items-center gap-4 rounded-lg bg-white/92 px-9 py-7 shadow-[0_24px_80px_rgba(15,23,42,0.28)] theme-dark:bg-slate-900/95">
         <span className="dashboard-spinner" />
         <span className="text-sm font-semibold uppercase tracking-[0.18em] text-red-700">
           Cargando

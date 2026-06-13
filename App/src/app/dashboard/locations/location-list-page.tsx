@@ -9,7 +9,6 @@ import {
 
 import {
   buttonClass,
-  dangerButtonClass,
   EmptyState,
   Feedback,
   Field,
@@ -18,6 +17,20 @@ import {
 } from "../components";
 import { getDashboardContext } from "../data";
 import { DashboardDialog } from "../dialog";
+import {
+  ActionIconTrigger,
+  DeleteActionButton,
+  ListingHeader,
+  ListingPrimaryAction,
+  ListingStatusBadge,
+  ListingTableShell,
+  listingActionCellClass,
+  listingCellClass,
+  listingHeadClass,
+  listingHeaderCellClass,
+  listingRowClass,
+  listingTableClass,
+} from "../list-ui";
 
 type LocationListPageProps = {
   companySlug?: string;
@@ -99,24 +112,18 @@ export async function LocationListPage({
   }
 
   return (
-    <div className="mx-auto flex w-[95%] flex-col gap-6">
+    <div className="mx-auto flex w-full flex-col gap-8 font-['Avenir_Next','Aptos','Segoe_UI',sans-serif]">
       <Feedback error={error} success={success} />
 
-      <header className="grid items-center gap-4 md:grid-cols-3">
-        <p className="text-xl font-semibold text-red-700">
-          No. Taquillas: {locations?.length ?? 0}
-        </p>
-        <h1 className="text-center text-3xl font-bold italic tracking-tight text-slate-700">
-          {brandName}
-        </h1>
-        <div className="flex justify-end">
-          {isAdmin ? (
+      <ListingHeader
+        action={
+          isAdmin ? (
             <DashboardDialog
               title="Nueva Taquilla"
               trigger={
-                <span className="inline-flex min-h-11 items-center justify-center bg-emerald-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700">
+                <ListingPrimaryAction>
                   Nueva Taquilla +
-                </span>
+                </ListingPrimaryAction>
               }
             >
               <LocationForm
@@ -126,9 +133,13 @@ export async function LocationListPage({
                 submitLabel="Crear taquilla"
               />
             </DashboardDialog>
-          ) : null}
-        </div>
-      </header>
+          ) : null
+        }
+        count={locations?.length ?? 0}
+        icon="locations"
+        metricLabel="No. Taquillas"
+        title={brandName}
+      />
 
       {!locations?.length ? (
         <EmptyState>
@@ -137,42 +148,42 @@ export async function LocationListPage({
             : "No hay taquillas disponibles para tus marcas."}
         </EmptyState>
       ) : (
-        <section className="overflow-x-auto bg-white shadow-sm">
-          <table className="w-full min-w-[860px] text-center text-sm">
-            <thead className="border-b border-gray-200 font-semibold text-zinc-950">
+        <ListingTableShell>
+          <table className={listingTableClass}>
+            <thead className={listingHeadClass}>
               <tr>
-                <th className="py-4 pr-4 text-left">Taquilla</th>
-                {!selectedCompany ? <th className="py-4 pr-4">Marca</th> : null}
-                <th className="py-4 pr-4">Dispositivo</th>
-                <th className="py-4 pr-4">Proyeccion por</th>
-                <th className="py-4 pr-4">Estatus</th>
-                <th className="py-4">Acciones</th>
+                <th className={listingHeaderCellClass}>Taquilla</th>
+                {!selectedCompany ? <th className={listingHeaderCellClass}>Marca</th> : null}
+                <th className={listingHeaderCellClass}>Dispositivo</th>
+                <th className={listingHeaderCellClass}>Proyeccion por</th>
+                <th className={listingHeaderCellClass}>Estatus</th>
+                <th className={`${listingHeaderCellClass} text-center`}>Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody>
               {locations.map((location) => {
                 const assignedCampaigns = campaignsByLocation.get(location.id) ?? [];
 
                 return (
-                  <tr key={location.id}>
-                    <td className="py-3 pr-4 text-left font-medium text-zinc-700">
+                  <tr className={listingRowClass} key={location.id}>
+                    <td className={`${listingCellClass} font-semibold text-slate-700`}>
                       {location.name}
                     </td>
                     {!selectedCompany ? (
-                      <td className="py-3 pr-4">
+                      <td className={listingCellClass}>
                         {brandLabel(companyById.get(location.company_id))}
                       </td>
                     ) : null}
-                    <td className="py-3 pr-4">{location.device ?? "Sin dato"}</td>
-                    <td className="py-3 pr-4">{location.projection ?? "Sin dato"}</td>
-                    <td className="py-3 pr-4">
-                      <StatusBadge>{location.status}</StatusBadge>
+                    <td className={listingCellClass}>{location.device ?? "Sin dato"}</td>
+                    <td className={listingCellClass}>{location.projection ?? "Sin dato"}</td>
+                    <td className={listingCellClass}>
+                      <ListingStatusBadge>{location.status}</ListingStatusBadge>
                     </td>
-                    <td className="py-3">
+                    <td className={listingActionCellClass}>
                       <div className="flex items-center justify-center gap-3">
                         <DashboardDialog
                           title={`Campañas en ${location.name}`}
-                          trigger={<ActionIcon label="Ver" tone="view" />}
+                          trigger={<ActionIconTrigger label="Ver" tone="view" />}
                         >
                           <AssignmentList
                             emptyText="Esta taquilla no tiene campañas asignadas."
@@ -187,7 +198,7 @@ export async function LocationListPage({
                         {isAdmin ? (
                           <DashboardDialog
                             title={`Modificar ${location.name}`}
-                            trigger={<ActionIcon label="Modificar" tone="edit" />}
+                            trigger={<ActionIconTrigger label="Modificar" tone="edit" />}
                           >
                             <LocationForm
                               action={updateLocation}
@@ -197,8 +208,8 @@ export async function LocationListPage({
                               submitLabel="Guardar cambios"
                             />
 
-                            <section className="mt-6 border-t border-zinc-200 pt-5">
-                              <h3 className="text-sm font-semibold text-zinc-950">
+                            <section className="mt-6 border-t border-slate-200 pt-5 theme-dark:border-slate-700">
+                              <h3 className="text-sm font-extrabold text-slate-800 theme-dark:text-slate-100">
                                 Campañas asignadas
                               </h3>
                               <form action={syncLocationCampaigns} className="mt-3 grid gap-3">
@@ -225,9 +236,7 @@ export async function LocationListPage({
                             <input name="returnPath" type="hidden" value={next} />
                             <input name="id" type="hidden" value={location.id} />
                             <input name="companyId" type="hidden" value={location.company_id} />
-                            <button className={dangerButtonClass} title="Eliminar">
-                              <DeleteIcon />
-                            </button>
+                            <DeleteActionButton />
                           </form>
                         ) : null}
                       </div>
@@ -237,7 +246,7 @@ export async function LocationListPage({
               })}
             </tbody>
           </table>
-        </section>
+        </ListingTableShell>
       )}
     </div>
   );
@@ -334,10 +343,10 @@ function AssignmentList({
     <ul className="grid gap-2">
       {items.map((item) => (
         <li
-          className="flex items-center justify-between border border-zinc-200 px-3 py-2"
+          className="flex items-center justify-between rounded-md border border-slate-200 px-3 py-2 theme-dark:border-slate-700"
           key={item.id}
         >
-          <span className="font-medium text-zinc-800">{item.name}</span>
+          <span className="font-semibold text-slate-800 theme-dark:text-slate-200">{item.name}</span>
           <StatusBadge>{item.helper}</StatusBadge>
         </li>
       ))}
@@ -361,50 +370,14 @@ function CheckboxList({
   }
 
   return (
-    <div className="grid max-h-48 gap-2 overflow-y-auto border border-zinc-200 p-3">
+    <div className="grid max-h-48 gap-2 overflow-y-auto rounded-md border border-slate-200 p-3 theme-dark:border-slate-700">
       {items.map((item) => (
-        <label className="flex items-center gap-2 text-sm text-zinc-700" key={item.id}>
+        <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 theme-dark:text-slate-300" key={item.id}>
           <input defaultChecked={checkedIds.includes(item.id)} name={name} type="checkbox" value={item.id} />
           {item.name}
         </label>
       ))}
     </div>
-  );
-}
-
-function ActionIcon({ label, tone }: Readonly<{ label: string; tone: "edit" | "view" }>) {
-  const color = tone === "view" ? "text-blue-500" : "text-amber-500";
-
-  return (
-    <span className={`inline-flex items-center justify-center transition hover:scale-110 ${color}`} title={label}>
-      {tone === "view" ? <ViewIcon /> : <EditIcon />}
-    </span>
-  );
-}
-
-function ViewIcon() {
-  return (
-    <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24">
-      <path d="M3.5 12s3-5.5 8.5-5.5 8.5 5.5 8.5 5.5-3 5.5-8.5 5.5S3.5 12 3.5 12Z" stroke="currentColor" strokeWidth="2" />
-      <path d="M12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" stroke="currentColor" strokeWidth="2" />
-    </svg>
-  );
-}
-
-function EditIcon() {
-  return (
-    <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24">
-      <path d="M4 16.8V20h3.2L18.7 8.5l-3.2-3.2L4 16.8Z" stroke="currentColor" strokeLinejoin="round" strokeWidth="2" />
-      <path d="m14.7 6.1 3.2 3.2" stroke="currentColor" strokeLinecap="round" strokeWidth="2" />
-    </svg>
-  );
-}
-
-function DeleteIcon() {
-  return (
-    <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24">
-      <path d="M5 7h14M10 11v6M14 11v6M8 7l.6 12h6.8L16 7M9.5 7l.8-2h3.4l.8 2" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-    </svg>
   );
 }
 

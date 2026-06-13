@@ -15,10 +15,21 @@ import {
   Field,
   inputClass,
   PageHeader,
-  StatusBadge,
 } from "../components";
 import { getDashboardContext } from "../data";
 import { DashboardDialog } from "../dialog";
+import {
+  ActionIconTrigger,
+  ListingPrimaryAction,
+  ListingStatusBadge,
+  ListingTableShell,
+  listingActionCellClass,
+  listingCellClass,
+  listingHeadClass,
+  listingHeaderCellClass,
+  listingRowClass,
+  listingTableClass,
+} from "../list-ui";
 
 type UsersPageProps = {
   searchParams: Promise<{
@@ -47,10 +58,10 @@ export default async function UsersPage({ searchParams }: Readonly<UsersPageProp
 
   if (!supabaseServerEnv.hasSecretKey) {
     return (
-      <div className="mx-auto flex w-[95%] flex-col gap-6">
+      <div className="mx-auto flex w-full flex-col gap-8">
         <PageHeader eyebrow="Super usuario" title="Gestion de usuarios" />
         <Feedback error={error} success={success} />
-        <section className="border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-950">
+        <section className="rounded-lg border border-red-100 bg-red-50 p-6 text-sm font-semibold leading-6 text-red-950 shadow-[0_18px_42px_rgba(15,23,42,0.06)] theme-dark:border-red-900/50 theme-dark:bg-red-950/35 theme-dark:text-red-200">
           Para gestionar usuarios desde la app falta configurar
           `SUPABASE_SECRET_KEY` o `SUPABASE_SERVICE_ROLE_KEY`. Esa llave es
           necesaria para crear cuentas reales en Supabase Auth y sincronizar sus
@@ -77,16 +88,16 @@ export default async function UsersPage({ searchParams }: Readonly<UsersPageProp
   const typedProfiles = (profiles ?? []) as Profile[];
 
   return (
-    <div className="mx-auto flex w-[95%] flex-col gap-6">
+    <div className="mx-auto flex w-full flex-col gap-8">
       <Feedback error={error} success={success} />
 
       <PageHeader eyebrow="Super usuario" title="Gestion de usuarios">
         <DashboardDialog
           title="Nuevo usuario"
           trigger={
-            <span className="inline-flex min-h-11 items-center justify-center bg-emerald-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700">
+            <ListingPrimaryAction>
               Nuevo Usuario +
-            </span>
+            </ListingPrimaryAction>
           }
         >
           <CreateUserForm />
@@ -108,49 +119,41 @@ export default async function UsersPage({ searchParams }: Readonly<UsersPageProp
       {!typedProfiles.length ? (
         <EmptyState>No hay usuarios disponibles para administrar.</EmptyState>
       ) : (
-        <section className="overflow-x-auto bg-white shadow-sm">
-          <table className="w-full min-w-[760px] text-left text-sm">
-            <thead className="border-b border-gray-200 font-semibold text-zinc-950">
+        <ListingTableShell>
+          <table className={listingTableClass}>
+            <thead className={listingHeadClass}>
               <tr>
-                <th className="px-4 py-4">Usuario</th>
-                <th className="px-4 py-4">Email</th>
-                <th className="px-4 py-4">Rol</th>
-                <th className="px-4 py-4">Alta</th>
-                <th className="px-4 py-4 text-center">Acciones</th>
+                <th className={listingHeaderCellClass}>Usuario</th>
+                <th className={listingHeaderCellClass}>Email</th>
+                <th className={listingHeaderCellClass}>Rol</th>
+                <th className={listingHeaderCellClass}>Alta</th>
+                <th className={`${listingHeaderCellClass} text-center`}>Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody>
               {typedProfiles.map((profile) => (
-                <tr key={profile.id}>
-                  <td className="px-4 py-3 font-medium text-zinc-800">
+                <tr className={listingRowClass} key={profile.id}>
+                  <td className={`${listingCellClass} font-semibold text-slate-700`}>
                     {profile.full_name || "Sin nombre"}
                   </td>
-                  <td className="px-4 py-3 text-zinc-600">{profile.email}</td>
-                  <td className="px-4 py-3">
-                    <StatusBadge>{profile.global_role}</StatusBadge>
+                  <td className={listingCellClass}>{profile.email}</td>
+                  <td className={listingCellClass}>
+                    <ListingStatusBadge>{profile.global_role}</ListingStatusBadge>
                   </td>
-                  <td className="px-4 py-3 text-zinc-500">
+                  <td className={listingCellClass}>
                     {new Date(profile.created_at).toLocaleDateString("es-MX")}
                   </td>
-                  <td className="px-4 py-3 text-center">
-                    <div className="flex items-center justify-center gap-2">
+                  <td className={listingActionCellClass}>
+                    <div className="flex items-center justify-center gap-3">
                       <DashboardDialog
                         title={`Modificar ${profile.email}`}
-                        trigger={
-                          <span className="inline-flex px-3 py-1.5 text-sm font-medium text-amber-600 transition hover:bg-amber-50">
-                            Modificar
-                          </span>
-                        }
+                        trigger={<ActionIconTrigger label="Modificar" tone="edit" />}
                       >
                         <EditUserForm currentUserId={user.id} profile={profile} />
                       </DashboardDialog>
                       <DashboardDialog
                         title={`Eliminar ${profile.email}`}
-                        trigger={
-                          <span className="inline-flex px-3 py-1.5 text-sm font-medium text-red-600 transition hover:bg-red-50">
-                            Eliminar
-                          </span>
-                        }
+                        trigger={<ActionIconTrigger label="Eliminar" tone="delete" />}
                       >
                         <DeleteUserForm currentUserId={user.id} profile={profile} />
                       </DashboardDialog>
@@ -160,7 +163,7 @@ export default async function UsersPage({ searchParams }: Readonly<UsersPageProp
               ))}
             </tbody>
           </table>
-        </section>
+        </ListingTableShell>
       )}
     </div>
   );
@@ -176,7 +179,7 @@ function UsersShell({
   success?: string;
 }>) {
   return (
-    <div className="mx-auto flex w-[95%] flex-col gap-6">
+    <div className="mx-auto flex w-full flex-col gap-8">
       <PageHeader eyebrow="Super usuario" title="Gestion de usuarios" />
       <Feedback error={error} success={success} />
       {children}
@@ -241,7 +244,7 @@ function EditUserForm({
       </Field>
       <RoleField defaultValue={profile.global_role} disabledUserOption={isEditingSelf} />
       {isEditingSelf ? (
-        <p className="text-xs leading-5 text-zinc-500">
+        <p className="text-xs font-semibold leading-5 text-slate-500 theme-dark:text-slate-400">
           No puedes quitarte tu propio rol de super usuario desde esta pantalla.
         </p>
       ) : null}
@@ -263,17 +266,17 @@ function DeleteUserForm({
     <form action={deleteManagedUser} className="grid gap-4">
       <input name="returnPath" type="hidden" value="/dashboard/users" />
       <input name="userId" type="hidden" value={profile.id} />
-      <p className="text-sm leading-6 text-zinc-600">
+      <p className="text-sm leading-6 text-slate-600 theme-dark:text-slate-300">
         Esta accion eliminara la cuenta de Supabase Auth y su perfil asociado.
         No se puede deshacer.
       </p>
       {isDeletingSelf ? (
-        <p className="border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-950">
+        <p className="rounded-md border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-950 theme-dark:border-red-900/50 theme-dark:bg-red-950/35 theme-dark:text-red-200">
           No puedes eliminar tu propia cuenta desde esta pantalla.
         </p>
       ) : null}
       <button
-        className="inline-flex min-h-10 items-center justify-center bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-red-500 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-zinc-500"
+        className="inline-flex min-h-12 items-center justify-center rounded-md bg-red-600 px-6 py-2.5 text-sm font-extrabold text-white shadow-[0_18px_36px_rgba(220,38,38,0.20)] transition-all hover:-translate-y-0.5 hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none"
         disabled={isDeletingSelf}
       >
         Eliminar usuario
@@ -309,9 +312,9 @@ function UserMetric({
   value: number;
 }>) {
   return (
-    <article className="bg-white px-6 py-4">
-      <p className="text-sm font-semibold text-red-600">{label}</p>
-      <p className="mt-2 text-4xl font-semibold text-zinc-950">{value}</p>
+    <article className="rounded-lg border border-slate-100 bg-white px-6 py-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] theme-dark:border-slate-800 theme-dark:bg-slate-900">
+      <p className="text-sm font-extrabold text-red-600">{label}</p>
+      <p className="mt-3 text-5xl font-extrabold tracking-tight text-slate-900 theme-dark:text-slate-100">{value}</p>
     </article>
   );
 }
