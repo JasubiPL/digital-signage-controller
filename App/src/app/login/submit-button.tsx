@@ -8,7 +8,7 @@ export function SubmitButton() {
   return (
     <button
       aria-live="polite"
-      className="group relative flex h-13 w-full items-center justify-center overflow-hidden rounded-md bg-red-700 px-4 text-base font-bold text-white shadow-[0_12px_26px_rgba(220,0,0,0.22)] transition hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-200 disabled:cursor-wait disabled:bg-red-800"
+      className="group relative flex h-13 w-full items-center justify-center overflow-hidden rounded-md border border-[var(--color-primary-border)] bg-[var(--color-primary)] px-4 text-base font-extrabold text-[#04131b] transition hover:-translate-y-0.5 hover:bg-[var(--color-primary-soft)] hover:shadow-[0_18px_42px_rgba(34,211,238,0.18)] focus:outline-none focus:ring-4 focus:ring-[rgba(34,211,238,0.18)] disabled:cursor-wait disabled:opacity-75"
       disabled={pending}
       type="submit"
     >

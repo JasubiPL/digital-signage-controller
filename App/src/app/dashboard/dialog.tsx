@@ -1,6 +1,7 @@
 "use client";
 
 import { type ReactNode, useRef } from "react";
+import { FiX } from "react-icons/fi";
 
 type DashboardDialogProps = {
   children: ReactNode;
@@ -17,28 +18,28 @@ export function DashboardDialog({
 
   return (
     <>
-      <button onClick={() => dialogRef.current?.showModal()} type="button">
+      <button className="inline-flex" onClick={() => dialogRef.current?.showModal()} type="button">
         {trigger}
       </button>
       <dialog
-        className="fixed inset-0 m-auto h-fit max-h-[calc(100vh-2rem)] w-[min(92vw,46rem)] rounded-lg border border-slate-100 bg-white p-0 shadow-[0_28px_100px_rgba(15,23,42,0.26)] backdrop:bg-slate-950/45 theme-dark:border-slate-800 theme-dark:bg-slate-900 theme-dark:shadow-[0_28px_100px_rgba(0,0,0,0.45)]"
+        className="glass-panel-strong fixed inset-0 m-auto h-fit max-h-[calc(100vh-2rem)] w-[min(92vw,46rem)] rounded-lg p-0 text-[var(--color-text-primary)] shadow-[0_24px_70px_rgba(0,0,0,0.36)] backdrop:bg-[#020617]/72"
         ref={dialogRef}
       >
-        <header className="flex items-center justify-between border-b border-slate-100 px-7 py-5 theme-dark:border-slate-800">
+        <header className="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-4">
           <div>
-            <h2 className="text-xl font-extrabold tracking-tight text-slate-800 theme-dark:text-slate-100">{title}</h2>
-            <span className="mt-3 block h-1 w-14 rounded-full bg-red-600" />
+            <h2 className="font-display text-lg font-extrabold tracking-tight text-[var(--color-text-primary)]">{title}</h2>
+            <span className="mt-2.5 block h-0.5 w-12 rounded-sm bg-[var(--color-primary)]" />
           </div>
           <button
             aria-label="Cerrar"
-            className="grid h-9 w-9 place-items-center rounded-full border border-slate-100 bg-white text-slate-500 shadow-sm transition hover:bg-red-50 hover:text-red-600 theme-dark:border-slate-700 theme-dark:bg-slate-950 theme-dark:text-slate-300 theme-dark:hover:bg-red-950/30 theme-dark:hover:text-red-300"
+            className="grid h-10 w-10 place-items-center rounded-md border border-[var(--color-border)] bg-[rgba(2,6,23,0.62)] text-[var(--color-text-muted)] transition hover:border-[var(--color-secondary)] hover:bg-[var(--color-secondary-muted)] hover:text-[var(--color-secondary-soft)] hover:shadow-[0_12px_24px_rgba(244,63,94,0.1)]"
             onClick={() => dialogRef.current?.close()}
             type="button"
           >
-            x
+            <FiX aria-hidden="true" className="h-5 w-5" />
           </button>
         </header>
-        <div className="max-h-[72vh] overflow-y-auto px-7 py-6">{children}</div>
+        <div className="max-h-[72vh] overflow-y-auto px-5 py-5">{children}</div>
       </dialog>
     </>
   );

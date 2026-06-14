@@ -1,4 +1,11 @@
 import type { ReactNode } from "react";
+import {
+  FiBarChart2,
+  FiEdit3,
+  FiEye,
+  FiMonitor,
+  FiTrash2,
+} from "react-icons/fi";
 
 import { IconSubmitButton } from "./submit-button";
 
@@ -13,10 +20,13 @@ type ListingHeaderProps = {
 type ActionTone = "delete" | "edit" | "view";
 
 const actionToneClass: Record<ActionTone, string> = {
-  delete: "border-red-100 bg-red-50 text-red-600 shadow-red-950/5 hover:border-red-200 hover:bg-red-100 theme-dark:border-red-900/50 theme-dark:bg-red-950/40 theme-dark:text-red-300 theme-dark:hover:bg-red-950/70",
-  edit: "border-orange-100 bg-orange-50 text-orange-500 shadow-orange-950/5 hover:border-orange-200 hover:bg-orange-100 theme-dark:border-orange-900/50 theme-dark:bg-orange-950/35 theme-dark:text-orange-300 theme-dark:hover:bg-orange-950/60",
-  view: "border-blue-100 bg-blue-50 text-blue-500 shadow-blue-950/5 hover:border-blue-200 hover:bg-blue-100 theme-dark:border-blue-900/50 theme-dark:bg-blue-950/35 theme-dark:text-blue-300 theme-dark:hover:bg-blue-950/60",
+  delete: "text-[var(--color-secondary-soft)] hover:border-[rgba(244,63,94,0.42)] hover:text-[var(--color-secondary)]",
+  edit: "text-[var(--color-tertiary)] hover:border-[rgba(255,177,59,0.42)] hover:text-[var(--color-tertiary-soft)]",
+  view: "text-[var(--color-primary)] hover:border-[rgba(34,211,238,0.42)] hover:text-[var(--color-primary-soft)]",
 };
+
+const actionIconClass =
+  "inline-grid h-9 w-9 place-items-center rounded-md border border-[rgba(20,33,58,0.88)] bg-[rgba(3,10,24,0.86)] transition hover:-translate-y-0.5 hover:bg-[rgba(7,18,37,0.96)] hover:shadow-[0_12px_24px_rgba(34,211,238,0.1)]";
 
 export function ListingHeader({
   action,
@@ -26,21 +36,21 @@ export function ListingHeader({
   title,
 }: Readonly<ListingHeaderProps>) {
   return (
-    <header className="grid items-center gap-5 md:grid-cols-[1fr_auto_1fr]">
-      <div className="flex items-center gap-4">
-        <span className="grid h-14 w-14 place-items-center rounded-full bg-red-50 text-red-600 shadow-[0_16px_40px_rgba(220,38,38,0.08)] theme-dark:bg-red-950/40 theme-dark:text-red-300">
+    <header className="grid items-center gap-4 rounded-lg px-5 py-4 md:grid-cols-[1fr_auto_1fr]">
+      <div className="flex items-center gap-3">
+        <span className="grid h-12 w-12 place-items-center rounded-lg border border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-[var(--color-primary)]">
           <MetricIcon icon={icon} />
         </span>
-        <p className="text-xl font-extrabold tracking-tight text-red-600">
-          {metricLabel}: {count}
+        <p className="font-display text-lg font-extrabold tracking-tight text-[var(--color-text-primary)]">
+          {metricLabel}: <span className="text-[var(--color-primary)]">{count}</span>
         </p>
       </div>
 
       <div className="text-center">
-        <h1 className="text-4xl font-extrabold tracking-tight text-slate-800 theme-dark:text-slate-100">
+        <h1 className="font-display text-3xl font-extrabold tracking-tight text-[var(--color-text-primary)]">
           {title}
         </h1>
-        <span className="mx-auto mt-4 block h-1 w-20 rounded-full bg-red-600 shadow-[0_5px_16px_rgba(220,38,38,0.35)]" />
+        <span className="mx-auto mt-3 block h-0.5 w-16 rounded-sm bg-[var(--color-primary)]" />
       </div>
 
       <div className="flex justify-start md:justify-end">{action}</div>
@@ -50,7 +60,7 @@ export function ListingHeader({
 
 export function ListingPrimaryAction({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <span className="inline-flex min-h-14 items-center justify-center rounded-md bg-red-600 px-7 py-3 text-base font-extrabold text-white shadow-[0_18px_36px_rgba(220,38,38,0.2)] transition hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-[0_22px_42px_rgba(220,38,38,0.25)] theme-dark:bg-red-500 theme-dark:hover:bg-red-400">
+    <span className="inline-flex min-h-12 items-center justify-center rounded-md border border-[var(--color-primary-border)] bg-[var(--color-primary)] px-6 py-2 text-sm font-extrabold text-[#001f25] transition hover:-translate-y-0.5 hover:bg-[var(--color-primary-soft)] hover:shadow-[0_18px_36px_rgba(34,211,238,0.18)]">
       {children}
     </span>
   );
@@ -58,26 +68,26 @@ export function ListingPrimaryAction({ children }: Readonly<{ children: ReactNod
 
 export function ListingTableShell({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <section className="overflow-hidden rounded-lg border border-slate-100 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.10)] theme-dark:border-slate-800 theme-dark:bg-slate-900 theme-dark:shadow-[0_24px_70px_rgba(0,0,0,0.30)]">
+    <section className="glass-panel overflow-hidden rounded-lg">
       <div className="overflow-x-auto">{children}</div>
     </section>
   );
 }
 
 export const listingTableClass =
-  "w-full min-w-[900px] border-collapse text-left text-base text-slate-700 theme-dark:text-slate-200";
+  "w-full min-w-[820px] border-collapse text-left text-sm text-[var(--color-text-secondary)]";
 
 export const listingHeadClass =
-  "border-b border-slate-200 bg-white text-sm font-extrabold text-slate-600 theme-dark:border-slate-800 theme-dark:bg-slate-900 theme-dark:text-slate-400";
+  "border-b border-[var(--color-border)] bg-[rgba(6,14,32,0.78)] font-mono text-xs font-extrabold uppercase tracking-[0.12em] text-[var(--color-text-muted)]";
 
-export const listingHeaderCellClass = "px-7 py-6";
+export const listingHeaderCellClass = "px-5 py-4";
 
 export const listingRowClass =
-  "border-b border-slate-100 last:border-b-0 transition hover:bg-slate-50/70 theme-dark:border-slate-800 theme-dark:hover:bg-slate-800/70";
+  "border-b border-[var(--color-border)] last:border-b-0 transition hover:bg-[rgba(34,211,238,0.045)]";
 
-export const listingCellClass = "px-7 py-6 align-middle";
+export const listingCellClass = "px-5 py-4 align-middle";
 
-export const listingActionCellClass = "px-7 py-5 align-middle";
+export const listingActionCellClass = "px-5 py-3 align-middle";
 
 export function ListingStatusBadge({ children }: Readonly<{ children: ReactNode }>) {
   const value = String(children).toLowerCase();
@@ -98,19 +108,22 @@ export function ListingStatusBadge({ children }: Readonly<{ children: ReactNode 
     viewer: "Consulta",
   };
   const isGood = value === "active" || value === "ok" || value === "super_admin";
-  const isWarning = value === "draft" || value === "remodeling" || value === "maintenance";
+  const isWarning = value === "remodeling" || value === "maintenance";
+  const isPending = value === "draft";
   const isDanger = value === "incident" || value === "archived" || value === "inactive";
   const tone = isGood
-    ? "border-emerald-100 bg-emerald-50 text-emerald-600 theme-dark:border-emerald-900/50 theme-dark:bg-emerald-950/35 theme-dark:text-emerald-300"
+    ? "border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-[var(--color-primary-soft)]"
     : isWarning
-      ? "border-orange-100 bg-orange-50 text-orange-500 theme-dark:border-orange-900/50 theme-dark:bg-orange-950/35 theme-dark:text-orange-300"
-      : isDanger
-        ? "border-red-100 bg-red-50 text-red-600 theme-dark:border-red-900/50 theme-dark:bg-red-950/35 theme-dark:text-red-300"
-        : "border-slate-100 bg-slate-50 text-slate-500 theme-dark:border-slate-700 theme-dark:bg-slate-800 theme-dark:text-slate-300";
+      ? "border-[rgba(244,63,94,0.34)] bg-[var(--color-secondary-muted)] text-[var(--color-secondary-soft)]"
+      : isPending
+        ? "border-[rgba(255,177,59,0.34)] bg-[var(--color-tertiary-muted)] text-[var(--color-tertiary-soft)]"
+        : isDanger
+          ? "border-[rgba(244,63,94,0.34)] bg-[var(--color-secondary-muted)] text-[var(--color-secondary-soft)]"
+          : "border-[var(--color-border)] bg-[rgba(148,163,184,0.08)] text-[var(--color-text-soft)]";
 
   return (
-    <span className={`inline-flex min-w-36 items-center justify-center gap-2 rounded-md border px-4 py-2.5 text-base font-bold ${tone}`}>
-      <StatusIcon tone={isGood ? "good" : isWarning ? "warning" : isDanger ? "danger" : "neutral"} />
+    <span className={`inline-flex min-w-28 items-center justify-center gap-2.5 rounded-full border px-4 py-1.5 font-mono text-xs font-extrabold ${tone}`}>
+      <span className="h-1.5 w-1.5 rounded-full bg-current" />
       {labelByStatus[value] ?? children}
     </span>
   );
@@ -124,7 +137,7 @@ export function ActionIconTrigger({
   tone: ActionTone;
 }>) {
   return (
-    <span className={`inline-grid h-12 w-12 place-items-center rounded-md border shadow-sm transition hover:-translate-y-0.5 ${actionToneClass[tone]}`} title={label}>
+    <span className={`${actionIconClass} ${actionToneClass[tone]}`} title={label}>
       <span className="sr-only">{label}</span>
       <ActionGlyph tone={tone} />
     </span>
@@ -134,7 +147,7 @@ export function ActionIconTrigger({
 export function DeleteActionButton({ label = "Eliminar" }: Readonly<{ label?: string }>) {
   return (
     <IconSubmitButton
-      className={`inline-grid h-12 w-12 place-items-center rounded-md border shadow-sm transition hover:-translate-y-0.5 ${actionToneClass.delete}`}
+      className={`${actionIconClass} ${actionToneClass.delete}`}
       label={label}
     >
       <ActionGlyph tone="delete" />
@@ -144,80 +157,20 @@ export function DeleteActionButton({ label = "Eliminar" }: Readonly<{ label?: st
 
 function MetricIcon({ icon }: Readonly<{ icon: "campaigns" | "locations" }>) {
   if (icon === "locations") {
-    return (
-      <svg aria-hidden="true" className="h-7 w-7" fill="none" viewBox="0 0 24 24">
-        <path d="M5 10h14v9H5v-9Z" stroke="currentColor" strokeWidth="2.2" />
-        <path d="M3.8 10 6 5h12l2.2 5H3.8Z" stroke="currentColor" strokeLinejoin="round" strokeWidth="2.2" />
-        <path d="M8 19v-5h8v5M8 7h8" stroke="currentColor" strokeWidth="2.2" />
-      </svg>
-    );
+    return <FiMonitor aria-hidden="true" className="h-6 w-6" />;
   }
 
-  return (
-    <svg aria-hidden="true" className="h-7 w-7" fill="none" viewBox="0 0 24 24">
-      <path d="M6 19V9M12 19V5M18 19v-7" stroke="currentColor" strokeLinecap="round" strokeWidth="2.6" />
-    </svg>
-  );
-}
-
-function StatusIcon({ tone }: Readonly<{ tone: "danger" | "good" | "neutral" | "warning" }>) {
-  if (tone === "good") {
-    return (
-      <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24">
-        <path d="m7 12 3 3 7-7" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" />
-        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
-      </svg>
-    );
-  }
-
-  if (tone === "warning") {
-    return (
-      <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
-        <path d="M12 7v5l3 2" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" />
-      </svg>
-    );
-  }
-
-  if (tone === "danger") {
-    return (
-      <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
-        <path d="M12 7v6M12 17h.01" stroke="currentColor" strokeLinecap="round" strokeWidth="2.4" />
-      </svg>
-    );
-  }
-
-  return (
-    <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24">
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
-      <path d="M9 12h6" stroke="currentColor" strokeLinecap="round" strokeWidth="2.2" />
-    </svg>
-  );
+  return <FiBarChart2 aria-hidden="true" className="h-6 w-6" />;
 }
 
 function ActionGlyph({ tone }: Readonly<{ tone: ActionTone }>) {
   if (tone === "view") {
-    return (
-      <svg aria-hidden="true" className="h-6 w-6" fill="none" viewBox="0 0 24 24">
-        <path d="M3.5 12s3-5.5 8.5-5.5 8.5 5.5 8.5 5.5-3 5.5-8.5 5.5S3.5 12 3.5 12Z" stroke="currentColor" strokeWidth="2.2" />
-        <path d="M12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" stroke="currentColor" strokeWidth="2.2" />
-      </svg>
-    );
+    return <FiEye aria-hidden="true" className="h-4 w-4" />;
   }
 
   if (tone === "edit") {
-    return (
-      <svg aria-hidden="true" className="h-6 w-6" fill="none" viewBox="0 0 24 24">
-        <path d="M4 16.8V20h3.2L18.7 8.5l-3.2-3.2L4 16.8Z" stroke="currentColor" strokeLinejoin="round" strokeWidth="2.2" />
-        <path d="m14.7 6.1 3.2 3.2" stroke="currentColor" strokeLinecap="round" strokeWidth="2.2" />
-      </svg>
-    );
+    return <FiEdit3 aria-hidden="true" className="h-4 w-4" />;
   }
 
-  return (
-    <svg aria-hidden="true" className="h-6 w-6" fill="none" viewBox="0 0 24 24">
-      <path d="M5 7h14M10 11v6M14 11v6M8 7l.6 12h6.8L16 7M9.5 7l.8-2h3.4l.8 2" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" />
-    </svg>
-  );
+  return <FiTrash2 aria-hidden="true" className="h-4 w-4" />;
 }

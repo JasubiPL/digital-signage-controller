@@ -1,6 +1,7 @@
+import Image from "next/image";
+
 import { getDashboardContext } from "./data";
 import { DashboardSidebar } from "./sidebar";
-import { ThemeToggle } from "./theme-toggle";
 
 export default async function DashboardLayout({
   children,
@@ -14,9 +15,20 @@ export default async function DashboardLayout({
     : companies[0]
       ? `/dashboard/locations/${companies[0].slug}`
       : "/dashboard/locations";
+  const email = user.email ?? "";
+  const displayName =
+    user.user_metadata?.full_name ??
+    user.user_metadata?.name ??
+    email.split("@")[0] ??
+    "usuario";
+  const avatarSrc = avatarSrcForHeaderUser({
+    email,
+    id: user.id,
+    isGlobalAdmin: canManageUsers,
+  });
 
   return (
-    <div className="flex min-h-screen bg-[linear-gradient(135deg,#f8fafc_0%,#ffffff_42%,#f3f6fb_100%)] font-['Avenir_Next','Aptos','Segoe_UI',sans-serif] text-slate-900 transition-colors theme-dark:bg-[linear-gradient(135deg,#020617_0%,#0f172a_46%,#111827_100%)] theme-dark:text-slate-100">
+    <div className="noc-grid flex min-h-screen font-sans text-[var(--color-text-primary)]">
       <DashboardSidebar
         canManageUsers={canManageUsers}
         companies={companies}
@@ -24,30 +36,59 @@ export default async function DashboardLayout({
       />
 
       <section className="flex min-h-screen flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-100 bg-white/90 px-6 py-3 shadow-[0_14px_42px_rgba(15,23,42,0.06)] backdrop-blur transition-colors theme-dark:border-slate-800 theme-dark:bg-slate-950/88 theme-dark:shadow-[0_14px_42px_rgba(0,0,0,0.22)]">
-          <div className="flex items-center gap-3">
+        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-[var(--color-border)] bg-[rgba(6,14,32,0.96)] px-5 py-2">
+          <div className="flex min-w-0 items-center gap-3">
             <DashboardSidebar
               canManageUsers={canManageUsers}
               companies={companies}
               homeHref={homeHref}
               mobile
             />
-            <ThemeToggle />
           </div>
-          <div className="flex items-center gap-3">
-            <p className="flex flex-col items-end text-sm font-extrabold text-slate-700 theme-dark:text-slate-200">
-              <span>Hola {user.email?.split("@")[0] ?? "usuario"}</span>
-              <small className="text-[10px] uppercase tracking-[0.18em] text-slate-400 theme-dark:text-slate-500">
-                Supabase Auth
+          <div className="flex items-center gap-2.5">
+            <p className="flex flex-col items-end text-xs font-extrabold text-[var(--color-text-primary)]">
+              <span>Hola {displayName}</span>
+              <small className="font-mono text-[9px] tracking-[0.08em] text-[var(--color-primary)]">
+                {email || "correo no disponible"}
               </small>
             </p>
-            <span className="grid h-12 w-12 place-items-center rounded-full bg-red-50 text-sm font-extrabold text-red-600 shadow-[0_16px_34px_rgba(220,38,38,0.12)] theme-dark:bg-red-950/50 theme-dark:text-red-300">
-              {(user.email?.[0] ?? "U").toUpperCase()}
+            <span className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-full border border-[var(--color-primary-border)] bg-[var(--color-primary-muted)]">
+              <Image
+                alt={`Avatar de ${displayName}`}
+                className="h-full w-full object-cover"
+                height={40}
+                src={avatarSrc}
+                width={40}
+              />
             </span>
           </div>
         </header>
-        <main className="h-full flex-1 overflow-y-auto px-6 py-8 lg:px-8">{children}</main>
+        <main className="h-full flex-1 overflow-y-auto px-5 py-6 lg:px-6">
+          {children}
+        </main>
       </section>
     </div>
   );
+}
+
+function avatarSrcForHeaderUser({
+  email,
+  id,
+  isGlobalAdmin,
+}: Readonly<{
+  email: string;
+  id: string;
+  isGlobalAdmin: boolean;
+}>) {
+  if (isGlobalAdmin) {
+    return "/default-avatar/admin.png";
+  }
+
+  const variants = ["/default-avatar/consultant.png", "/default-avatar/manager.png"];
+  const hash = Array.from(id || email).reduce(
+    (sum, char) => sum + char.charCodeAt(0),
+    0,
+  );
+
+  return variants[hash % variants.length];
 }

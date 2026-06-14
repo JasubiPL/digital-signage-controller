@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 
 import {
@@ -10,6 +11,7 @@ import { supabaseServerEnv } from "@/server/supabase/env";
 
 import {
   buttonClass,
+  dangerButtonClass,
   EmptyState,
   Feedback,
   Field,
@@ -59,10 +61,10 @@ export default async function UsersPage({ searchParams }: Readonly<UsersPageProp
 
   if (!supabaseServerEnv.hasSecretKey) {
     return (
-      <div className="mx-auto flex w-full flex-col gap-8">
+      <div className="mx-auto flex w-full flex-col gap-6">
         <PageHeader eyebrow="Super usuario" title="Gestion de usuarios" />
         <Feedback error={error} success={success} />
-        <section className="rounded-lg border border-red-100 bg-red-50 p-6 text-sm font-semibold leading-6 text-red-950 shadow-[0_18px_42px_rgba(15,23,42,0.06)] theme-dark:border-red-900/50 theme-dark:bg-red-950/35 theme-dark:text-red-200">
+        <section className="rounded-lg border border-[rgba(244,63,94,0.34)] bg-[var(--color-secondary-muted)] p-6 text-sm font-semibold leading-6 text-[var(--color-secondary-soft)]">
           Para gestionar usuarios desde la app falta configurar
           `SUPABASE_SECRET_KEY` o `SUPABASE_SERVICE_ROLE_KEY`. Esa llave es
           necesaria para crear cuentas reales en Supabase Auth y sincronizar sus
@@ -89,7 +91,7 @@ export default async function UsersPage({ searchParams }: Readonly<UsersPageProp
   const typedProfiles = (profiles ?? []) as Profile[];
 
   return (
-    <div className="mx-auto flex w-full flex-col gap-8">
+    <div className="mx-auto flex w-full flex-col gap-6">
       <Feedback error={error} success={success} />
 
       <PageHeader eyebrow="Super usuario" title="Gestion de usuarios">
@@ -134,8 +136,13 @@ export default async function UsersPage({ searchParams }: Readonly<UsersPageProp
             <tbody>
               {typedProfiles.map((profile) => (
                 <tr className={listingRowClass} key={profile.id}>
-                  <td className={`${listingCellClass} font-semibold text-slate-700 theme-dark:text-slate-100`}>
-                    {profile.full_name || "Sin nombre"}
+                  <td className={listingCellClass}>
+                    <div className="flex items-center gap-3">
+                      <UserAvatar profile={profile} />
+                      <span className="font-semibold text-[var(--color-text-primary)]">
+                        {profile.full_name || "Sin nombre"}
+                      </span>
+                    </div>
                   </td>
                   <td className={listingCellClass}>{profile.email}</td>
                   <td className={listingCellClass}>
@@ -145,7 +152,7 @@ export default async function UsersPage({ searchParams }: Readonly<UsersPageProp
                     {new Date(profile.created_at).toLocaleDateString("es-MX")}
                   </td>
                   <td className={listingActionCellClass}>
-                    <div className="flex items-center justify-center gap-3">
+                    <div className="flex items-center justify-center gap-2">
                       <DashboardDialog
                         title={`Modificar ${profile.email}`}
                         trigger={<ActionIconTrigger label="Modificar" tone="edit" />}
@@ -170,6 +177,37 @@ export default async function UsersPage({ searchParams }: Readonly<UsersPageProp
   );
 }
 
+function UserAvatar({ profile }: Readonly<{ profile: Profile }>) {
+  const displayName = profile.full_name || profile.email;
+
+  return (
+    <span className="relative grid h-10 w-10 flex-none place-items-center overflow-hidden rounded-full border border-[var(--color-primary-border)] bg-[var(--color-primary-muted)]">
+      <Image
+        alt={`Avatar de ${displayName}`}
+        className="h-full w-full object-cover"
+        height={40}
+        priority={false}
+        src={avatarSrcForProfile(profile)}
+        width={40}
+      />
+    </span>
+  );
+}
+
+function avatarSrcForProfile(profile: Profile) {
+  if (profile.global_role === "super_admin") {
+    return "/default-avatar/admin.png";
+  }
+
+  const variants = ["/default-avatar/consultant.png", "/default-avatar/manager.png"];
+  const hash = Array.from(profile.id || profile.email).reduce(
+    (sum, char) => sum + char.charCodeAt(0),
+    0,
+  );
+
+  return variants[hash % variants.length];
+}
+
 function UsersShell({
   children,
   error,
@@ -180,7 +218,7 @@ function UsersShell({
   success?: string;
 }>) {
   return (
-    <div className="mx-auto flex w-full flex-col gap-8">
+    <div className="mx-auto flex w-full flex-col gap-6">
       <PageHeader eyebrow="Super usuario" title="Gestion de usuarios" />
       <Feedback error={error} success={success} />
       {children}
@@ -247,7 +285,7 @@ function EditUserForm({
       </Field>
       <RoleField defaultValue={profile.global_role} disabledUserOption={isEditingSelf} />
       {isEditingSelf ? (
-        <p className="text-xs font-semibold leading-5 text-slate-500 theme-dark:text-slate-400">
+        <p className="text-xs font-semibold leading-5 text-[var(--color-text-muted)]">
           No puedes quitarte tu propio rol de super usuario desde esta pantalla.
         </p>
       ) : null}
@@ -271,28 +309,25 @@ function DeleteUserForm({
     <form action={deleteManagedUser} className="grid gap-4">
       <input name="returnPath" type="hidden" value="/dashboard/users" />
       <input name="userId" type="hidden" value={profile.id} />
-      <p className="text-sm leading-6 text-slate-600 theme-dark:text-slate-300">
+      <p className="text-sm leading-6 text-[var(--color-text-soft)]">
         Esta accion eliminara la cuenta de Supabase Auth y su perfil asociado.
         No se puede deshacer.
       </p>
       {isDeletingSelf ? (
-        <p className="rounded-md border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-950 theme-dark:border-red-900/50 theme-dark:bg-red-950/35 theme-dark:text-red-200">
+        <p className="rounded-md border border-[rgba(244,63,94,0.34)] bg-[var(--color-secondary-muted)] px-4 py-3 text-sm font-semibold text-[var(--color-secondary-soft)]">
           No puedes eliminar tu propia cuenta desde esta pantalla.
         </p>
       ) : null}
       {isDeletingSelf ? (
         <button
-          className="inline-flex min-h-12 items-center justify-center rounded-md bg-slate-200 px-6 py-2.5 text-sm font-extrabold text-slate-500 shadow-none disabled:cursor-not-allowed"
+          className="inline-flex min-h-11 items-center justify-center rounded-md border border-[var(--color-border)] bg-[rgba(148,163,184,0.12)] px-5 py-2 text-sm font-extrabold text-[var(--color-text-muted)] shadow-none disabled:cursor-not-allowed"
           disabled
           type="button"
         >
           Eliminar usuario
         </button>
       ) : (
-        <SubmitButton
-          className="inline-flex min-h-12 items-center justify-center rounded-md bg-red-600 px-6 py-2.5 text-sm font-extrabold text-white shadow-[0_18px_36px_rgba(220,38,38,0.20)] transition-all hover:-translate-y-0.5 hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none"
-          pendingLabel="Eliminando..."
-        >
+        <SubmitButton className={dangerButtonClass} pendingLabel="Eliminando...">
           Eliminar usuario
         </SubmitButton>
       )}
@@ -327,9 +362,9 @@ function UserMetric({
   value: number;
 }>) {
   return (
-    <article className="rounded-lg border border-slate-100 bg-white px-6 py-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] theme-dark:border-slate-800 theme-dark:bg-slate-900">
-      <p className="text-sm font-extrabold text-red-600">{label}</p>
-      <p className="mt-3 text-5xl font-extrabold tracking-tight text-slate-900 theme-dark:text-slate-100">{value}</p>
+    <article className="glass-panel rounded-lg px-5 py-4">
+      <p className="mono-label text-xs text-[var(--color-primary)]">{label}</p>
+      <p className="mt-2 font-display text-4xl font-extrabold tracking-tight text-[var(--color-text-primary)]">{value}</p>
     </article>
   );
 }

@@ -130,7 +130,7 @@ export async function LocationListPage({
   }
 
   return (
-    <div className="mx-auto flex w-full flex-col gap-8 font-['Avenir_Next','Aptos','Segoe_UI',sans-serif]">
+    <div className="mx-auto flex w-full flex-col gap-6">
       <Feedback error={error} success={success} />
 
       <ListingHeader
@@ -184,7 +184,7 @@ export async function LocationListPage({
 
                 return (
                   <tr className={listingRowClass} key={location.id}>
-                    <td className={`${listingCellClass} font-semibold text-slate-700 theme-dark:text-slate-100`}>
+                    <td className={`${listingCellClass} font-semibold text-[var(--color-text-primary)]`}>
                       {location.name}
                     </td>
                     {!selectedCompany ? (
@@ -198,7 +198,7 @@ export async function LocationListPage({
                       <LocationStatusBadge>{location.status}</LocationStatusBadge>
                     </td>
                     <td className={listingActionCellClass}>
-                      <div className="flex items-center justify-center gap-3">
+                      <div className="flex items-center justify-center gap-2">
                         <DashboardDialog
                           title={`Campañas en ${location.name}`}
                           trigger={<ActionIconTrigger label="Ver" tone="view" />}
@@ -223,8 +223,8 @@ export async function LocationListPage({
                               submitLabel="Guardar cambios"
                             />
 
-                            <section className="mt-6 border-t border-slate-200 pt-5 theme-dark:border-slate-700">
-                              <h3 className="text-sm font-extrabold text-slate-800 theme-dark:text-slate-100">
+                            <section className="mt-6 border-t border-[var(--color-border)] pt-5">
+                              <h3 className="mono-label text-sm font-extrabold text-[var(--color-text-primary)]">
                                 Campañas asignadas
                               </h3>
                               <form action={syncLocationCampaigns} className="mt-3 grid gap-3">
@@ -291,13 +291,14 @@ function LocationStatusBadge({ children }: Readonly<{ children: React.ReactNode 
   };
   const tone =
     value === "ok"
-      ? "border-emerald-100 bg-emerald-50 text-emerald-600 theme-dark:border-emerald-900/50 theme-dark:bg-emerald-950/35 theme-dark:text-emerald-300"
+      ? "border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-[var(--color-primary-soft)]"
       : value === "remodeling"
-        ? "border-orange-100 bg-orange-50 text-orange-500 theme-dark:border-orange-900/50 theme-dark:bg-orange-950/35 theme-dark:text-orange-300"
-        : "border-red-100 bg-red-50 text-red-600 theme-dark:border-red-900/50 theme-dark:bg-red-950/35 theme-dark:text-red-300";
+        ? "border-[rgba(244,63,94,0.34)] bg-[var(--color-secondary-muted)] text-[var(--color-secondary-soft)]"
+        : "border-[rgba(244,63,94,0.34)] bg-[var(--color-secondary-muted)] text-[var(--color-secondary-soft)]";
 
   return (
-    <span className={`inline-flex min-w-36 items-center justify-center gap-2 rounded-md border px-4 py-2.5 text-base font-bold ${tone}`}>
+    <span className={`inline-flex min-w-28 items-center justify-center gap-2.5 rounded-full border px-4 py-1.5 font-mono text-xs font-extrabold ${tone}`}>
+      <span className="h-1.5 w-1.5 rounded-full bg-current" />
       {labelByStatus[value]}
     </span>
   );
@@ -391,8 +392,8 @@ function AssignmentList({
   }
 
   return (
-    <section className="overflow-hidden rounded-md border border-slate-200 theme-dark:border-slate-700">
-      <div className={`grid gap-3 border-b border-slate-200 bg-slate-50 px-3 py-2 text-xs font-extrabold uppercase tracking-wide text-slate-500 theme-dark:border-slate-700 theme-dark:bg-slate-950 theme-dark:text-slate-400 ${
+    <section className="overflow-hidden rounded-md border border-[var(--color-border)] bg-[rgba(2,6,23,0.34)]">
+      <div className={`grid gap-3 border-b border-[var(--color-border)] bg-[rgba(6,14,32,0.72)] px-3 py-2 font-mono text-xs font-extrabold uppercase tracking-[0.12em] text-[var(--color-text-muted)] ${
         canEdit ? "grid-cols-[1fr_12rem_4rem]" : "grid-cols-[1fr_12rem]"
       }`}>
         <span>Nombre de campaña</span>
@@ -401,12 +402,12 @@ function AssignmentList({
       </div>
       {items.map((item) => (
         <div
-          className={`grid items-center gap-3 border-b border-slate-100 px-3 py-2 last:border-b-0 theme-dark:border-slate-800 ${
+          className={`grid items-center gap-3 border-b border-[var(--color-border)] px-3 py-3 last:border-b-0 ${
             canEdit ? "grid-cols-[1fr_12rem_4rem]" : "grid-cols-[1fr_12rem]"
           }`}
           key={item.assignmentId}
         >
-          <span className="font-semibold text-slate-800 theme-dark:text-slate-200">
+          <span className="font-semibold text-[var(--color-text-primary)]">
             {item.name}
           </span>
           {canEdit ? (
@@ -440,10 +441,10 @@ function CheckboxList({
   }
 
   return (
-    <div className="grid max-h-48 gap-2 overflow-y-auto rounded-md border border-slate-200 p-3 theme-dark:border-slate-700">
+    <div className="grid max-h-48 gap-2 overflow-y-auto rounded-md border border-[var(--color-border)] bg-[rgba(2,6,23,0.34)] p-3">
       {items.map((item) => (
-        <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 theme-dark:text-slate-300" key={item.id}>
-          <input defaultChecked={checkedIds.includes(item.id)} name={name} type="checkbox" value={item.id} />
+        <label className="flex min-h-10 items-center gap-3 rounded-md border border-transparent px-3 py-2 text-sm font-semibold text-[var(--color-text-secondary)] transition hover:border-[var(--color-border)] hover:bg-[rgba(34,211,238,0.045)]" key={item.id}>
+          <input className="h-4 w-4 accent-[var(--color-primary)]" defaultChecked={checkedIds.includes(item.id)} name={name} type="checkbox" value={item.id} />
           {item.name}
         </label>
       ))}

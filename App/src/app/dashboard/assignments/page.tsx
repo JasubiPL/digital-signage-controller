@@ -88,7 +88,7 @@ export default async function AssignmentsPage({ searchParams }: PageProps) {
   const screenById = new Map((screens ?? []).map((screen) => [screen.id, screen]));
 
   return (
-    <div className="mx-auto flex w-full flex-col gap-8">
+    <div className="mx-auto flex w-full flex-col gap-6">
       <PageHeader eyebrow="Asignaciones" title="Campañas por ubicación y pantalla" />
       <Feedback error={error} success={success} />
 
@@ -149,7 +149,7 @@ export default async function AssignmentsPage({ searchParams }: PageProps) {
       </section>
 
       <section className="grid gap-4">
-        <h2 className="text-2xl font-extrabold tracking-tight text-slate-800 theme-dark:text-slate-100">
+        <h2 className="font-display text-2xl font-extrabold tracking-tight text-[var(--color-text-primary)]">
           Campañas en ubicaciones ({campaignLocations?.length ?? 0})
         </h2>
         {!campaignLocations?.length ? (
@@ -169,7 +169,7 @@ export default async function AssignmentsPage({ searchParams }: PageProps) {
               <tbody>
                 {campaignLocations.map((assignment) => (
                   <tr className={listingRowClass} key={assignment.id}>
-                    <td className={`${listingCellClass} font-semibold text-slate-700 theme-dark:text-slate-100`}>
+                    <td className={`${listingCellClass} font-semibold text-[var(--color-text-primary)]`}>
                       {campaignById.get(assignment.campaign_id)?.name ?? "Sin campaña"}
                     </td>
                     <td className={listingCellClass}>
@@ -195,7 +195,7 @@ export default async function AssignmentsPage({ searchParams }: PageProps) {
       </section>
 
       <section className="grid gap-4">
-        <h2 className="text-2xl font-extrabold tracking-tight text-slate-800 theme-dark:text-slate-100">
+        <h2 className="font-display text-2xl font-extrabold tracking-tight text-[var(--color-text-primary)]">
           Campañas en pantallas ({campaignScreens?.length ?? 0})
         </h2>
         {!campaignScreens?.length ? (
@@ -215,7 +215,7 @@ export default async function AssignmentsPage({ searchParams }: PageProps) {
               <tbody>
                 {campaignScreens.map((assignment) => (
                   <tr className={listingRowClass} key={assignment.id}>
-                    <td className={`${listingCellClass} font-semibold text-slate-700 theme-dark:text-slate-100`}>
+                    <td className={`${listingCellClass} font-semibold text-[var(--color-text-primary)]`}>
                       {campaignById.get(assignment.campaign_id)?.name ?? "Sin campaña"}
                     </td>
                     <td className={listingCellClass}>
