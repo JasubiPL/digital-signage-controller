@@ -10,15 +10,14 @@ export function FeedbackToast({
   success?: string;
 }>) {
   const message = error ?? success;
-  const [isVisible, setIsVisible] = useState(Boolean(message));
+  const [expiredMessage, setExpiredMessage] = useState<string | null>(null);
+  const isVisible = Boolean(message && expiredMessage !== message);
 
   useEffect(() => {
-    setIsVisible(Boolean(message));
-
     if (!message) return;
 
     const timeout = window.setTimeout(() => {
-      setIsVisible(false);
+      setExpiredMessage(message);
     }, 4000);
 
     return () => window.clearTimeout(timeout);
