@@ -1,5 +1,7 @@
 import Image from "next/image";
 
+import { SystemFooter } from "@/app/system-footer";
+
 import { getDashboardContext } from "./data";
 import { DashboardSidebar } from "./sidebar";
 
@@ -66,6 +68,7 @@ export default async function DashboardLayout({
         <main className="h-full flex-1 overflow-y-auto px-5 py-6 lg:px-6">
           {children}
         </main>
+        <SystemFooter className="border-t border-[var(--color-border)] bg-[rgba(6,14,32,0.78)] px-5 py-4 lg:px-6" />
       </section>
     </div>
   );

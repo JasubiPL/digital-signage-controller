@@ -11,6 +11,8 @@ import {
   FiUsers,
 } from "react-icons/fi";
 
+import { BrandIcon } from "@/app/brand-icon";
+
 type Company = {
   id: string;
   legacy_code?: string | null;
@@ -110,9 +112,7 @@ export function DashboardSidebar({
             onClick={() => navigate(defaultHref)}
             type="button"
           >
-            <span className="grid h-11 w-11 place-items-center rounded-lg border border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-xl text-[var(--color-primary)] transition group-hover:border-[var(--color-primary)]">
-              <FiGrid aria-hidden="true" />
-            </span>
+            <BrandIcon className="h-11 w-11 transition group-hover:border-[var(--color-primary)]" />
             <span className="grid">
               <span className="font-display text-xl font-extrabold leading-none tracking-tight text-[var(--color-primary-soft)]">
                 DS Controller

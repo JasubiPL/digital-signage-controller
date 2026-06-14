@@ -1,5 +1,7 @@
 "use client";
 
+import { BrandIcon } from "@/app/brand-icon";
+
 export default function GlobalError({
   error,
   reset,
@@ -12,9 +14,12 @@ export default function GlobalError({
       <body className="min-h-screen bg-[var(--color-bg)] px-5 py-10 text-[var(--color-text-primary)]">
         <main className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-xl flex-col justify-center">
           <section className="glass-panel-strong rounded-lg p-8">
-            <p className="mono-label text-sm text-[var(--color-primary)]">
-              DS Controller
-            </p>
+            <div className="flex items-center gap-3">
+              <BrandIcon className="h-10 w-10" />
+              <p className="mono-label text-sm text-[var(--color-primary)]">
+                DS Controller
+              </p>
+            </div>
             <h1 className="mt-4 text-3xl font-bold">
               Algo salio mal
             </h1>
