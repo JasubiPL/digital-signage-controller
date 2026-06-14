@@ -219,6 +219,45 @@ body {
   width: 55%;
 }
 
+.rich-text-content :where(h1, h2, h3, h4) {
+  color: var(--color-text-primary);
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0.85rem 0 0.45rem;
+}
+
+.rich-text-content :where(ul, ol) {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.65rem 0;
+  padding-left: 1.25rem;
+}
+
+.rich-text-content ul {
+  list-style: disc;
+}
+
+.rich-text-content ol {
+  list-style: decimal;
+}
+
+.rich-text-content :where(strong, b) {
+  color: var(--color-text-primary);
+  font-weight: 900;
+}
+
+.rich-text-content :where(em, i) {
+  color: var(--color-primary-soft);
+}
+
+.rich-text-content a {
+  color: var(--color-primary-soft);
+  text-decoration: underline;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+}
+
 @keyframes login-spin {
   to {
     transform: rotate(360deg);

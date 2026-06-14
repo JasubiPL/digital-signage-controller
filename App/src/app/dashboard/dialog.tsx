@@ -22,7 +22,7 @@ export function DashboardDialog({
         {trigger}
       </button>
       <dialog
-        className="glass-panel-strong fixed inset-0 m-auto flex max-h-[calc(100vh-2rem)] w-[min(92vw,46rem)] flex-col overflow-hidden rounded-lg p-0 text-[var(--color-text-primary)] shadow-[0_24px_70px_rgba(0,0,0,0.36)] backdrop:bg-[#020617]/72"
+        className="glass-panel-strong fixed inset-0 m-auto hidden max-h-[calc(100vh-2rem)] w-[min(92vw,46rem)] flex-col overflow-hidden rounded-lg p-0 text-[var(--color-text-primary)] shadow-[0_24px_70px_rgba(0,0,0,0.36)] backdrop:bg-[#020617]/72 open:flex"
         ref={dialogRef}
       >
         <header className="flex flex-none items-center justify-between border-b border-[var(--color-border)] px-5 py-4">

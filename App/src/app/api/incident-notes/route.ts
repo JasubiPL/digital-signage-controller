@@ -3,13 +3,14 @@ import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/server/auth/session";
-import { assertCanCommentIncidents } from "@/server/media/storage";
+import { assertCanCommentIncidents, isUuid } from "@/server/media/storage";
 
 export async function POST(request: Request) {
   const user = await requireUser("/dashboard/incidents");
   const body = await request.json().catch(() => null) as {
     body?: string;
     incidentId?: string;
+    parentNoteId?: string;
   } | null;
 
   if (!body?.incidentId || !body.body?.trim()) {
@@ -40,6 +41,28 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: permission.message }, { status: 403 });
   }
 
+  if (body.parentNoteId) {
+    if (!isUuid(body.parentNoteId)) {
+      return NextResponse.json({ error: "Comentario de respuesta invalido." }, { status: 400 });
+    }
+
+    const { data: parentNote, error: parentNoteError } = await supabase
+      .from("location_incident_notes")
+      .select("id")
+      .eq("id", body.parentNoteId)
+      .eq("incident_id", incident.id)
+      .eq("event_type", "note")
+      .maybeSingle();
+
+    if (parentNoteError) {
+      return NextResponse.json({ error: parentNoteError.message }, { status: 500 });
+    }
+
+    if (!parentNote) {
+      return NextResponse.json({ error: "Comentario de respuesta no encontrado." }, { status: 404 });
+    }
+  }
+
   const { data: note, error } = await supabase
     .from("location_incident_notes")
     .insert({
@@ -49,6 +72,7 @@ export async function POST(request: Request) {
       event_type: "note",
       incident_id: incident.id,
       location_id: incident.location_id,
+      parent_note_id: body.parentNoteId || null,
     })
     .select("id")
     .single();
@@ -58,6 +82,7 @@ export async function POST(request: Request) {
   }
 
   revalidatePath("/dashboard/incidents");
+  revalidatePath(`/dashboard/incidents/${incident.id}`);
 
   return NextResponse.json({ note }, { status: 201 });
 }

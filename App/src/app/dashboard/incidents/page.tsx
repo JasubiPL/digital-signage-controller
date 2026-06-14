@@ -1,21 +1,17 @@
-import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   FiAlertTriangle,
   FiClock,
-  FiImage,
-  FiMessageSquare,
   FiShield,
 } from "react-icons/fi";
 
 import {
-  deleteIncidentAttachment,
-  updateLocationIncident,
+  deleteLocationIncident,
 } from "@/app/dashboard/actions";
 
 import {
   buttonClass,
-  dangerButtonClass,
   EmptyState,
   Feedback,
   Field,
@@ -25,12 +21,11 @@ import {
 import { getDashboardContext } from "../data";
 import { DashboardDialog } from "../dialog";
 import {
-  AddNoteForm,
   CreateIncidentForm,
-  UploadIncidentAttachmentForm,
 } from "./incident-client-forms";
 import {
   ActionIconTrigger,
+  DeleteActionButton,
   ListingPrimaryAction,
   ListingTableShell,
   listingActionCellClass,
@@ -40,7 +35,6 @@ import {
   listingRowClass,
   listingTableClass,
 } from "../list-ui";
-import { SubmitButton } from "../submit-button";
 
 type IncidentsPageProps = {
   searchParams: Promise<{
@@ -84,31 +78,6 @@ type Incident = {
   status: string;
   title: string;
   updated_at: string;
-};
-
-type IncidentNote = {
-  author_id: string | null;
-  body: string;
-  company_id: string;
-  created_at: string;
-  event_type: string;
-  id: string;
-  incident_id: string;
-  location_id: string;
-};
-
-type IncidentAttachment = {
-  caption: string | null;
-  company_id: string;
-  created_at: string;
-  id: string;
-  incident_id: string;
-  location_id: string;
-  mime_type: string;
-  note_id: string | null;
-  original_name: string;
-  size_bytes: number;
-  status: string;
 };
 
 const incidentStatuses = ["open", "in_progress", "waiting", "resolved", "canceled"];
@@ -160,33 +129,9 @@ export default async function IncidentsPage({
       ])
     : [{ data: [] }, { data: [] }];
   const incidents = (incidentResult.data ?? []) as Incident[];
-  const incidentIds = incidents.map((incident) => incident.id);
-  const [{ data: notes }, { data: attachments }] = incidentIds.length
-    ? await Promise.all([
-        supabase
-          .from("location_incident_notes")
-          .select("id, incident_id, company_id, location_id, author_id, body, event_type, created_at")
-          .in("incident_id", incidentIds)
-          .order("created_at", { ascending: true }),
-        supabase
-          .from("location_incident_attachments")
-          .select("id, incident_id, note_id, company_id, location_id, original_name, mime_type, size_bytes, caption, status, created_at")
-          .in("incident_id", incidentIds)
-          .eq("status", "active")
-          .order("created_at", { ascending: true }),
-      ])
-    : [{ data: [] }, { data: [] }];
   const typedLocations = (locations ?? []) as Location[];
-  const typedNotes = (notes ?? []) as IncidentNote[];
-  const typedAttachments = (attachments ?? []) as IncidentAttachment[];
   const companyById = new Map(companies.map((company) => [company.id, company]));
   const locationById = new Map(typedLocations.map((location) => [location.id, location]));
-  const notesByIncident = groupBy(typedNotes, "incident_id");
-  const attachmentsByIncident = groupBy(typedAttachments, "incident_id");
-  const attachmentsByNote = groupBy(
-    typedAttachments.filter((attachment) => attachment.note_id),
-    "note_id",
-  );
 
   return (
     <div className="mx-auto flex w-full flex-col gap-6">
@@ -276,21 +221,17 @@ export default async function IncidentsPage({
                     {incident.assignee_name || "Sin asignar"}
                   </td>
                   <td className={listingActionCellClass}>
-                    <div className="flex justify-center">
-                      <DashboardDialog
-                        title={incident.title}
-                        trigger={<ActionIconTrigger label="Ver incidente" tone="view" />}
-                      >
-                        <IncidentDetail
-                          attachments={attachmentsByIncident.get(incident.id) ?? []}
-                          attachmentsByNote={attachmentsByNote}
-                          canManage={access.isGlobalAdmin}
-                          companies={companies}
-                          incident={incident}
-                          location={locationById.get(incident.location_id)}
-                          notes={notesByIncident.get(incident.id) ?? []}
-                        />
-                      </DashboardDialog>
+                    <div className="flex justify-center gap-2">
+                      <Link href={`/dashboard/incidents/${incident.id}`}>
+                        <ActionIconTrigger label="Ver incidente" tone="view" />
+                      </Link>
+                      {access.isGlobalAdmin ? (
+                        <form action={deleteLocationIncident}>
+                          <input name="returnPath" type="hidden" value="/dashboard/incidents" />
+                          <input name="id" type="hidden" value={incident.id} />
+                          <DeleteActionButton label={`Eliminar ${incident.title}`} />
+                        </form>
+                      ) : null}
                     </div>
                   </td>
                 </tr>
@@ -402,180 +343,6 @@ function IncidentFilters({
   );
 }
 
-function IncidentDetail({
-  attachments,
-  attachmentsByNote,
-  canManage,
-  companies,
-  incident,
-  location,
-  notes,
-}: Readonly<{
-  attachments: IncidentAttachment[];
-  attachmentsByNote: Map<string | null, IncidentAttachment[]>;
-  canManage: boolean;
-  companies: Company[];
-  incident: Incident;
-  location?: Location;
-  notes: IncidentNote[];
-}>) {
-  const incidentAttachments = attachments.filter((attachment) => !attachment.note_id);
-
-  return (
-    <section className="grid gap-6">
-      <div className="grid gap-3 rounded-lg border border-[var(--color-border)] bg-[rgba(2,6,23,0.34)] p-4 text-sm text-[var(--color-text-secondary)]">
-        <div className="flex flex-wrap gap-2">
-          <IncidentBadge value={incident.status} />
-          <IncidentBadge value={incident.priority} />
-          <span className="rounded-full border border-[var(--color-border)] px-3 py-1.5 font-mono text-xs font-extrabold text-[var(--color-text-soft)]">
-            {categoryLabel(incident.category)}
-          </span>
-        </div>
-        <p className="leading-6">{incident.description}</p>
-        <p className="font-mono text-xs text-[var(--color-text-muted)]">
-          {brandLabel(companies.find((company) => company.id === incident.company_id))} · {location?.name ?? "Sin taquilla"} · Abierto {formatDateTime(incident.opened_at)}
-        </p>
-        {incident.resolution_summary ? (
-          <p className="rounded-md border border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] px-4 py-3 text-sm font-semibold text-[var(--color-primary-soft)]">
-            Resolucion: {incident.resolution_summary}
-          </p>
-        ) : null}
-      </div>
-
-      {canManage ? (
-        <AdminIncidentForm incident={incident} />
-      ) : null}
-
-      {canManage ? (
-        <UploadIncidentAttachmentForm incidentId={incident.id} />
-      ) : null}
-
-      <AttachmentGallery
-        attachments={incidentAttachments}
-        canManage={canManage}
-      />
-
-      <section className="grid gap-3">
-        <h3 className="font-display text-lg font-extrabold text-[var(--color-text-primary)]">
-          Comentarios y seguimiento
-        </h3>
-        <AddNoteForm incidentId={incident.id} />
-        {!notes.length ? (
-          <EmptyState>No hay comentarios registrados.</EmptyState>
-        ) : (
-          <div className="grid gap-3">
-            {notes.map((note) => (
-              <article
-                className="rounded-lg border border-[var(--color-border)] bg-[rgba(2,6,23,0.34)] p-4"
-                key={note.id}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <span className="inline-flex items-center gap-2 font-mono text-xs font-extrabold text-[var(--color-primary)]">
-                    <FiMessageSquare aria-hidden="true" />
-                    {eventLabel(note.event_type)}
-                  </span>
-                  <time className="font-mono text-xs text-[var(--color-text-muted)]">
-                    {formatDateTime(note.created_at)}
-                  </time>
-                </div>
-                <p className="mt-3 whitespace-pre-wrap text-sm font-semibold leading-6 text-[var(--color-text-secondary)]">
-                  {note.body}
-                </p>
-                <AttachmentGallery
-                  attachments={attachmentsByNote.get(note.id) ?? []}
-                  canManage={canManage}
-                  compact
-                />
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
-    </section>
-  );
-}
-
-function AdminIncidentForm({ incident }: Readonly<{ incident: Incident }>) {
-  return (
-    <form action={updateLocationIncident} className="grid gap-4 rounded-lg border border-[var(--color-border)] p-4">
-      <input name="returnPath" type="hidden" value="/dashboard/incidents" />
-      <input name="id" type="hidden" value={incident.id} />
-      <Field label="Titulo">
-        <input className={inputClass} defaultValue={incident.title} name="title" required />
-      </Field>
-      <Field label="Descripcion">
-        <textarea className={inputClass} defaultValue={incident.description} name="description" required rows={3} />
-      </Field>
-      <section className="grid gap-4 md:grid-cols-4">
-        <CategoryField defaultValue={incident.category} />
-        <PriorityField defaultValue={incident.priority} />
-        <StatusField defaultValue={incident.status} />
-        <Field label="Responsable">
-          <input className={inputClass} defaultValue={incident.assignee_name ?? ""} name="assigneeName" />
-        </Field>
-      </section>
-      <Field label="Resumen de resolucion">
-        <textarea className={inputClass} defaultValue={incident.resolution_summary ?? ""} name="resolutionSummary" rows={2} />
-      </Field>
-      <Field label="Nota opcional">
-        <textarea className={inputClass} name="note" rows={2} />
-      </Field>
-      <SubmitButton className={buttonClass} pendingLabel="Guardando...">
-        Guardar incidente
-      </SubmitButton>
-    </form>
-  );
-}
-
-function AttachmentGallery({
-  attachments,
-  canManage,
-  compact = false,
-}: Readonly<{
-  attachments: IncidentAttachment[];
-  canManage: boolean;
-  compact?: boolean;
-}>) {
-  if (!attachments.length) return null;
-
-  return (
-    <section className={`grid gap-3 ${compact ? "mt-4 grid-cols-2" : "grid-cols-2 md:grid-cols-3"}`}>
-      {attachments.map((attachment) => (
-        <figure
-          className="overflow-hidden rounded-lg border border-[var(--color-border)] bg-[rgba(2,6,23,0.5)]"
-          key={attachment.id}
-        >
-          <a href={`/api/incident-attachments/${attachment.id}`} rel="noreferrer" target="_blank">
-            <Image
-              alt={attachment.caption || attachment.original_name}
-              className="h-36 w-full object-cover"
-              height={144}
-              src={`/api/incident-attachments/${attachment.id}`}
-              unoptimized
-              width={240}
-            />
-          </a>
-          <figcaption className="grid gap-2 px-3 py-3 text-xs font-semibold text-[var(--color-text-muted)]">
-            <span className="inline-flex items-center gap-2">
-              <FiImage aria-hidden="true" />
-              {attachment.caption || attachment.original_name}
-            </span>
-            {canManage ? (
-              <form action={deleteIncidentAttachment}>
-                <input name="returnPath" type="hidden" value="/dashboard/incidents" />
-                <input name="id" type="hidden" value={attachment.id} />
-                <SubmitButton className={`${dangerButtonClass} w-full`} pendingLabel="Eliminando...">
-                  Eliminar imagen
-                </SubmitButton>
-              </form>
-            ) : null}
-          </figcaption>
-        </figure>
-      ))}
-    </section>
-  );
-}
-
 function IncidentMetric({
   icon,
   label,
@@ -595,48 +362,6 @@ function IncidentMetric({
         {value}
       </p>
     </article>
-  );
-}
-
-function CategoryField({ defaultValue = "other" }: Readonly<{ defaultValue?: string }>) {
-  return (
-    <Field label="Categoria">
-      <select className={inputClass} defaultValue={defaultValue} name="category">
-        {incidentCategories.map((category) => (
-          <option key={category} value={category}>
-            {categoryLabel(category)}
-          </option>
-        ))}
-      </select>
-    </Field>
-  );
-}
-
-function PriorityField({ defaultValue = "medium" }: Readonly<{ defaultValue?: string }>) {
-  return (
-    <Field label="Prioridad">
-      <select className={inputClass} defaultValue={defaultValue} name="priority">
-        {incidentPriorities.map((priority) => (
-          <option key={priority} value={priority}>
-            {priorityLabel(priority)}
-          </option>
-        ))}
-      </select>
-    </Field>
-  );
-}
-
-function StatusField({ defaultValue = "open" }: Readonly<{ defaultValue?: string }>) {
-  return (
-    <Field label="Estado">
-      <select className={inputClass} defaultValue={defaultValue} name="status">
-        {incidentStatuses.map((status) => (
-          <option key={status} value={status}>
-            {statusLabel(status)}
-          </option>
-        ))}
-      </select>
-    </Field>
   );
 }
 
@@ -660,19 +385,6 @@ function IncidentBadge({ value }: Readonly<{ value: string }>) {
 
 function validOption(value: string | undefined, options: string[]) {
   return value && options.includes(value) ? value : undefined;
-}
-
-function groupBy<T>(items: T[], key: keyof T) {
-  const map = new Map<string | null, T[]>();
-
-  for (const item of items) {
-    const value = String(item[key] ?? "");
-    const current = map.get(value) ?? [];
-    current.push(item);
-    map.set(value, current);
-  }
-
-  return map;
 }
 
 function brandLabel(company?: Company) {
@@ -720,18 +432,6 @@ function statusLabel(value: string) {
   };
 
   return labels[value] ?? "";
-}
-
-function eventLabel(value: string) {
-  const labels: Record<string, string> = {
-    assignment_change: "Responsable",
-    note: "Comentario",
-    priority_change: "Prioridad",
-    resolution: "Resolucion",
-    status_change: "Estado",
-  };
-
-  return labels[value] ?? value;
 }
 
 function formatDateTime(value: string) {

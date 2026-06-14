@@ -136,10 +136,13 @@ function incidentImageFiles(formData: FormData, key = "images") {
 
 async function revalidateIncidentPaths(
   supabase: SupabaseClient,
-  input: { companyId?: string | null } = {},
+  input: { companyId?: string | null; incidentId?: string | null } = {},
 ) {
   revalidatePath("/dashboard/incidents");
   revalidatePath("/dashboard/locations");
+  if (input.incidentId) {
+    revalidatePath(`/dashboard/incidents/${input.incidentId}`);
+  }
 
   if (!input.companyId) return;
 
@@ -822,7 +825,10 @@ export async function createLocationIncident(formData: FormData) {
       companyId: incident.company_id,
       locationId: incident.location_id,
     });
-    await revalidateIncidentPaths(supabase, { companyId: incident.company_id });
+    await revalidateIncidentPaths(supabase, {
+      companyId: incident.company_id,
+      incidentId: incident.id,
+    });
     finish(path, "success", "Incidente creado.");
   } catch (error) {
     unstable_rethrow(error);
@@ -885,7 +891,10 @@ export async function updateLocationIncident(formData: FormData) {
       companyId: incident.company_id,
       locationId: incident.location_id,
     });
-    await revalidateIncidentPaths(supabase, { companyId: incident.company_id });
+    await revalidateIncidentPaths(supabase, {
+      companyId: incident.company_id,
+      incidentId: incident.id,
+    });
     finish(path, "success", "Incidente actualizado.");
   } catch (error) {
     unstable_rethrow(error);
@@ -901,6 +910,113 @@ export async function resolveLocationIncident(formData: FormData) {
 export async function cancelLocationIncident(formData: FormData) {
   formData.set("status", "canceled");
   await updateLocationIncident(formData);
+}
+
+export async function updateLocationIncidentStatus(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/incidents");
+
+  try {
+    const user = await requireUser(path);
+    const id = field(formData, "id");
+    const supabase = await createClient();
+    const incident = await incidentForAction(supabase, id);
+
+    await assertCanManageCompany(incident.company_id);
+
+    const status = incidentStatus(formData);
+    const isResolved = status === "resolved" || status === "canceled";
+    const { error } = await supabase
+      .from("location_incidents")
+      .update({
+        resolved_at: isResolved ? new Date().toISOString() : null,
+        resolved_by: isResolved ? user.id : null,
+        status,
+      })
+      .eq("id", incident.id)
+      .eq("company_id", incident.company_id);
+
+    if (error) throw error;
+
+    const { error: noteError } = await supabase
+      .from("location_incident_notes")
+      .insert({
+        author_id: user.id,
+        body: `Estado actualizado a ${status}.`,
+        company_id: incident.company_id,
+        event_type: "status_change",
+        incident_id: incident.id,
+        location_id: incident.location_id,
+      });
+
+    if (noteError) throw noteError;
+
+    await syncLocationIncidentStatus(supabase, {
+      companyId: incident.company_id,
+      locationId: incident.location_id,
+    });
+    await revalidateIncidentPaths(supabase, {
+      companyId: incident.company_id,
+      incidentId: incident.id,
+    });
+    finish(path, "success", "Estado actualizado.");
+  } catch (error) {
+    unstable_rethrow(error);
+    finish(path, "error", errorMessage(error, "No se pudo actualizar el estado."));
+  }
+}
+
+export async function deleteLocationIncident(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/incidents");
+
+  try {
+    await requireUser(path);
+    const id = field(formData, "id");
+    const supabase = await createClient();
+    const incident = await incidentForAction(supabase, id);
+
+    await assertCanManageCompany(incident.company_id);
+
+    const { data: attachments, error: attachmentError } = await supabase
+      .from("location_incident_attachments")
+      .select("storage_path")
+      .eq("incident_id", incident.id)
+      .eq("company_id", incident.company_id);
+
+    if (attachmentError) throw attachmentError;
+
+    const storagePaths = (attachments ?? [])
+      .map((attachment) => attachment.storage_path)
+      .filter((storagePath): storagePath is string => Boolean(storagePath));
+
+    if (storagePaths.length) {
+      const { error: removeError } = await supabase.storage
+        .from(INCIDENT_IMAGE_BUCKET)
+        .remove(storagePaths);
+
+      if (removeError) throw removeError;
+    }
+
+    const { error } = await supabase
+      .from("location_incidents")
+      .delete()
+      .eq("id", incident.id)
+      .eq("company_id", incident.company_id);
+
+    if (error) throw error;
+
+    await syncLocationIncidentStatus(supabase, {
+      companyId: incident.company_id,
+      locationId: incident.location_id,
+    });
+    await revalidateIncidentPaths(supabase, {
+      companyId: incident.company_id,
+      incidentId: incident.id,
+    });
+    finish(path, "success", "Incidente eliminado.");
+  } catch (error) {
+    unstable_rethrow(error);
+    finish(path, "error", errorMessage(error, "No se pudo eliminar el incidente."));
+  }
 }
 
 export async function addLocationIncidentNote(formData: FormData) {
@@ -943,7 +1059,10 @@ export async function addLocationIncidentNote(formData: FormData) {
       noteId: note.id,
       uploadedBy: user.id,
     });
-    await revalidateIncidentPaths(supabase, { companyId: incident.company_id });
+    await revalidateIncidentPaths(supabase, {
+      companyId: incident.company_id,
+      incidentId: incident.id,
+    });
     finish(path, "success", "Comentario agregado.");
   } catch (error) {
     unstable_rethrow(error);
@@ -973,7 +1092,10 @@ export async function uploadIncidentAttachment(formData: FormData) {
       locationId: incident.location_id,
       uploadedBy: user.id,
     });
-    await revalidateIncidentPaths(supabase, { companyId: incident.company_id });
+    await revalidateIncidentPaths(supabase, {
+      companyId: incident.company_id,
+      incidentId: incident.id,
+    });
     finish(path, "success", "Imagen subida.");
   } catch (error) {
     unstable_rethrow(error);
@@ -990,7 +1112,7 @@ export async function deleteIncidentAttachment(formData: FormData) {
     const supabase = await createClient();
     const { data: attachment, error } = await supabase
       .from("location_incident_attachments")
-      .select("id, bucket, company_id, storage_path")
+      .select("id, bucket, company_id, incident_id, storage_path")
       .eq("id", id)
       .eq("status", "active")
       .maybeSingle();
@@ -1013,7 +1135,10 @@ export async function deleteIncidentAttachment(formData: FormData) {
 
     if (updateError) throw updateError;
 
-    await revalidateIncidentPaths(supabase, { companyId: attachment.company_id });
+    await revalidateIncidentPaths(supabase, {
+      companyId: attachment.company_id,
+      incidentId: attachment.incident_id,
+    });
     finish(path, "success", "Imagen eliminada.");
   } catch (error) {
     unstable_rethrow(error);
