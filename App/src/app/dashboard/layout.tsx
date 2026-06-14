@@ -1,5 +1,6 @@
 import { getDashboardContext } from "./data";
 import { DashboardSidebar } from "./sidebar";
+import { FiActivity } from "react-icons/fi";
 
 export default async function DashboardLayout({
   children,
@@ -24,13 +25,26 @@ export default async function DashboardLayout({
 
       <section className="flex min-h-screen flex-1 flex-col">
         <header className="sticky top-0 z-20 flex items-center justify-between border-b border-[var(--color-border)] bg-[rgba(6,14,32,0.86)] px-6 py-3 shadow-[0_14px_42px_rgba(0,0,0,0.22)] backdrop-blur-xl">
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-3">
             <DashboardSidebar
               canManageUsers={canManageUsers}
               companies={companies}
               homeHref={homeHref}
               mobile
             />
+            <div className="hidden min-w-0 items-center gap-3 lg:flex">
+              <span className="grid h-10 w-10 place-items-center rounded-lg border border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-[var(--color-primary)]">
+                <FiActivity aria-hidden="true" />
+              </span>
+              <div className="min-w-0">
+                <p className="font-display text-lg font-extrabold tracking-tight text-[var(--color-primary-soft)]">
+                  DS Controller
+                </p>
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+                  Gestor de taquillas
+                </p>
+              </div>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <p className="flex flex-col items-end text-sm font-extrabold text-[var(--color-text-primary)]">
