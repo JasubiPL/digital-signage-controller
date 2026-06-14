@@ -75,13 +75,13 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   ]);
 
   return (
-    <div className="mx-auto flex h-full w-full flex-col gap-8">
+    <div className="mx-auto flex h-full w-full flex-col gap-6">
       <PageHeader eyebrow="Dashboard" title="Panel privado">
       </PageHeader>
 
       <Feedback error={error} />
 
-      <section className="grid gap-5 md:grid-cols-4">
+      <section className="grid gap-4 md:grid-cols-4">
         <MetricCard
           helper="Activas y pendientes"
           icon={<FiRadio aria-hidden="true" />}
@@ -202,14 +202,14 @@ function MetricCard({
   value: number;
 }>) {
   return (
-    <article className="glass-panel group relative min-h-40 overflow-hidden rounded-lg px-7 py-6 transition hover:border-[var(--color-primary-border)] hover:bg-[rgba(34,211,238,0.055)]">
-      <div className="absolute right-5 top-5 text-7xl text-[rgba(148,163,184,0.08)] transition group-hover:text-[rgba(34,211,238,0.1)]">
+    <article className="glass-panel group relative min-h-32 overflow-hidden rounded-lg px-5 py-4 transition hover:border-[var(--color-primary-border)] hover:bg-[rgba(34,211,238,0.055)]">
+      <div className="absolute right-4 top-4 text-6xl text-[rgba(148,163,184,0.08)] transition group-hover:text-[rgba(34,211,238,0.1)]">
         {icon}
       </div>
-      <p className="mono-label relative text-lg font-extrabold text-[var(--color-primary)]">{label}</p>
-      <div className="relative mt-4 flex items-end justify-between gap-4">
-        <p className="font-display text-6xl font-extrabold tracking-tight text-[var(--color-text-primary)]">{value}</p>
-        <p className="max-w-28 pb-2 text-right text-sm font-semibold leading-5 text-[var(--color-text-muted)]">{helper}</p>
+      <p className="mono-label relative text-sm font-extrabold text-[var(--color-primary)]">{label}</p>
+      <div className="relative mt-3 flex items-end justify-between gap-3">
+        <p className="font-display text-5xl font-extrabold tracking-tight text-[var(--color-text-primary)]">{value}</p>
+        <p className="max-w-24 pb-1.5 text-right text-xs font-semibold leading-5 text-[var(--color-text-muted)]">{helper}</p>
       </div>
     </article>
   );
@@ -230,7 +230,7 @@ function StateCard({
       : "border-[var(--color-border)] bg-[rgba(15,23,42,0.64)] text-[var(--color-text-primary)]";
 
   return (
-    <section className={`rounded-lg border p-6 shadow-[0_18px_42px_rgba(0,0,0,0.14)] backdrop-blur-xl ${styles}`}>
+    <section className={`rounded-lg border p-6 ${styles}`}>
       <h2 className="font-display text-lg font-extrabold">{title}</h2>
       <div className="mt-3 text-sm font-semibold leading-6 text-[var(--color-text-soft)]">{children}</div>
     </section>

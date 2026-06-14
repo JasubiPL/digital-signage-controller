@@ -17,17 +17,17 @@ export function PageHeader({
   children?: React.ReactNode;
 }>) {
   return (
-    <section className="grid items-center gap-5 md:grid-cols-[1fr_auto_1fr]">
+    <section className="grid items-center gap-4 md:grid-cols-[1fr_auto_1fr]">
       <div>
-        <p className="mono-label text-sm font-extrabold text-[var(--color-primary)]">
+        <p className="mono-label text-xs font-extrabold text-[var(--color-primary)]">
           {eyebrow}
         </p>
       </div>
       <div className="text-center">
-        <h1 className="font-display text-4xl font-extrabold tracking-tight text-[var(--color-text-primary)]">
+        <h1 className="font-display text-3xl font-extrabold tracking-tight text-[var(--color-text-primary)]">
           {title}
         </h1>
-        <span className="mx-auto mt-4 block h-1 w-20 rounded-sm bg-[var(--color-primary)] shadow-[0_0_18px_rgba(34,211,238,0.45)]" />
+        <span className="mx-auto mt-3 block h-0.5 w-16 rounded-sm bg-[var(--color-primary)]" />
       </div>
       <div className="flex justify-start md:justify-end">{children}</div>
     </section>
@@ -47,18 +47,18 @@ export function Panel({
 }>) {
   return (
     <section className="glass-panel overflow-hidden rounded-lg">
-      <div className="border-b border-[var(--color-border)] px-7 py-5">
-        <h2 className="font-display text-xl font-extrabold tracking-tight text-[var(--color-text-primary)]">{title}</h2>
+      <div className="border-b border-[var(--color-border)] px-5 py-4">
+        <h2 className="font-display text-lg font-extrabold tracking-tight text-[var(--color-text-primary)]">{title}</h2>
       </div>
-      <div className="p-7">{children}</div>
+      <div className="p-5">{children}</div>
     </section>
   );
 }
 
 export function EmptyState({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="rounded-lg border border-dashed border-[var(--color-border-strong)] bg-[rgba(15,23,42,0.48)] px-6 py-10 text-center text-sm font-semibold text-[var(--color-text-muted)] shadow-[0_18px_42px_rgba(0,0,0,0.14)]">
-      <span className="mx-auto mb-4 block h-1 w-16 rounded-sm bg-[var(--color-primary)] opacity-70" />
+    <div className="rounded-lg border border-dashed border-[var(--color-border-strong)] bg-[rgba(15,23,42,0.48)] px-5 py-8 text-center text-sm font-semibold text-[var(--color-text-muted)]">
+      <span className="mx-auto mb-3 block h-0.5 w-14 rounded-sm bg-[var(--color-primary)] opacity-70" />
       <p>{children}</p>
     </div>
   );
@@ -80,16 +80,16 @@ export function Field({
 }
 
 export const inputClass =
-  "min-h-12 rounded-md border border-[var(--color-border)] bg-[rgba(2,6,23,0.72)] px-3 py-2 text-sm font-semibold text-[var(--color-text-primary)] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] outline-none transition placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary-border)] focus:bg-[rgba(6,14,32,0.95)] focus:ring-4 focus:ring-[rgba(34,211,238,0.12)] [&_option]:bg-[#060e20] [&_option]:text-[var(--color-text-primary)]";
+  "min-h-11 rounded-md border border-[var(--color-border)] bg-[rgba(2,6,23,0.72)] px-3 py-2 text-sm font-semibold text-[var(--color-text-primary)] outline-none transition placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary-border)] focus:bg-[rgba(6,14,32,0.95)] focus:ring-4 focus:ring-[rgba(34,211,238,0.1)] [&_option]:bg-[#060e20] [&_option]:text-[var(--color-text-primary)]";
 
 export const buttonClass =
-  "inline-flex min-h-12 items-center justify-center rounded-md border border-[var(--color-primary-border)] bg-[var(--color-primary)] px-6 py-2.5 text-sm font-extrabold text-[#001f25] shadow-[0_18px_36px_rgba(34,211,238,0.18)] transition-all hover:-translate-y-0.5 hover:bg-[var(--color-primary-soft)] hover:shadow-[0_22px_42px_rgba(34,211,238,0.24)] active:scale-95";
+  "inline-flex min-h-11 items-center justify-center rounded-md border border-[var(--color-primary-border)] bg-[var(--color-primary)] px-5 py-2 text-sm font-extrabold text-[#001f25] transition-all hover:-translate-y-0.5 hover:bg-[var(--color-primary-soft)] hover:shadow-[0_18px_36px_rgba(34,211,238,0.18)] active:scale-95";
 
 export const dangerButtonClass =
-  "inline-flex min-h-10 items-center justify-center rounded-md border border-[rgba(244,63,94,0.34)] bg-[var(--color-secondary-muted)] px-4 py-2 text-sm font-extrabold text-[var(--color-secondary-soft)] shadow-[0_14px_28px_rgba(244,63,94,0.08)] transition-all hover:-translate-y-0.5 hover:border-[var(--color-secondary)] hover:bg-[rgba(244,63,94,0.18)] active:scale-95";
+  "inline-flex min-h-10 items-center justify-center rounded-md border border-[rgba(244,63,94,0.34)] bg-[var(--color-secondary-muted)] px-4 py-2 text-sm font-extrabold text-[var(--color-secondary-soft)] transition-all hover:-translate-y-0.5 hover:border-[var(--color-secondary)] hover:bg-[rgba(244,63,94,0.18)] hover:shadow-[0_14px_28px_rgba(244,63,94,0.12)] active:scale-95";
 
 export const ghostButtonClass =
-  "inline-flex min-h-12 items-center justify-center rounded-md border border-[var(--color-border)] bg-[rgba(19,27,46,0.72)] px-5 py-2 text-sm font-extrabold text-[var(--color-text-secondary)] shadow-[0_14px_28px_rgba(0,0,0,0.12)] transition hover:-translate-y-0.5 hover:border-[var(--color-primary-border)] hover:bg-[var(--color-primary-muted)] hover:text-[var(--color-primary-soft)]";
+  "inline-flex min-h-11 items-center justify-center rounded-md border border-[var(--color-border)] bg-[rgba(19,27,46,0.72)] px-4 py-2 text-sm font-extrabold text-[var(--color-text-secondary)] transition hover:-translate-y-0.5 hover:border-[var(--color-primary-border)] hover:bg-[var(--color-primary-muted)] hover:text-[var(--color-primary-soft)] hover:shadow-[0_12px_24px_rgba(34,211,238,0.1)]";
 
 export function DashboardLink({
   children,
@@ -124,19 +124,22 @@ export function StatusBadge({ children }: Readonly<{ children: React.ReactNode }
     viewer: "Consulta",
   };
   const isGood = value === "ok" || value === "active" || value === "super_admin";
-  const isWarning = value === "remodeling" || value === "draft" || value === "maintenance";
+  const isWarning = value === "remodeling" || value === "maintenance";
+  const isPending = value === "draft";
   const isDanger = value === "incident" || value === "archived" || value === "inactive";
   const color = isGood
     ? "border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-[var(--color-primary-soft)]"
     : isWarning
-      ? "border-[rgba(255,177,59,0.34)] bg-[var(--color-tertiary-muted)] text-[var(--color-tertiary-soft)]"
-      : isDanger
-        ? "border-[rgba(244,63,94,0.34)] bg-[var(--color-secondary-muted)] text-[var(--color-secondary-soft)]"
-        : "border-[var(--color-border)] bg-[rgba(148,163,184,0.08)] text-[var(--color-text-soft)]";
+      ? "border-[rgba(244,63,94,0.34)] bg-[var(--color-secondary-muted)] text-[var(--color-secondary-soft)]"
+      : isPending
+        ? "border-[rgba(255,177,59,0.34)] bg-[var(--color-tertiary-muted)] text-[var(--color-tertiary-soft)]"
+        : isDanger
+          ? "border-[rgba(244,63,94,0.34)] bg-[var(--color-secondary-muted)] text-[var(--color-secondary-soft)]"
+          : "border-[var(--color-border)] bg-[rgba(148,163,184,0.08)] text-[var(--color-text-soft)]";
 
   return (
-    <span className={`inline-flex min-w-28 items-center justify-center gap-2 rounded-md border px-4 py-2 font-mono text-xs font-extrabold ${color}`}>
-      <span className="h-1.5 w-1.5 rounded-full bg-current shadow-[0_0_10px_currentColor]" />
+    <span className={`inline-flex min-w-24 items-center justify-center gap-2 rounded-full border px-3.5 py-1.5 font-mono text-xs font-extrabold ${color}`}>
+      <span className="h-1.5 w-1.5 rounded-full bg-current" />
       {labelByStatus[value] ?? children}
     </span>
   );

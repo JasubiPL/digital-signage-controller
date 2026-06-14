@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
 :root {
@@ -7,13 +8,13 @@
   --foreground: #dae2fd;
 
   --color-background: #020617;
-  --color-background-grid: rgba(138, 235, 255, 0.045);
+  --color-background-grid: rgba(138, 235, 255, 0.032);
   --color-surface: #0b1326;
   --color-surface-low: #060e20;
   --color-surface-raised: #131b2e;
-  --color-surface-panel: rgba(15, 23, 42, 0.72);
-  --color-surface-panel-strong: rgba(19, 27, 46, 0.92);
-  --color-surface-hover: rgba(34, 42, 61, 0.82);
+  --color-surface-panel: rgba(15, 23, 42, 0.9);
+  --color-surface-panel-strong: rgba(19, 27, 46, 0.96);
+  --color-surface-hover: rgba(31, 41, 58, 0.88);
   --color-text-primary: #eef4ff;
   --color-text-secondary: #dae2fd;
   --color-text-muted: #96a3b8;
@@ -22,8 +23,8 @@
   --color-border-strong: rgba(138, 235, 255, 0.3);
   --color-primary: #22d3ee;
   --color-primary-soft: #8aebff;
-  --color-primary-muted: rgba(34, 211, 238, 0.12);
-  --color-primary-border: rgba(34, 211, 238, 0.42);
+  --color-primary-muted: rgba(34, 211, 238, 0.1);
+  --color-primary-border: rgba(34, 211, 238, 0.32);
   --color-secondary: #f43f5e;
   --color-secondary-soft: #ffb2b7;
   --color-secondary-muted: rgba(244, 63, 94, 0.12);
@@ -36,16 +37,16 @@
   --color-info: #8aebff;
 
   --font-display: "Sora", "Avenir Next", "Aptos", "Segoe UI", sans-serif;
-  --font-body: "Hanken Grotesk", "Avenir Next", "Aptos", "Segoe UI", sans-serif;
+  --font-body: "Sora", "Avenir Next", "Aptos", "Segoe UI", sans-serif;
   --font-label: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 
   --radius-sm: 0.25rem;
   --radius-md: 0.375rem;
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
-  --shadow-glow-cyan: 0 0 24px rgba(34, 211, 238, 0.2);
-  --shadow-glow-rose: 0 0 24px rgba(244, 63, 94, 0.18);
-  --shadow-panel: 0 24px 80px rgba(0, 0, 0, 0.34);
+  --shadow-glow-cyan: 0 0 18px rgba(34, 211, 238, 0.18);
+  --shadow-glow-rose: 0 0 18px rgba(244, 63, 94, 0.16);
+  --shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.22);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --duration-fast: 140ms;
   --duration-base: 220ms;
@@ -79,34 +80,26 @@ body {
 
 .noc-grid {
   background:
-    radial-gradient(circle at 24% 0%, rgba(34, 211, 238, 0.12), transparent 28rem),
-    radial-gradient(circle at 88% 12%, rgba(244, 63, 94, 0.08), transparent 26rem),
     linear-gradient(var(--color-background-grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--color-background-grid) 1px, transparent 1px),
-    linear-gradient(135deg, #020617 0%, #08111f 46%, #0b1326 100%);
-  background-size: auto, auto, 64px 64px, 64px 64px, auto;
+    linear-gradient(135deg, #020617 0%, #07111f 52%, #0b1326 100%);
+  background-size: 64px 64px, 64px 64px, auto;
 }
 
 .glass-panel {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0) 32%),
-    var(--color-surface-panel);
+  background: var(--color-surface-panel);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-panel);
-  backdrop-filter: blur(20px);
 }
 
 .glass-panel-strong {
-  background:
-    linear-gradient(180deg, rgba(138, 235, 255, 0.08), rgba(138, 235, 255, 0) 34%),
-    var(--color-surface-panel-strong);
+  background: var(--color-surface-panel-strong);
   border: 1px solid var(--color-border-strong);
-  box-shadow: var(--shadow-panel), var(--shadow-glow-cyan);
-  backdrop-filter: blur(28px);
+  box-shadow: var(--shadow-panel);
 }
 
 .cyan-glow {
-  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.24), var(--shadow-glow-cyan);
+  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.22);
 }
 
 .mono-label {
@@ -145,13 +138,10 @@ body {
 }
 
 .login-shell {
-  --login-red: #d40000;
-  --login-ink: #171b22;
   background:
-    linear-gradient(180deg, var(--login-red) 0 6px, transparent 6px),
-    radial-gradient(circle at 50% 26%, rgba(255, 255, 255, 0.98), transparent 24rem),
-    linear-gradient(135deg, #f8f9fb 0%, #ffffff 45%, #f7f8fa 100%);
-  font-family: "Avenir Next", "Aptos", "Segoe UI", sans-serif;
+    linear-gradient(180deg, rgba(2, 8, 23, 0.98), #07121f 54%, #050b16);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
   position: relative;
 }
 
@@ -164,64 +154,37 @@ body {
 
 .login-shell::before {
   background:
-    linear-gradient(135deg, transparent 0 44%, rgba(255, 255, 255, 0.86) 44% 44.3%, transparent 44.3%),
-    linear-gradient(315deg, transparent 0 47%, rgba(255, 255, 255, 0.72) 47% 47.25%, transparent 47.25%);
-  inset: 6px 0 0;
-  opacity: 0.95;
+    linear-gradient(90deg, rgba(138, 235, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(138, 235, 255, 0.035) 1px, transparent 1px);
+  background-size: 8rem 8rem;
+  inset: 0;
+  mask-image: linear-gradient(180deg, black, transparent 86%);
+  opacity: 0.58;
 }
 
 .login-shell::after {
-  background:
-    radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.96), transparent 32rem),
-    linear-gradient(135deg, transparent 0 45%, rgba(222, 226, 232, 0.6) 45% 45.15%, transparent 45.15%),
-    linear-gradient(315deg, transparent 0 48%, rgba(222, 226, 232, 0.5) 48% 48.15%, transparent 48.15%);
-  inset: 6px 0 0;
+  background: rgba(34, 211, 238, 0.24);
+  height: 3px;
+  inset: 0 0 auto;
 }
 
 .login-grid-lines {
   background:
-    linear-gradient(135deg, transparent 0 49.8%, rgba(205, 211, 221, 0.38) 49.8% 50%, transparent 50%),
-    linear-gradient(315deg, transparent 0 50%, rgba(205, 211, 221, 0.24) 50% 50.16%, transparent 50.16%);
+    linear-gradient(135deg, transparent 0 49.8%, rgba(138, 235, 255, 0.045) 49.8% 50%, transparent 50%),
+    linear-gradient(315deg, transparent 0 50%, rgba(138, 235, 255, 0.035) 50% 50.16%, transparent 50.16%);
   inset: 0;
   mask-image: radial-gradient(circle at 50% 50%, black, transparent 78%);
   pointer-events: none;
   position: absolute;
 }
 
-.login-ribbon {
-  background: linear-gradient(135deg, rgba(212, 0, 0, 0.08), rgba(212, 0, 0, 0.02));
-  border-radius: 3.5rem;
-  filter: blur(0.2px);
-  height: 36rem;
-  pointer-events: none;
-  position: absolute;
-  right: -8rem;
-  top: 15rem;
-  transform: rotate(44deg);
-  width: 11rem;
-}
-
-.login-dot-field {
-  background-image: radial-gradient(circle, rgba(212, 0, 0, 0.72) 1.15px, transparent 1.25px);
-  background-size: 18px 18px;
-  bottom: 8rem;
-  height: 11rem;
-  left: 8vw;
-  mask-image: linear-gradient(135deg, transparent 0 12%, black 30%, transparent 88%);
-  opacity: 0.55;
-  pointer-events: none;
-  position: absolute;
-  transform: skewX(-24deg);
-  width: 13rem;
-}
-
 .login-card {
-  color: var(--login-ink);
+  color: var(--color-text-primary);
   position: relative;
 }
 
 .login-card::before {
-  border: 1px solid rgba(255, 255, 255, 0.74);
+  border: 1px solid rgba(138, 235, 255, 0.14);
   border-radius: inherit;
   content: "";
   inset: 1px;
@@ -232,10 +195,9 @@ body {
 .login-spinner {
   animation: login-spin 0.72s linear infinite;
   background:
-    radial-gradient(circle at 50% 0.12rem, #ffffff 0 0.14rem, transparent 0.15rem),
-    conic-gradient(from 35deg, #ffffff 0 76deg, rgba(255, 255, 255, 0.22) 76deg 360deg);
+    radial-gradient(circle at 50% 0.12rem, #052031 0 0.14rem, transparent 0.15rem),
+    conic-gradient(from 35deg, #052031 0 76deg, rgba(5, 32, 49, 0.22) 76deg 360deg);
   border-radius: 999px;
-  box-shadow: 0 0 16px rgba(255, 255, 255, 0.34);
   display: inline-block;
   height: 1.15rem;
   mask: radial-gradient(circle, transparent 0 38%, black 39%);
@@ -245,19 +207,5 @@ body {
 @keyframes login-spin {
   to {
     transform: rotate(360deg);
-  }
-}
-
-@media (max-width: 640px) {
-  .login-ribbon {
-    opacity: 0.65;
-    right: -10rem;
-    top: 22rem;
-  }
-
-  .login-dot-field {
-    bottom: 1.5rem;
-    left: -1rem;
-    opacity: 0.34;
   }
 }

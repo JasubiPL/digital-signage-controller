@@ -54,7 +54,7 @@ export default async function ScreensPage({ searchParams }: PageProps) {
   const locationById = new Map((locations ?? []).map((location) => [location.id, location]));
 
   return (
-    <div className="mx-auto flex w-full flex-col gap-8">
+    <div className="mx-auto flex w-full flex-col gap-6">
       <PageHeader eyebrow="Pantallas" title="Dispositivos y players" />
       <Feedback error={error} success={success} />
 
@@ -102,7 +102,7 @@ export default async function ScreensPage({ searchParams }: PageProps) {
       </Panel>
 
       <section className="grid gap-4">
-        <h2 className="text-2xl font-extrabold tracking-tight text-slate-800 theme-dark:text-slate-100">
+        <h2 className="font-display text-2xl font-extrabold tracking-tight text-[var(--color-text-primary)]">
           Pantallas ({screens?.length ?? 0})
         </h2>
         {!screens?.length ? (
@@ -123,7 +123,7 @@ export default async function ScreensPage({ searchParams }: PageProps) {
               <tbody>
                 {screens.map((screen) => (
                   <tr className={listingRowClass} key={screen.id}>
-                    <td className={`${listingCellClass} font-semibold text-slate-700 theme-dark:text-slate-100`}>{screen.name}</td>
+                    <td className={`${listingCellClass} font-semibold text-[var(--color-text-primary)]`}>{screen.name}</td>
                     <td className={listingCellClass}>{companyById.get(screen.company_id)?.name}</td>
                     <td className={listingCellClass}>
                       {screen.location_id

@@ -130,7 +130,7 @@ export async function LocationListPage({
   }
 
   return (
-    <div className="mx-auto flex w-full flex-col gap-8">
+    <div className="mx-auto flex w-full flex-col gap-6">
       <Feedback error={error} success={success} />
 
       <ListingHeader
@@ -198,7 +198,7 @@ export async function LocationListPage({
                       <LocationStatusBadge>{location.status}</LocationStatusBadge>
                     </td>
                     <td className={listingActionCellClass}>
-                      <div className="flex items-center justify-center gap-3">
+                      <div className="flex items-center justify-center gap-2">
                         <DashboardDialog
                           title={`Campañas en ${location.name}`}
                           trigger={<ActionIconTrigger label="Ver" tone="view" />}
@@ -293,12 +293,12 @@ function LocationStatusBadge({ children }: Readonly<{ children: React.ReactNode 
     value === "ok"
       ? "border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-[var(--color-primary-soft)]"
       : value === "remodeling"
-        ? "border-[rgba(255,177,59,0.34)] bg-[var(--color-tertiary-muted)] text-[var(--color-tertiary-soft)]"
+        ? "border-[rgba(244,63,94,0.34)] bg-[var(--color-secondary-muted)] text-[var(--color-secondary-soft)]"
         : "border-[rgba(244,63,94,0.34)] bg-[var(--color-secondary-muted)] text-[var(--color-secondary-soft)]";
 
   return (
-    <span className={`inline-flex min-w-36 items-center justify-center gap-2 rounded-md border px-4 py-2.5 font-mono text-sm font-bold ${tone}`}>
-      <span className="h-1.5 w-1.5 rounded-full bg-current shadow-[0_0_10px_currentColor]" />
+    <span className={`inline-flex min-w-28 items-center justify-center gap-2.5 rounded-full border px-4 py-1.5 font-mono text-xs font-extrabold ${tone}`}>
+      <span className="h-1.5 w-1.5 rounded-full bg-current" />
       {labelByStatus[value]}
     </span>
   );

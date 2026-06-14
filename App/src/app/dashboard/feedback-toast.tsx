@@ -27,8 +27,8 @@ export function FeedbackToast({
   if (!message) return null;
 
   const tone = error
-    ? "border-[rgba(244,63,94,0.34)] bg-[rgba(69,10,10,0.92)] text-[var(--color-secondary-soft)] shadow-[0_22px_60px_rgba(244,63,94,0.14)]"
-    : "border-[var(--color-primary-border)] bg-[rgba(6,14,32,0.94)] text-[var(--color-primary-soft)] shadow-[0_22px_60px_rgba(34,211,238,0.14)]";
+    ? "border-[rgba(244,63,94,0.34)] bg-[rgba(69,10,10,0.94)] text-[var(--color-secondary-soft)]"
+    : "border-[var(--color-primary-border)] bg-[rgba(6,14,32,0.96)] text-[var(--color-primary-soft)]";
   const iconTone = error
     ? "border-[rgba(244,63,94,0.38)] bg-[var(--color-secondary-muted)] text-[var(--color-secondary-soft)]"
     : "border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-[var(--color-primary-soft)]";
@@ -36,7 +36,7 @@ export function FeedbackToast({
   return (
     <div
       aria-live="polite"
-      className={`fixed left-1/2 top-6 z-[80] flex w-[min(92vw,38rem)] -translate-x-1/2 items-center gap-4 rounded-lg border px-7 py-5 text-base font-extrabold backdrop-blur-xl transition-all duration-300 ${
+      className={`fixed left-1/2 top-6 z-[80] flex w-[min(92vw,38rem)] -translate-x-1/2 items-center gap-4 rounded-lg border px-7 py-5 text-base font-extrabold transition-all duration-300 ${
         isVisible
           ? "translate-y-0 opacity-100"
           : "-translate-y-4 pointer-events-none opacity-0"

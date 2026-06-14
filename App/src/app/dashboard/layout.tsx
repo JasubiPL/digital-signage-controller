@@ -36,7 +36,7 @@ export default async function DashboardLayout({
       />
 
       <section className="flex min-h-screen flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-[var(--color-border)] bg-[rgba(6,14,32,0.86)] px-6 py-3 shadow-[0_14px_42px_rgba(0,0,0,0.22)] backdrop-blur-xl">
+        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-[var(--color-border)] bg-[rgba(6,14,32,0.96)] px-5 py-2">
           <div className="flex min-w-0 items-center gap-3">
             <DashboardSidebar
               canManageUsers={canManageUsers}
@@ -45,25 +45,25 @@ export default async function DashboardLayout({
               mobile
             />
           </div>
-          <div className="flex items-center gap-3">
-            <p className="flex flex-col items-end text-sm font-extrabold text-[var(--color-text-primary)]">
+          <div className="flex items-center gap-2.5">
+            <p className="flex flex-col items-end text-xs font-extrabold text-[var(--color-text-primary)]">
               <span>Hola {displayName}</span>
-              <small className="font-mono text-[10px] tracking-[0.08em] text-[var(--color-primary)]">
+              <small className="font-mono text-[9px] tracking-[0.08em] text-[var(--color-primary)]">
                 {email || "correo no disponible"}
               </small>
             </p>
-            <span className="relative grid h-12 w-12 place-items-center overflow-hidden rounded-full border border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] shadow-[0_0_26px_rgba(34,211,238,0.14)]">
+            <span className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-full border border-[var(--color-primary-border)] bg-[var(--color-primary-muted)]">
               <Image
                 alt={`Avatar de ${displayName}`}
                 className="h-full w-full object-cover"
-                height={48}
+                height={40}
                 src={avatarSrc}
-                width={48}
+                width={40}
               />
             </span>
           </div>
         </header>
-        <main className="h-full flex-1 overflow-y-auto px-6 py-8 lg:px-8">
+        <main className="h-full flex-1 overflow-y-auto px-5 py-6 lg:px-6">
           {children}
         </main>
       </section>

@@ -75,25 +75,25 @@ export function AssignmentStatusEditor({
   return (
     <>
       <span
-        className={`inline-flex min-w-28 items-center justify-center gap-2 rounded-md border px-4 py-2 font-mono text-xs font-extrabold ${statusTones[status]}`}
+        className={`inline-flex min-w-24 items-center justify-center gap-2 rounded-full border px-3.5 py-1.5 font-mono text-xs font-extrabold ${statusTones[status]}`}
       >
-        <span className="h-1.5 w-1.5 rounded-full bg-current shadow-[0_0_10px_currentColor]" />
+        <span className="h-1.5 w-1.5 rounded-full bg-current" />
         {statusLabels[status]}
       </span>
 
       <div className="flex justify-center">
         <button
-          className="inline-grid h-10 w-10 place-items-center rounded-md border border-[rgba(255,177,59,0.24)] bg-[rgba(255,177,59,0.08)] text-[var(--color-tertiary)] shadow-[0_14px_28px_rgba(0,0,0,0.12)] transition hover:-translate-y-0.5 hover:border-[var(--color-tertiary)] hover:bg-[var(--color-tertiary-muted)]"
+          className="inline-grid h-9 w-9 place-items-center rounded-md border border-[rgba(20,33,58,0.88)] bg-[rgba(3,10,24,0.86)] text-[var(--color-tertiary)] transition hover:-translate-y-0.5 hover:border-[rgba(255,177,59,0.42)] hover:bg-[rgba(7,18,37,0.96)] hover:text-[var(--color-tertiary-soft)] hover:shadow-[0_12px_24px_rgba(255,177,59,0.1)]"
           onClick={() => dialogRef.current?.showModal()}
           title="Editar estatus"
           type="button"
         >
           <span className="sr-only">Editar estatus</span>
-          <FiEdit3 aria-hidden="true" className="h-5 w-5" />
+          <FiEdit3 aria-hidden="true" className="h-4 w-4" />
         </button>
 
         <dialog
-          className="glass-panel-strong fixed inset-0 m-auto h-fit w-[min(92vw,28rem)] rounded-lg p-0 text-[var(--color-text-primary)] shadow-[0_28px_100px_rgba(0,0,0,0.48)] backdrop:bg-[#020617]/65 backdrop:backdrop-blur-[3px]"
+          className="glass-panel-strong fixed inset-0 m-auto h-fit w-[min(92vw,28rem)] rounded-lg p-0 text-[var(--color-text-primary)] shadow-[0_24px_70px_rgba(0,0,0,0.36)] backdrop:bg-[#020617]/72"
           ref={dialogRef}
         >
           <header className="flex items-center justify-between border-b border-[var(--color-border)] px-6 py-4">
@@ -107,7 +107,7 @@ export function AssignmentStatusEditor({
             </div>
             <button
               aria-label="Cerrar"
-              className="grid h-10 w-10 place-items-center rounded-md border border-[var(--color-border)] bg-[rgba(2,6,23,0.62)] text-[var(--color-text-muted)] shadow-[0_14px_28px_rgba(0,0,0,0.12)] transition hover:border-[var(--color-secondary)] hover:bg-[var(--color-secondary-muted)] hover:text-[var(--color-secondary-soft)]"
+              className="grid h-10 w-10 place-items-center rounded-md border border-[var(--color-border)] bg-[rgba(2,6,23,0.62)] text-[var(--color-text-muted)] transition hover:border-[var(--color-secondary)] hover:bg-[var(--color-secondary-muted)] hover:text-[var(--color-secondary-soft)] hover:shadow-[0_12px_24px_rgba(244,63,94,0.1)]"
               onClick={() => dialogRef.current?.close()}
               type="button"
             >

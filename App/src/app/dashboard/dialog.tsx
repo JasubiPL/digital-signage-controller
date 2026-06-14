@@ -22,24 +22,24 @@ export function DashboardDialog({
         {trigger}
       </button>
       <dialog
-        className="glass-panel-strong fixed inset-0 m-auto h-fit max-h-[calc(100vh-2rem)] w-[min(92vw,46rem)] rounded-lg p-0 text-[var(--color-text-primary)] shadow-[0_28px_100px_rgba(0,0,0,0.48)] backdrop:bg-[#020617]/65 backdrop:backdrop-blur-[3px]"
+        className="glass-panel-strong fixed inset-0 m-auto h-fit max-h-[calc(100vh-2rem)] w-[min(92vw,46rem)] rounded-lg p-0 text-[var(--color-text-primary)] shadow-[0_24px_70px_rgba(0,0,0,0.36)] backdrop:bg-[#020617]/72"
         ref={dialogRef}
       >
-        <header className="flex items-center justify-between border-b border-[var(--color-border)] px-7 py-5">
+        <header className="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-4">
           <div>
-            <h2 className="font-display text-xl font-extrabold tracking-tight text-[var(--color-text-primary)]">{title}</h2>
-            <span className="mt-3 block h-1 w-14 rounded-sm bg-[var(--color-primary)] shadow-[0_0_18px_rgba(34,211,238,0.45)]" />
+            <h2 className="font-display text-lg font-extrabold tracking-tight text-[var(--color-text-primary)]">{title}</h2>
+            <span className="mt-2.5 block h-0.5 w-12 rounded-sm bg-[var(--color-primary)]" />
           </div>
           <button
             aria-label="Cerrar"
-            className="grid h-10 w-10 place-items-center rounded-md border border-[var(--color-border)] bg-[rgba(2,6,23,0.62)] text-[var(--color-text-muted)] shadow-[0_14px_28px_rgba(0,0,0,0.12)] transition hover:border-[var(--color-secondary)] hover:bg-[var(--color-secondary-muted)] hover:text-[var(--color-secondary-soft)]"
+            className="grid h-10 w-10 place-items-center rounded-md border border-[var(--color-border)] bg-[rgba(2,6,23,0.62)] text-[var(--color-text-muted)] transition hover:border-[var(--color-secondary)] hover:bg-[var(--color-secondary-muted)] hover:text-[var(--color-secondary-soft)] hover:shadow-[0_12px_24px_rgba(244,63,94,0.1)]"
             onClick={() => dialogRef.current?.close()}
             type="button"
           >
             <FiX aria-hidden="true" className="h-5 w-5" />
           </button>
         </header>
-        <div className="max-h-[72vh] overflow-y-auto px-7 py-6">{children}</div>
+        <div className="max-h-[72vh] overflow-y-auto px-5 py-5">{children}</div>
       </dialog>
     </>
   );

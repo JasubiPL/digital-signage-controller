@@ -113,7 +113,7 @@ export async function CampaignListPage({
   }
 
   return (
-    <div className="mx-auto flex w-full flex-col gap-8">
+    <div className="mx-auto flex w-full flex-col gap-6">
       <Feedback error={error} success={success} />
 
       <ListingHeader
@@ -181,7 +181,7 @@ export async function CampaignListPage({
                       <ListingStatusBadge>{campaign.status}</ListingStatusBadge>
                     </td>
                     <td className={listingActionCellClass}>
-                      <div className="flex items-center justify-center gap-3">
+                      <div className="flex items-center justify-center gap-2">
                         <DashboardDialog
                           title={`Taquillas asignadas a ${campaign.name}`}
                           trigger={<ActionIconTrigger label="Ver" tone="view" />}

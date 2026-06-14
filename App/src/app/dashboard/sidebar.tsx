@@ -103,27 +103,27 @@ export function DashboardSidebar({
 
   return (
     <>
-      <aside className="hidden min-h-screen w-80 flex-col justify-between border-r border-[var(--color-border)] bg-[rgba(6,14,32,0.86)] shadow-[18px_0_60px_rgba(0,0,0,0.24)] backdrop-blur-xl lg:flex">
+      <aside className="hidden min-h-screen w-72 flex-col justify-between border-r border-[var(--color-border)] bg-[rgba(6,14,32,0.96)] lg:flex">
         <section className="min-h-0">
           <button
-            className="group mt-8 flex w-full items-center gap-4 px-8 text-left"
+            className="group mt-7 flex w-full items-center gap-3 px-6 text-left"
             onClick={() => navigate(defaultHref)}
             type="button"
           >
-            <span className="grid h-14 w-14 place-items-center rounded-lg border border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-[1.55rem] text-[var(--color-primary)] shadow-[0_0_24px_rgba(34,211,238,0.18)] transition group-hover:shadow-[0_0_32px_rgba(34,211,238,0.28)]">
+            <span className="grid h-11 w-11 place-items-center rounded-lg border border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-xl text-[var(--color-primary)] transition group-hover:border-[var(--color-primary)]">
               <FiGrid aria-hidden="true" />
             </span>
             <span className="grid">
-              <span className="font-display text-2xl font-extrabold leading-none tracking-tight text-[var(--color-primary-soft)]">
+              <span className="font-display text-xl font-extrabold leading-none tracking-tight text-[var(--color-primary-soft)]">
                 DS Controller
               </span>
-              <span className="mt-1 font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+              <span className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                 Gestor de taquillas
               </span>
             </span>
           </button>
 
-          <nav aria-label="Navegacion principal" className="mt-12 grid gap-2 px-5">
+          <nav aria-label="Navegacion principal" className="mt-10 grid gap-1.5 px-4">
             {canManageUsers ? (
               <SidebarLink
                 active={pathname === "/dashboard"}
@@ -182,9 +182,9 @@ export function DashboardSidebar({
           </nav>
         </section>
 
-        <form action="/logout" className="border-t border-[var(--color-border)] px-5 py-7" method="post">
-          <button className="flex min-h-14 w-full items-center justify-center gap-3 rounded-md border border-[var(--color-border)] bg-[rgba(19,27,46,0.74)] px-5 py-3 text-sm font-extrabold text-[var(--color-text-secondary)] shadow-[0_16px_34px_rgba(0,0,0,0.12)] transition hover:border-[var(--color-secondary)] hover:bg-[var(--color-secondary-muted)] hover:text-[var(--color-secondary-soft)]">
-            <FiLogOut aria-hidden="true" className="text-lg" />
+        <form action="/logout" className="border-t border-[var(--color-border)] px-4 py-5" method="post">
+          <button className="flex min-h-12 w-full items-center justify-center gap-2.5 rounded-md border border-[var(--color-border)] bg-[rgba(19,27,46,0.74)] px-4 py-2.5 text-sm font-extrabold text-[var(--color-text-secondary)] transition hover:border-[var(--color-secondary)] hover:bg-[var(--color-secondary-muted)] hover:text-[var(--color-secondary-soft)] hover:shadow-[0_14px_28px_rgba(244,63,94,0.1)]">
+            <FiLogOut aria-hidden="true" className="text-base" />
             Logout
           </button>
         </form>
@@ -220,30 +220,30 @@ function SidebarGroup({
     <section>
       <button
         aria-expanded={isOpen}
-        className={`relative flex min-h-14 w-full items-center justify-between rounded-md border px-5 py-3 text-left text-base font-extrabold transition ${
+        className={`relative flex min-h-11 w-full items-center justify-between rounded-md border px-4 py-2 text-left text-sm font-extrabold transition ${
           active
-            ? "border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-[var(--color-primary-soft)] shadow-[inset_4px_0_0_var(--color-primary),0_18px_38px_rgba(34,211,238,0.08)]"
+            ? "border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-[var(--color-primary-soft)] shadow-[inset_4px_0_0_var(--color-primary)]"
             : "border-transparent text-[var(--color-text-muted)] hover:border-[var(--color-border)] hover:bg-[rgba(19,27,46,0.7)] hover:text-[var(--color-primary-soft)]"
         }`}
         onClick={onToggle}
         type="button"
       >
-        <span className="flex items-center gap-4">
-          <span className="text-xl">{icon}</span>
+        <span className="flex items-center gap-3">
+          <span className="text-lg">{icon}</span>
           {title}
         </span>
         <ChevronIcon open={isOpen} />
       </button>
 
       {isOpen ? (
-        <div className="ml-7 mt-2 grid gap-1 border-l border-[var(--color-border)] pb-1 pl-8">
+        <div className="ml-6 mt-2 grid gap-1 border-l border-[var(--color-border)] pb-1 pl-6">
           {companies.map((company) => {
             const href = `${routeBase}/${company.slug}`;
             const active = pathname === href;
 
             return (
               <button
-                className={`relative min-h-10 rounded-md border px-4 py-2 text-left font-mono text-sm font-bold transition before:absolute before:-left-[2.05rem] before:top-1/2 before:h-px before:w-5 ${
+                className={`relative min-h-9 rounded-md border px-3 py-1.5 text-left font-mono text-xs font-bold transition before:absolute before:-left-[1.55rem] before:top-1/2 before:h-px before:w-4 ${
                   active
                     ? "border-[var(--color-primary-border)] bg-[rgba(34,211,238,0.08)] text-[var(--color-primary-soft)] before:bg-[var(--color-primary)]"
                     : "border-transparent text-[var(--color-text-muted)] before:bg-[var(--color-border)] hover:border-[var(--color-border)] hover:bg-[rgba(19,27,46,0.58)] hover:text-[var(--color-primary-soft)]"
@@ -277,15 +277,15 @@ function SidebarLink({
 }>) {
   return (
     <button
-      className={`relative flex min-h-14 w-full items-center gap-4 rounded-md border px-5 py-3 text-base font-extrabold transition ${
+      className={`relative flex min-h-11 w-full items-center gap-3 rounded-md border px-4 py-2 text-sm font-extrabold transition ${
         active
-          ? "border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-[var(--color-primary-soft)] shadow-[inset_4px_0_0_var(--color-primary),0_18px_38px_rgba(34,211,238,0.08)]"
+          ? "border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-[var(--color-primary-soft)] shadow-[inset_4px_0_0_var(--color-primary)]"
           : "border-transparent text-[var(--color-text-muted)] hover:border-[var(--color-border)] hover:bg-[rgba(19,27,46,0.7)] hover:text-[var(--color-primary-soft)]"
       }`}
       onClick={() => onNavigate(href)}
       type="button"
     >
-      <span className="text-xl">{icon}</span>
+      <span className="text-lg">{icon}</span>
       {children}
     </button>
   );
@@ -329,7 +329,7 @@ function ChevronIcon({ open }: Readonly<{ open: boolean }>) {
   return (
     <FiChevronRight
       aria-hidden="true"
-      className={`text-xl transition ${open ? "rotate-90" : ""}`}
+      className={`text-lg transition ${open ? "rotate-90" : ""}`}
     />
   );
 }
@@ -339,7 +339,7 @@ function DashboardLoadingOverlay() {
     <div
       aria-live="polite"
       aria-label="Cargando contenido"
-      className="fixed inset-0 z-50 grid place-items-center bg-[#020617]/62 backdrop-blur-[3px]"
+      className="fixed inset-0 z-50 grid place-items-center bg-[#020617]/72"
       role="status"
     >
       <div className="glass-panel-strong grid place-items-center gap-4 rounded-lg px-9 py-7">
