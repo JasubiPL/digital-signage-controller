@@ -28,13 +28,16 @@ Mientras no este configurado Supabase CLI con acceso al proyecto, aplicar desde 
 
 ## Aplicacion con Supabase CLI
 
-Cuando se configure Supabase CLI:
+Cuando se configure Supabase CLI, enlaza tu propio proyecto Supabase:
 
 ```sh
-supabase link --project-ref hlpgjwoeiykcditbwtvq
-supabase db push
-supabase db seed
+npm run supabase:link -- <tu-project-ref>
+npm run supabase:push
+npm run supabase:seed
 ```
+
+No publiques credenciales ni project refs privados si tu instancia no debe ser
+publica. Cada desarrollador puede enlazar su propio proyecto cloud o local.
 
 ## Nota
 

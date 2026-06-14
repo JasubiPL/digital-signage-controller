@@ -31,26 +31,19 @@ SUPABASE_SERVICE_ROLE_KEY=
 ## Desarrollo local
 
 ```sh
-cd App
 npm install
+npm run install:app
 npm run dev
 ```
 
 ## Build de produccion
 
 ```sh
-cd App
 npm run build
 npm run start
 ```
 
 ## Windows local/LAN
-
-El archivo `run-services.bat` ahora inicia solo la aplicacion Next.js:
-
-```text
-App/
-```
 
 Para exponer en LAN durante desarrollo usa:
 
@@ -71,7 +64,6 @@ Antes de usar produccion:
 ## Verificaciones previas
 
 ```sh
-cd App
 npm run lint
 npm run typecheck
 npm run build
