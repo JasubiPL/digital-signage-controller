@@ -113,7 +113,7 @@ export async function CampaignListPage({
   }
 
   return (
-    <div className="mx-auto flex w-full flex-col gap-8 font-['Avenir_Next','Aptos','Segoe_UI',sans-serif]">
+    <div className="mx-auto flex w-full flex-col gap-8">
       <Feedback error={error} success={success} />
 
       <ListingHeader
@@ -167,7 +167,7 @@ export async function CampaignListPage({
 
                 return (
                   <tr className={listingRowClass} key={campaign.id}>
-                    <td className={`${listingCellClass} font-semibold text-slate-700 theme-dark:text-slate-100`}>
+                    <td className={`${listingCellClass} font-semibold text-[var(--color-text-primary)]`}>
                       {campaign.name}
                     </td>
                     {!selectedCompany ? (
@@ -209,8 +209,8 @@ export async function CampaignListPage({
                               submitLabel="Guardar cambios"
                             />
 
-                            <section className="mt-6 border-t border-slate-200 pt-5 theme-dark:border-slate-700">
-                              <h3 className="text-sm font-extrabold text-slate-800 theme-dark:text-slate-100">
+                            <section className="mt-6 border-t border-[var(--color-border)] pt-5">
+                              <h3 className="mono-label text-sm font-extrabold text-[var(--color-text-primary)]">
                                 Taquillas asignadas
                               </h3>
                               <form action={syncCampaignLocations} className="mt-3 grid gap-3">
@@ -341,10 +341,10 @@ function AssignmentList({
     <ul className="grid gap-2">
       {items.map((item) => (
         <li
-          className="flex items-center justify-between rounded-md border border-slate-200 px-3 py-2 theme-dark:border-slate-700"
+          className="flex items-center justify-between gap-4 rounded-md border border-[var(--color-border)] bg-[rgba(2,6,23,0.34)] px-3 py-3"
           key={item.id}
         >
-          <span className="font-semibold text-slate-800 theme-dark:text-slate-200">{item.name}</span>
+          <span className="font-semibold text-[var(--color-text-primary)]">{item.name}</span>
           <StatusBadge>{item.helper}</StatusBadge>
         </li>
       ))}
@@ -368,10 +368,10 @@ function CheckboxList({
   }
 
   return (
-    <div className="grid max-h-48 gap-2 overflow-y-auto rounded-md border border-slate-200 p-3 theme-dark:border-slate-700">
+    <div className="grid max-h-48 gap-2 overflow-y-auto rounded-md border border-[var(--color-border)] bg-[rgba(2,6,23,0.34)] p-3">
       {items.map((item) => (
-        <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 theme-dark:text-slate-300" key={item.id}>
-          <input defaultChecked={checkedIds.includes(item.id)} name={name} type="checkbox" value={item.id} />
+        <label className="flex min-h-10 items-center gap-3 rounded-md border border-transparent px-3 py-2 text-sm font-semibold text-[var(--color-text-secondary)] transition hover:border-[var(--color-border)] hover:bg-[rgba(34,211,238,0.045)]" key={item.id}>
+          <input className="h-4 w-4 accent-[var(--color-primary)]" defaultChecked={checkedIds.includes(item.id)} name={name} type="checkbox" value={item.id} />
           {item.name}
         </label>
       ))}
