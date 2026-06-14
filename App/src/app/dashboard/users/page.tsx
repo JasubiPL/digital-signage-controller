@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 
 import {
@@ -134,8 +135,13 @@ export default async function UsersPage({ searchParams }: Readonly<UsersPageProp
             <tbody>
               {typedProfiles.map((profile) => (
                 <tr className={listingRowClass} key={profile.id}>
-                  <td className={`${listingCellClass} font-semibold text-slate-700 theme-dark:text-slate-100`}>
-                    {profile.full_name || "Sin nombre"}
+                  <td className={listingCellClass}>
+                    <div className="flex items-center gap-4">
+                      <UserAvatar profile={profile} />
+                      <span className="font-semibold text-[var(--color-text-primary)]">
+                        {profile.full_name || "Sin nombre"}
+                      </span>
+                    </div>
                   </td>
                   <td className={listingCellClass}>{profile.email}</td>
                   <td className={listingCellClass}>
@@ -168,6 +174,37 @@ export default async function UsersPage({ searchParams }: Readonly<UsersPageProp
       )}
     </div>
   );
+}
+
+function UserAvatar({ profile }: Readonly<{ profile: Profile }>) {
+  const displayName = profile.full_name || profile.email;
+
+  return (
+    <span className="relative grid h-12 w-12 flex-none place-items-center overflow-hidden rounded-full border border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] shadow-[0_0_18px_rgba(34,211,238,0.14)]">
+      <Image
+        alt={`Avatar de ${displayName}`}
+        className="h-full w-full object-cover"
+        height={48}
+        priority={false}
+        src={avatarSrcForProfile(profile)}
+        width={48}
+      />
+    </span>
+  );
+}
+
+function avatarSrcForProfile(profile: Profile) {
+  if (profile.global_role === "super_admin") {
+    return "/default-avatar/admin.png";
+  }
+
+  const variants = ["/default-avatar/consultant.png", "/default-avatar/manager.png"];
+  const hash = Array.from(profile.id || profile.email).reduce(
+    (sum, char) => sum + char.charCodeAt(0),
+    0,
+  );
+
+  return variants[hash % variants.length];
 }
 
 function UsersShell({

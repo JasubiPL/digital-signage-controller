@@ -1,6 +1,7 @@
+import Image from "next/image";
+
 import { getDashboardContext } from "./data";
 import { DashboardSidebar } from "./sidebar";
-import { FiActivity } from "react-icons/fi";
 
 export default async function DashboardLayout({
   children,
@@ -14,6 +15,17 @@ export default async function DashboardLayout({
     : companies[0]
       ? `/dashboard/locations/${companies[0].slug}`
       : "/dashboard/locations";
+  const email = user.email ?? "";
+  const displayName =
+    user.user_metadata?.full_name ??
+    user.user_metadata?.name ??
+    email.split("@")[0] ??
+    "usuario";
+  const avatarSrc = avatarSrcForHeaderUser({
+    email,
+    id: user.id,
+    isGlobalAdmin: canManageUsers,
+  });
 
   return (
     <div className="noc-grid flex min-h-screen font-sans text-[var(--color-text-primary)]">
@@ -32,29 +44,22 @@ export default async function DashboardLayout({
               homeHref={homeHref}
               mobile
             />
-            <div className="hidden min-w-0 items-center gap-3 lg:flex">
-              <span className="grid h-10 w-10 place-items-center rounded-lg border border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-[var(--color-primary)]">
-                <FiActivity aria-hidden="true" />
-              </span>
-              <div className="min-w-0">
-                <p className="font-display text-lg font-extrabold tracking-tight text-[var(--color-primary-soft)]">
-                  DS Controller
-                </p>
-                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
-                  Gestor de taquillas
-                </p>
-              </div>
-            </div>
           </div>
           <div className="flex items-center gap-3">
             <p className="flex flex-col items-end text-sm font-extrabold text-[var(--color-text-primary)]">
-              <span>Hola {user.email?.split("@")[0] ?? "usuario"}</span>
-              <small className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-primary)]">
-                Supabase Auth
+              <span>Hola {displayName}</span>
+              <small className="font-mono text-[10px] tracking-[0.08em] text-[var(--color-primary)]">
+                {email || "correo no disponible"}
               </small>
             </p>
-            <span className="grid h-12 w-12 place-items-center rounded-full border border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-sm font-extrabold text-[var(--color-primary-soft)] shadow-[0_0_26px_rgba(34,211,238,0.14)]">
-              {(user.email?.[0] ?? "U").toUpperCase()}
+            <span className="relative grid h-12 w-12 place-items-center overflow-hidden rounded-full border border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] shadow-[0_0_26px_rgba(34,211,238,0.14)]">
+              <Image
+                alt={`Avatar de ${displayName}`}
+                className="h-full w-full object-cover"
+                height={48}
+                src={avatarSrc}
+                width={48}
+              />
             </span>
           </div>
         </header>
@@ -64,4 +69,26 @@ export default async function DashboardLayout({
       </section>
     </div>
   );
+}
+
+function avatarSrcForHeaderUser({
+  email,
+  id,
+  isGlobalAdmin,
+}: Readonly<{
+  email: string;
+  id: string;
+  isGlobalAdmin: boolean;
+}>) {
+  if (isGlobalAdmin) {
+    return "/default-avatar/admin.png";
+  }
+
+  const variants = ["/default-avatar/consultant.png", "/default-avatar/manager.png"];
+  const hash = Array.from(id || email).reduce(
+    (sum, char) => sum + char.charCodeAt(0),
+    0,
+  );
+
+  return variants[hash % variants.length];
 }

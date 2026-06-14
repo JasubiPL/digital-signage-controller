@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { FiCheck, FiX } from "react-icons/fi";
 
 export function FeedbackToast({
   error,
@@ -26,23 +27,23 @@ export function FeedbackToast({
   if (!message) return null;
 
   const tone = error
-    ? "border-red-200 bg-red-50 text-red-950 shadow-red-950/15 theme-dark:border-red-900/60 theme-dark:bg-red-950 theme-dark:text-red-100"
-    : "border-emerald-200 bg-emerald-50 text-emerald-950 shadow-emerald-950/15 theme-dark:border-emerald-900/60 theme-dark:bg-emerald-950 theme-dark:text-emerald-100";
+    ? "border-[rgba(244,63,94,0.34)] bg-[rgba(69,10,10,0.92)] text-[var(--color-secondary-soft)] shadow-[0_22px_60px_rgba(244,63,94,0.14)]"
+    : "border-[var(--color-primary-border)] bg-[rgba(6,14,32,0.94)] text-[var(--color-primary-soft)] shadow-[0_22px_60px_rgba(34,211,238,0.14)]";
   const iconTone = error
-    ? "bg-red-600 text-white theme-dark:bg-red-500"
-    : "bg-emerald-600 text-white theme-dark:bg-emerald-500";
+    ? "border-[rgba(244,63,94,0.38)] bg-[var(--color-secondary-muted)] text-[var(--color-secondary-soft)]"
+    : "border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-[var(--color-primary-soft)]";
 
   return (
     <div
       aria-live="polite"
-      className={`fixed left-1/2 top-6 z-[80] flex w-[min(92vw,38rem)] -translate-x-1/2 items-center gap-4 rounded-lg border px-7 py-5 text-base font-extrabold shadow-2xl transition-all duration-300 ${
+      className={`fixed left-1/2 top-6 z-[80] flex w-[min(92vw,38rem)] -translate-x-1/2 items-center gap-4 rounded-lg border px-7 py-5 text-base font-extrabold backdrop-blur-xl transition-all duration-300 ${
         isVisible
           ? "translate-y-0 opacity-100"
           : "-translate-y-4 pointer-events-none opacity-0"
       } ${tone}`}
       role={error ? "alert" : "status"}
     >
-      <span className={`grid h-12 w-12 flex-none place-items-center rounded-full ${iconTone}`}>
+      <span className={`grid h-12 w-12 flex-none place-items-center rounded-md border ${iconTone}`}>
         {error ? <ErrorIcon /> : <SuccessIcon />}
       </span>
       <span className="leading-6">{message}</span>
@@ -51,28 +52,9 @@ export function FeedbackToast({
 }
 
 function SuccessIcon() {
-  return (
-    <svg aria-hidden="true" className="h-7 w-7" fill="none" viewBox="0 0 24 24">
-      <path
-        d="m6.5 12.5 3.5 3.5 7.5-8"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2.8"
-      />
-    </svg>
-  );
+  return <FiCheck aria-hidden="true" className="h-7 w-7" />;
 }
 
 function ErrorIcon() {
-  return (
-    <svg aria-hidden="true" className="h-7 w-7" fill="none" viewBox="0 0 24 24">
-      <path
-        d="M7 7 17 17M17 7 7 17"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="2.8"
-      />
-    </svg>
-  );
+  return <FiX aria-hidden="true" className="h-7 w-7" />;
 }
