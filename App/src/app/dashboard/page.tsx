@@ -1,4 +1,11 @@
 import { redirect } from "next/navigation";
+import {
+  FiArchive,
+  FiBriefcase,
+  FiHardDrive,
+  FiMonitor,
+  FiRadio,
+} from "react-icons/fi";
 
 import { bootstrapFirstAdmin } from "@/server/auth/bootstrap";
 import { createClient } from "@/lib/supabase/server";
@@ -9,7 +16,7 @@ import {
   requireUser,
 } from "@/server/auth/session";
 
-import { Feedback, PageHeader, StatusBadge } from "./components";
+import { buttonClass, Feedback, PageHeader, StatusBadge } from "./components";
 import { SubmitButton } from "./submit-button";
 
 type DashboardPageProps = {
@@ -75,10 +82,30 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       <Feedback error={error} />
 
       <section className="grid gap-5 md:grid-cols-4">
-        <MetricCard helper="Activas y pendientes" label="Campañas" value={campaignCount ?? 0} />
-        <MetricCard helper="Taquillas/puntos" label="Taquillas" value={locationCount ?? 0} />
-        <MetricCard helper="Players y pantallas" label="Pantallas" value={screenCount ?? 0} />
-        <MetricCard helper="Storage privado" label="Archivos" value={mediaCount ?? 0} />
+        <MetricCard
+          helper="Activas y pendientes"
+          icon={<FiRadio aria-hidden="true" />}
+          label="Campañas"
+          value={campaignCount ?? 0}
+        />
+        <MetricCard
+          helper="Taquillas/puntos"
+          icon={<FiBriefcase aria-hidden="true" />}
+          label="Taquillas"
+          value={locationCount ?? 0}
+        />
+        <MetricCard
+          helper="Players y pantallas"
+          icon={<FiMonitor aria-hidden="true" />}
+          label="Pantallas"
+          value={screenCount ?? 0}
+        />
+        <MetricCard
+          helper="Storage privado"
+          icon={<FiHardDrive aria-hidden="true" />}
+          label="Archivos"
+          value={mediaCount ?? 0}
+        />
       </section>
 
       {!profile.ok ? (
@@ -107,10 +134,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             super usuario de todas las compañías.
           </p>
           <form action={bootstrapFirstAdmin} className="mt-4">
-            <SubmitButton
-              className="inline-flex min-h-12 items-center justify-center rounded-md bg-red-600 px-6 py-2.5 text-sm font-extrabold text-white shadow-[0_18px_36px_rgba(220,38,38,0.20)] transition-all hover:-translate-y-0.5 hover:bg-red-700 active:scale-95"
-              pendingLabel="Creando..."
-            >
+            <SubmitButton className={buttonClass} pendingLabel="Creando...">
               Crear primer super usuario
             </SubmitButton>
           </form>
@@ -136,20 +160,25 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
       {profile.ok && access.data.length > 0 ? (
         <section className="grid gap-4">
-          <h2 className="text-2xl font-extrabold tracking-tight text-slate-800 theme-dark:text-slate-100">
-            Compañías disponibles
-          </h2>
+          <div className="flex items-center gap-3">
+            <span className="grid h-10 w-10 place-items-center rounded-md border border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-[var(--color-primary)]">
+              <FiArchive aria-hidden="true" />
+            </span>
+            <h2 className="font-display text-2xl font-extrabold tracking-tight text-[var(--color-text-primary)]">
+              Compañías disponibles
+            </h2>
+          </div>
           <section className="grid gap-4 md:grid-cols-2">
             {access.data.map((item) => (
               <article
-                className="rounded-lg border border-slate-100 bg-white p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] theme-dark:border-slate-800 theme-dark:bg-slate-900"
+                className="glass-panel rounded-lg p-5 transition hover:border-[var(--color-primary-border)] hover:bg-[rgba(34,211,238,0.055)]"
                 key={`${item.companies?.id}-${item.role}`}
               >
                 <StatusBadge>{item.role}</StatusBadge>
-                <h2 className="mt-4 text-lg font-extrabold text-slate-800 theme-dark:text-slate-100">
+                <h2 className="mt-4 font-display text-lg font-extrabold text-[var(--color-text-primary)]">
                   {item.companies?.name ?? "Compañía sin nombre"}
                 </h2>
-                <p className="mt-1 text-sm font-semibold text-slate-500 theme-dark:text-slate-400">
+                <p className="mt-1 font-mono text-sm font-semibold text-[var(--color-text-muted)]">
                   Slug: {item.companies?.slug ?? "sin-slug"}
                 </p>
               </article>
@@ -163,19 +192,24 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
 function MetricCard({
   helper,
+  icon,
   label,
   value,
 }: Readonly<{
   helper: string;
+  icon: React.ReactNode;
   label: string;
   value: number;
 }>) {
   return (
-    <article className="rounded-lg border border-slate-100 bg-white px-7 py-6 shadow-[0_24px_70px_rgba(15,23,42,0.10)] theme-dark:border-slate-800 theme-dark:bg-slate-900 theme-dark:shadow-[0_24px_70px_rgba(0,0,0,0.30)]">
-      <p className="text-lg font-extrabold text-red-600">{label}</p>
-      <div className="mt-4 flex items-end justify-between gap-4">
-        <p className="text-6xl font-extrabold tracking-tight text-slate-900 theme-dark:text-slate-100">{value}</p>
-        <p className="max-w-28 pb-2 text-right text-sm font-semibold leading-5 text-slate-500 theme-dark:text-slate-400">{helper}</p>
+    <article className="glass-panel group relative min-h-40 overflow-hidden rounded-lg px-7 py-6 transition hover:border-[var(--color-primary-border)] hover:bg-[rgba(34,211,238,0.055)]">
+      <div className="absolute right-5 top-5 text-7xl text-[rgba(148,163,184,0.08)] transition group-hover:text-[rgba(34,211,238,0.1)]">
+        {icon}
+      </div>
+      <p className="mono-label relative text-lg font-extrabold text-[var(--color-primary)]">{label}</p>
+      <div className="relative mt-4 flex items-end justify-between gap-4">
+        <p className="font-display text-6xl font-extrabold tracking-tight text-[var(--color-text-primary)]">{value}</p>
+        <p className="max-w-28 pb-2 text-right text-sm font-semibold leading-5 text-[var(--color-text-muted)]">{helper}</p>
       </div>
     </article>
   );
@@ -192,13 +226,13 @@ function StateCard({
 }>) {
   const styles =
     tone === "error"
-      ? "border-red-100 bg-red-50 text-red-950 theme-dark:border-red-900/50 theme-dark:bg-red-950/35 theme-dark:text-red-200"
-      : "border-slate-100 bg-white text-slate-800 theme-dark:border-slate-800 theme-dark:bg-slate-900 theme-dark:text-slate-100";
+      ? "border-[rgba(244,63,94,0.34)] bg-[var(--color-secondary-muted)] text-[var(--color-secondary-soft)]"
+      : "border-[var(--color-border)] bg-[rgba(15,23,42,0.64)] text-[var(--color-text-primary)]";
 
   return (
-    <section className={`rounded-lg border p-6 shadow-[0_18px_42px_rgba(15,23,42,0.06)] ${styles}`}>
-      <h2 className="text-lg font-extrabold">{title}</h2>
-      <div className="mt-3 text-sm font-semibold leading-6 text-slate-600 theme-dark:text-slate-300">{children}</div>
+    <section className={`rounded-lg border p-6 shadow-[0_18px_42px_rgba(0,0,0,0.14)] backdrop-blur-xl ${styles}`}>
+      <h2 className="font-display text-lg font-extrabold">{title}</h2>
+      <div className="mt-3 text-sm font-semibold leading-6 text-[var(--color-text-soft)]">{children}</div>
     </section>
   );
 }
