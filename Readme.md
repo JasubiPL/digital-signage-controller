@@ -131,6 +131,7 @@ Privadas:
 - `/dashboard/screens`
 - `/dashboard/assignments`
 - `/dashboard/files`
+- `/dashboard/incidents`
 
 APIs:
 

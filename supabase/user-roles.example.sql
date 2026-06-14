@@ -17,12 +17,28 @@ set
   global_role = excluded.global_role,
   updated_at = now();
 
--- Usuario consulta: solo puede leer informacion.
+-- Manager: consulta informacion y puede comentar incidentes.
 insert into public.profiles (id, email, full_name, global_role)
 select
   u.id,
   u.email,
-  'Usuario Consulta',
+  'Manager',
+  'manager'
+from auth.users u
+where u.email = 'manager@example.com'
+on conflict (id) do update
+set
+  email = excluded.email,
+  full_name = excluded.full_name,
+  global_role = excluded.global_role,
+  updated_at = now();
+
+-- Consultor: solo puede leer informacion general.
+insert into public.profiles (id, email, full_name, global_role)
+select
+  u.id,
+  u.email,
+  'Consultor',
   'user'
 from auth.users u
 where u.email = 'consulta@example.com'

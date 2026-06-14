@@ -204,6 +204,21 @@ body {
   width: 1.15rem;
 }
 
+@keyframes upload-progress-scan {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.upload-progress-indeterminate {
+  animation: upload-progress-scan 1.05s ease-in-out infinite;
+  width: 55%;
+}
+
 @keyframes login-spin {
   to {
     transform: rotate(360deg);

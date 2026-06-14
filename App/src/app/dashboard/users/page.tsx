@@ -45,7 +45,7 @@ type Profile = {
   created_at: string;
   email: string;
   full_name: string | null;
-  global_role: "super_admin" | "user";
+  global_role: "super_admin" | "manager" | "user";
   id: string;
 };
 
@@ -107,14 +107,18 @@ export default async function UsersPage({ searchParams }: Readonly<UsersPageProp
         </DashboardDialog>
       </PageHeader>
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-4">
         <UserMetric label="Usuarios" value={typedProfiles.length} />
         <UserMetric
           label="Super usuarios"
           value={typedProfiles.filter((profile) => profile.global_role === "super_admin").length}
         />
         <UserMetric
-          label="Usuarios consulta"
+          label="Managers"
+          value={typedProfiles.filter((profile) => profile.global_role === "manager").length}
+        />
+        <UserMetric
+          label="Consultores"
           value={typedProfiles.filter((profile) => profile.global_role === "user").length}
         />
       </section>
@@ -199,13 +203,11 @@ function avatarSrcForProfile(profile: Profile) {
     return "/default-avatar/admin.png";
   }
 
-  const variants = ["/default-avatar/consultant.png", "/default-avatar/manager.png"];
-  const hash = Array.from(profile.id || profile.email).reduce(
-    (sum, char) => sum + char.charCodeAt(0),
-    0,
-  );
+  if (profile.global_role === "manager") {
+    return "/default-avatar/manager.png";
+  }
 
-  return variants[hash % variants.length];
+  return "/default-avatar/consultant.png";
 }
 
 function UsersShell({
@@ -339,15 +341,18 @@ function RoleField({
   defaultValue,
   disabledUserOption = false,
 }: Readonly<{
-  defaultValue: "super_admin" | "user";
+  defaultValue: "super_admin" | "manager" | "user";
   disabledUserOption?: boolean;
 }>) {
   return (
     <Field label="Rol">
       <select className={inputClass} defaultValue={defaultValue} name="globalRole">
         <option value="super_admin">Super usuario</option>
+        <option disabled={disabledUserOption} value="manager">
+          Manager
+        </option>
         <option disabled={disabledUserOption} value="user">
-          Usuario consulta
+          Consultor
         </option>
       </select>
     </Field>

@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import {
+  FiAlertTriangle,
   FiChevronRight,
   FiGrid,
   FiLogOut,
@@ -21,6 +22,7 @@ type Company = {
 };
 
 type DashboardSidebarProps = {
+  canAccessIncidents: boolean;
   canManageUsers: boolean;
   companies: Company[];
   homeHref?: string;
@@ -28,6 +30,7 @@ type DashboardSidebarProps = {
 };
 
 export function DashboardSidebar({
+  canAccessIncidents,
   canManageUsers,
   companies,
   homeHref,
@@ -77,6 +80,15 @@ export function DashboardSidebar({
             onNavigate={navigate}
           >
             Usuarios
+          </MobileLink>
+        ) : null}
+        {canAccessIncidents ? (
+          <MobileLink
+            active={pathname === "/dashboard/incidents"}
+            href="/dashboard/incidents"
+            onNavigate={navigate}
+          >
+            Incidentes
           </MobileLink>
         ) : null}
         {orderedCompanies.map((company) => (
@@ -143,6 +155,17 @@ export function DashboardSidebar({
                 onNavigate={navigate}
               >
                 Usuarios
+              </SidebarLink>
+            ) : null}
+
+            {canAccessIncidents ? (
+              <SidebarLink
+                active={pathname.startsWith("/dashboard/incidents")}
+                href="/dashboard/incidents"
+                icon={<FiAlertTriangle aria-hidden="true" />}
+                onNavigate={navigate}
+              >
+                Incidentes
               </SidebarLink>
             ) : null}
 

@@ -24,7 +24,7 @@ export type CompanyAccess = {
   } | null;
 };
 
-type ProfileRole = "user" | "super_admin";
+export type ProfileRole = "user" | "manager" | "super_admin";
 
 export async function getCurrentUser() {
   const supabase = await createClient();
@@ -101,9 +101,11 @@ export async function getUserCompanyAccess(userId: string) {
 
   if (profileError) {
     return {
+      canAccessIncidents: false,
       data: [],
       error: profileError.message,
       isGlobalAdmin: false,
+      isManager: false,
     };
   }
 
@@ -116,9 +118,11 @@ export async function getUserCompanyAccess(userId: string) {
 
   if (error) {
     return {
+      canAccessIncidents: globalRole === "super_admin" || globalRole === "manager",
       data: [],
       error: error.message,
       isGlobalAdmin: globalRole === "super_admin",
+      isManager: globalRole === "manager",
     };
   }
 
@@ -127,8 +131,10 @@ export async function getUserCompanyAccess(userId: string) {
       role: globalRole,
       companies: company,
     })),
+    canAccessIncidents: globalRole === "super_admin" || globalRole === "manager",
     error: null,
     isGlobalAdmin: globalRole === "super_admin",
+    isManager: globalRole === "manager",
   };
 }
 

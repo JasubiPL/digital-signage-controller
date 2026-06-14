@@ -22,10 +22,10 @@ export function DashboardDialog({
         {trigger}
       </button>
       <dialog
-        className="glass-panel-strong fixed inset-0 m-auto h-fit max-h-[calc(100vh-2rem)] w-[min(92vw,46rem)] rounded-lg p-0 text-[var(--color-text-primary)] shadow-[0_24px_70px_rgba(0,0,0,0.36)] backdrop:bg-[#020617]/72"
+        className="glass-panel-strong fixed inset-0 m-auto flex max-h-[calc(100vh-2rem)] w-[min(92vw,46rem)] flex-col overflow-hidden rounded-lg p-0 text-[var(--color-text-primary)] shadow-[0_24px_70px_rgba(0,0,0,0.36)] backdrop:bg-[#020617]/72"
         ref={dialogRef}
       >
-        <header className="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-4">
+        <header className="flex flex-none items-center justify-between border-b border-[var(--color-border)] px-5 py-4">
           <div>
             <h2 className="font-display text-lg font-extrabold tracking-tight text-[var(--color-text-primary)]">{title}</h2>
             <span className="mt-2.5 block h-0.5 w-12 rounded-sm bg-[var(--color-primary)]" />
@@ -39,7 +39,7 @@ export function DashboardDialog({
             <FiX aria-hidden="true" className="h-5 w-5" />
           </button>
         </header>
-        <div className="max-h-[72vh] overflow-y-auto px-5 py-5">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">{children}</div>
       </dialog>
     </>
   );

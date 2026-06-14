@@ -36,7 +36,7 @@ export function FeedbackToast({
   return (
     <div
       aria-live="polite"
-      className={`fixed left-1/2 top-6 z-[80] flex w-[min(92vw,38rem)] -translate-x-1/2 items-center gap-4 rounded-lg border px-7 py-5 text-base font-extrabold transition-all duration-300 ${
+      className={`fixed left-1/2 top-6 z-[9999] flex w-[min(92vw,38rem)] -translate-x-1/2 items-center gap-4 rounded-lg border px-7 py-5 text-base font-extrabold transition-all duration-300 ${
         isVisible
           ? "translate-y-0 opacity-100"
           : "-translate-y-4 pointer-events-none opacity-0"
