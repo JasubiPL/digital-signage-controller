@@ -18,12 +18,18 @@ Next.js como aplicacion principal y Supabase como backend.
 
 ```text
 digital-signage-controller/
-|- App/        # Aplicacion Next.js
-|- supabase/   # Migraciones, seed y ejemplos SQL
-|- specs/      # Documentacion tecnica vigente
-|- Readme.md
-`- run-services.bat
+|- App/             # Aplicacion Next.js
+|- supabase/        # Migraciones, seed y ejemplos SQL
+|- specs/           # Documentacion tecnica vigente
+|- CONTRIBUTING.md  # Guia para colaboradores
+|- LICENSE
+|- package.json     # Scripts de orquestacion y Supabase CLI
+`- Readme.md
 ```
+
+La raiz funciona como orquestador del proyecto. `App/` contiene el runtime web,
+`supabase/` contiene infraestructura de base de datos y `specs/` documenta las
+decisiones tecnicas vigentes del sistema.
 
 ## Requisitos
 
@@ -37,8 +43,8 @@ digital-signage-controller/
 1. Instala dependencias:
 
 ```sh
-cd App
 npm install
+npm run install:app
 ```
 
 2. Crea `App/.env.local` usando `App/.env.example` como base:
@@ -68,6 +74,10 @@ No subas `.env.local` a Git.
 
 ## Supabase
 
+La dependencia `supabase` del `package.json` raiz fija la version del Supabase
+CLI usada por colaboradores. Las dependencias `@supabase/*` de `App/package.json`
+son las librerias que usa la aplicacion Next.js en runtime.
+
 Ejecuta en Supabase SQL Editor, en este orden:
 
 1. `supabase/migrations/202606120001_initial_schema.sql`
@@ -88,7 +98,6 @@ prueba. Los usuarios no se seedearon porque dependen de `auth.users`.
 ## Desarrollo
 
 ```sh
-cd App
 npm run dev
 ```
 
@@ -98,16 +107,9 @@ Abre:
 http://localhost:3000
 ```
 
-En Windows tambien puedes ejecutar:
-
-```text
-run-services.bat
-```
-
 ## Validacion
 
 ```sh
-cd App
 npm run lint
 npm run typecheck
 npm run build
@@ -129,6 +131,7 @@ Privadas:
 - `/dashboard/screens`
 - `/dashboard/assignments`
 - `/dashboard/files`
+- `/dashboard/incidents`
 
 APIs:
 
@@ -174,6 +177,8 @@ Documentos utiles:
 - `specs/datos-iniciales.md`
 - `specs/deployment.md`
 
+Para contribuir, revisa tambien `CONTRIBUTING.md`.
+
 ## Troubleshooting
 
 Verifica conexion publica:
@@ -188,9 +193,12 @@ Verifica secret key server-side:
 http://localhost:3000/api/health/supabase?probe=admin
 ```
 
-Si Next muestra una advertencia sobre lockfiles multiples, confirma que solo
-exista el lockfile activo en:
+Si Next muestra una advertencia sobre lockfiles multiples, verifica que estas
+ejecutando los comandos desde la raiz con los scripts de orquestacion o desde
+`App/` solo cuando quieras trabajar directamente sobre la app. En este repo hay
+dos lockfiles intencionales:
 
 ```text
+package-lock.json       # Supabase CLI y scripts de raiz
 App/package-lock.json
 ```

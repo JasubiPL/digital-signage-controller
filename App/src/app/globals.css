@@ -204,6 +204,60 @@ body {
   width: 1.15rem;
 }
 
+@keyframes upload-progress-scan {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.upload-progress-indeterminate {
+  animation: upload-progress-scan 1.05s ease-in-out infinite;
+  width: 55%;
+}
+
+:where(.rich-text-content, .rich-text-editor) :where(h1, h2, h3, h4) {
+  color: var(--color-text-primary);
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0.85rem 0 0.45rem;
+}
+
+:where(.rich-text-content, .rich-text-editor) :where(ul, ol) {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.65rem 0;
+  padding-left: 1.25rem;
+}
+
+:where(.rich-text-content, .rich-text-editor) ul {
+  list-style: disc;
+}
+
+:where(.rich-text-content, .rich-text-editor) ol {
+  list-style: decimal;
+}
+
+:where(.rich-text-content, .rich-text-editor) :where(strong, b) {
+  color: var(--color-text-primary);
+  font-weight: 900;
+}
+
+:where(.rich-text-content, .rich-text-editor) :where(em, i) {
+  color: inherit;
+}
+
+:where(.rich-text-content, .rich-text-editor) a {
+  color: var(--color-primary-soft);
+  text-decoration: underline;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+}
+
 @keyframes login-spin {
   to {
     transform: rotate(360deg);

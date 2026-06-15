@@ -1,4 +1,19 @@
 {
+  "name": "digital-signage-controller",
+  "version": "3.4.0",
+  "private": true,
+  "description": "Open source digital signage controller powered by Next.js and Supabase.",
+  "scripts": {
+    "dev": "npm --prefix App run dev",
+    "build": "npm --prefix App run build",
+    "start": "npm --prefix App run start",
+    "lint": "npm --prefix App run lint",
+    "typecheck": "npm --prefix App run typecheck",
+    "install:app": "npm --prefix App install",
+    "supabase:link": "supabase link --project-ref",
+    "supabase:push": "supabase db push",
+    "supabase:seed": "supabase db seed"
+  },
   "devDependencies": {
     "supabase": "^2.106.0"
   }

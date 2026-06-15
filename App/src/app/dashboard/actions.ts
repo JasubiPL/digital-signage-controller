@@ -2,6 +2,7 @@
 
 import { randomUUID } from "node:crypto";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { redirect, unstable_rethrow } from "next/navigation";
 
@@ -9,9 +10,15 @@ import { createClient } from "@/lib/supabase/server";
 import { sanitizeNextPath } from "@/lib/auth/redirect";
 import { getUserCompanyAccess, requireUser } from "@/server/auth/session";
 import {
+  buildIncidentImagePath,
   buildCampaignMediaPath,
   CAMPAIGN_MEDIA_BUCKET,
   CAMPAIGN_MEDIA_MAX_BYTES,
+  INCIDENT_IMAGE_BUCKET,
+  INCIDENT_IMAGE_MAX_BYTES,
+  INCIDENT_IMAGE_TOTAL_MAX_BYTES,
+  assertCanCommentIncidents,
+  getIncidentImageExtensionForMimeType,
   getExtensionForMimeType,
 } from "@/server/media/storage";
 import { createAdminClient } from "@/server/supabase/admin";
@@ -20,6 +27,24 @@ type ActionState = "success" | "error";
 
 const assignmentStatuses = ["active", "draft", "inactive"] as const;
 type AssignmentStatus = (typeof assignmentStatuses)[number];
+const profileRoles = ["super_admin", "manager", "user"] as const;
+type ProfileRole = (typeof profileRoles)[number];
+const incidentCategories = [
+  "screen_issue",
+  "player_offline",
+  "content_not_loading",
+  "usb_issue",
+  "streaming_issue",
+  "physical_damage",
+  "remodeling_operation",
+  "other",
+] as const;
+type IncidentCategory = (typeof incidentCategories)[number];
+const incidentPriorities = ["low", "medium", "high", "critical"] as const;
+type IncidentPriority = (typeof incidentPriorities)[number];
+const incidentStatuses = ["open", "in_progress", "waiting", "resolved", "canceled"] as const;
+type IncidentStatus = (typeof incidentStatuses)[number];
+const activeIncidentStatuses = ["open", "in_progress", "waiting"] as const;
 
 function field(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -73,6 +98,186 @@ function errorMessage(error: unknown, fallback: string) {
   return fallback;
 }
 
+function profileRole(formData: FormData) {
+  const role = field(formData, "globalRole");
+
+  return profileRoles.includes(role as ProfileRole) ? (role as ProfileRole) : "user";
+}
+
+function incidentCategory(formData: FormData) {
+  const category = field(formData, "category");
+
+  return incidentCategories.includes(category as IncidentCategory)
+    ? (category as IncidentCategory)
+    : "other";
+}
+
+function incidentPriority(formData: FormData) {
+  const priority = field(formData, "priority");
+
+  return incidentPriorities.includes(priority as IncidentPriority)
+    ? (priority as IncidentPriority)
+    : "medium";
+}
+
+function incidentStatus(formData: FormData) {
+  const status = field(formData, "status");
+
+  return incidentStatuses.includes(status as IncidentStatus)
+    ? (status as IncidentStatus)
+    : "open";
+}
+
+const incidentStatusLabels: Record<IncidentStatus, string> = {
+  canceled: "Cancelado",
+  in_progress: "En proceso",
+  open: "Abierto",
+  resolved: "Resuelto",
+  waiting: "En espera",
+};
+
+function incidentStatusLabel(status: IncidentStatus) {
+  return incidentStatusLabels[status] ?? status;
+}
+
+function incidentImageFiles(formData: FormData, key = "images") {
+  return formData
+    .getAll(key)
+    .filter((value): value is File => value instanceof File && value.size > 0);
+}
+
+async function revalidateIncidentPaths(
+  supabase: SupabaseClient,
+  input: { companyId?: string | null; incidentId?: string | null } = {},
+) {
+  revalidatePath("/dashboard/incidents");
+  revalidatePath("/dashboard/locations");
+  if (input.incidentId) {
+    revalidatePath(`/dashboard/incidents/${input.incidentId}`);
+  }
+
+  if (!input.companyId) return;
+
+  const { data } = await supabase
+    .from("companies")
+    .select("slug")
+    .eq("id", input.companyId)
+    .maybeSingle();
+
+  if (data?.slug) {
+    revalidatePath(`/dashboard/locations/${data.slug}`);
+  }
+}
+
+async function syncLocationIncidentStatus(
+  supabase: SupabaseClient,
+  input: {
+    companyId: string;
+    locationId: string;
+  },
+) {
+  const { count, error: countError } = await supabase
+    .from("location_incidents")
+    .select("id", { count: "exact", head: true })
+    .eq("company_id", input.companyId)
+    .eq("location_id", input.locationId)
+    .in("status", [...activeIncidentStatuses]);
+
+  if (countError) throw countError;
+
+  const { error } = await supabase
+    .from("locations")
+    .update({ status: (count ?? 0) > 0 ? "incident" : "ok" })
+    .eq("id", input.locationId)
+    .eq("company_id", input.companyId);
+
+  if (error) throw error;
+}
+
+async function uploadIncidentImages(
+  supabase: SupabaseClient,
+  input: {
+    caption?: string | null;
+    companyId: string;
+    files: File[];
+    incidentId: string;
+    locationId: string;
+    noteId?: string | null;
+    uploadedBy: string;
+  },
+) {
+  const totalBytes = input.files.reduce((sum, fileValue) => sum + fileValue.size, 0);
+
+  if (totalBytes > INCIDENT_IMAGE_TOTAL_MAX_BYTES) {
+    throw new Error("La carga total de imagenes supera el limite de 30 MB.");
+  }
+
+  for (const fileValue of input.files) {
+    if (fileValue.size > INCIDENT_IMAGE_MAX_BYTES) {
+      throw new Error("Cada imagen debe pesar máximo 10 MB.");
+    }
+
+    const extension = getIncidentImageExtensionForMimeType(fileValue.type);
+
+    if (!extension) {
+      throw new Error("Solo se permiten imagenes JPG, PNG, WebP o GIF.");
+    }
+
+    const fileId = randomUUID();
+    const storagePath = buildIncidentImagePath({
+      companyId: input.companyId,
+      extension,
+      fileId,
+      incidentId: input.incidentId,
+      locationId: input.locationId,
+    });
+    const fileBuffer = Buffer.from(await fileValue.arrayBuffer());
+    const { error: uploadError } = await supabase.storage
+      .from(INCIDENT_IMAGE_BUCKET)
+      .upload(storagePath, fileBuffer, {
+        contentType: fileValue.type,
+        upsert: false,
+      });
+
+    if (uploadError) throw uploadError;
+
+    const { error: insertError } = await supabase
+      .from("location_incident_attachments")
+      .insert({
+        bucket: INCIDENT_IMAGE_BUCKET,
+        caption: input.caption,
+        company_id: input.companyId,
+        incident_id: input.incidentId,
+        location_id: input.locationId,
+        mime_type: fileValue.type,
+        note_id: input.noteId ?? null,
+        original_name: fileValue.name?.trim().slice(0, 255) || `${fileId}.${extension}`,
+        size_bytes: fileValue.size,
+        status: "active",
+        storage_path: storagePath,
+        uploaded_by: input.uploadedBy,
+      });
+
+    if (insertError) {
+      await supabase.storage.from(INCIDENT_IMAGE_BUCKET).remove([storagePath]);
+      throw insertError;
+    }
+  }
+}
+
+async function incidentForAction(supabase: SupabaseClient, incidentId: string) {
+  const { data, error } = await supabase
+    .from("location_incidents")
+    .select("id, company_id, location_id, status")
+    .eq("id", incidentId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) throw new Error("No se encontró el incidente.");
+
+  return data;
+}
+
 function assignmentStatus(formData: FormData) {
   const status = field(formData, "status");
 
@@ -120,10 +325,7 @@ export async function createManagedUser(formData: FormData) {
     const email = field(formData, "email").toLowerCase();
     const fullName = field(formData, "fullName");
     const password = field(formData, "password");
-    const globalRole =
-      field(formData, "globalRole") === "super_admin"
-        ? "super_admin"
-        : "user";
+    const globalRole = profileRole(formData);
 
     if (!email) throw new Error("Captura el email del usuario.");
     if (password.length < 8) {
@@ -171,13 +373,14 @@ export async function updateManagedUser(formData: FormData) {
     const userId = field(formData, "userId");
     const email = field(formData, "email").toLowerCase();
     const fullName = field(formData, "fullName");
-    const globalRole =
-      field(formData, "globalRole") === "super_admin"
-        ? "super_admin"
-        : "user";
+    const password = field(formData, "password");
+    const globalRole = profileRole(formData);
 
     if (!userId) throw new Error("Usuario invalido.");
     if (!email) throw new Error("Captura el email del usuario.");
+    if (password && password.length < 8) {
+      throw new Error("La contraseña debe tener al menos 8 caracteres.");
+    }
     if (scope.user.id === userId && globalRole !== "super_admin") {
       throw new Error("No puedes quitarte tu propio rol de super usuario.");
     }
@@ -185,6 +388,7 @@ export async function updateManagedUser(formData: FormData) {
     const admin = createAdminClient();
     const { error: authError } = await admin.auth.admin.updateUserById(userId, {
       email: email || undefined,
+      password: password || undefined,
       user_metadata: {
         full_name: fullName || email,
       },
@@ -470,15 +674,30 @@ export async function updateLocation(formData: FormData) {
     const companyId = field(formData, "companyId");
     await assertCanManageCompany(companyId);
 
+    const status = field(formData, "status") || "ok";
+    const locationUpdate: {
+      device: string | null;
+      name: string;
+      projection: string | null;
+      status?: string;
+    } = {
+      device: optionalField(formData, "device"),
+      name: field(formData, "name"),
+      projection: optionalField(formData, "projection"),
+    };
+
+    // El estatus "incident" se asigna automaticamente al registrar un
+    // incidente. Aqui solo guardamos los demas campos y mandamos al usuario a
+    // crear el incidente con la taquilla preseleccionada; si lo cancela, la
+    // taquilla conserva su estatus anterior.
+    if (status !== "incident") {
+      locationUpdate.status = status;
+    }
+
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("locations")
-      .update({
-        device: optionalField(formData, "device"),
-        name: field(formData, "name"),
-        projection: optionalField(formData, "projection"),
-        status: field(formData, "status") || "ok",
-      })
+      .update(locationUpdate)
       .eq("id", id)
       .eq("company_id", companyId)
       .select("id")
@@ -488,6 +707,11 @@ export async function updateLocation(formData: FormData) {
     if (!data) throw new Error("No se encontro la taquilla para actualizar.");
 
     revalidatePath(path);
+
+    if (status === "incident") {
+      redirect(`/dashboard/incidents?newIncidentLocation=${id}`);
+    }
+
     finish(path, "success", "Taquilla actualizada.");
   } catch (error) {
     unstable_rethrow(error);
@@ -576,6 +800,386 @@ export async function updateCampaignLocationStatus(formData: FormData) {
   } catch (error) {
     unstable_rethrow(error);
     finish(path, "error", errorMessage(error, "No se pudo actualizar el estatus de la campaña."));
+  }
+}
+
+export async function createLocationIncident(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/incidents");
+
+  try {
+    const user = await requireUser(path);
+    const locationId = field(formData, "locationId");
+    const title = field(formData, "title");
+    const description = field(formData, "description");
+
+    if (!title) throw new Error("Captura el titulo del incidente.");
+    if (!description) throw new Error("Captura la descripcion del incidente.");
+
+    const supabase = await createClient();
+    const { data: location, error: locationError } = await supabase
+      .from("locations")
+      .select("id, company_id")
+      .eq("id", locationId)
+      .maybeSingle();
+
+    if (locationError) throw locationError;
+    if (!location) throw new Error("Selecciona una taquilla valida.");
+
+    await assertCanManageCompany(location.company_id);
+
+    const status = incidentStatus(formData);
+    const isResolved = status === "resolved" || status === "canceled";
+    const { data: incident, error } = await supabase
+      .from("location_incidents")
+      .insert({
+        assignee_name: optionalField(formData, "assigneeName"),
+        category: incidentCategory(formData),
+        company_id: location.company_id,
+        description,
+        location_id: location.id,
+        priority: incidentPriority(formData),
+        reported_by: user.id,
+        resolved_at: isResolved ? new Date().toISOString() : null,
+        resolved_by: isResolved ? user.id : null,
+        resolution_summary: isResolved ? optionalField(formData, "resolutionSummary") : null,
+        status,
+        title,
+      })
+      .select("id, company_id, location_id")
+      .single();
+
+    if (error) throw error;
+
+    await uploadIncidentImages(supabase, {
+      caption: optionalField(formData, "caption"),
+      companyId: incident.company_id,
+      files: incidentImageFiles(formData),
+      incidentId: incident.id,
+      locationId: incident.location_id,
+      uploadedBy: user.id,
+    });
+    await syncLocationIncidentStatus(supabase, {
+      companyId: incident.company_id,
+      locationId: incident.location_id,
+    });
+    await revalidateIncidentPaths(supabase, {
+      companyId: incident.company_id,
+      incidentId: incident.id,
+    });
+    finish(path, "success", "Incidente creado.");
+  } catch (error) {
+    unstable_rethrow(error);
+    finish(path, "error", errorMessage(error, "No se pudo crear el incidente."));
+  }
+}
+
+export async function updateLocationIncident(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/incidents");
+
+  try {
+    const user = await requireUser(path);
+    const id = field(formData, "id");
+    const title = field(formData, "title");
+    const description = field(formData, "description");
+
+    if (!title) throw new Error("Captura el titulo del incidente.");
+    if (!description) throw new Error("Captura la descripcion del incidente.");
+
+    const supabase = await createClient();
+    const incident = await incidentForAction(supabase, id);
+    await assertCanManageCompany(incident.company_id);
+
+    const status = incidentStatus(formData);
+    const isResolved = status === "resolved" || status === "canceled";
+    const { error } = await supabase
+      .from("location_incidents")
+      .update({
+        assignee_name: optionalField(formData, "assigneeName"),
+        category: incidentCategory(formData),
+        description,
+        priority: incidentPriority(formData),
+        resolved_at: isResolved ? new Date().toISOString() : null,
+        resolved_by: isResolved ? user.id : null,
+        resolution_summary: isResolved ? optionalField(formData, "resolutionSummary") : null,
+        status,
+        title,
+      })
+      .eq("id", incident.id);
+
+    if (error) throw error;
+
+    const note = optionalField(formData, "note");
+    if (note) {
+      const { error: noteError } = await supabase
+        .from("location_incident_notes")
+        .insert({
+          author_id: user.id,
+          body: note,
+          company_id: incident.company_id,
+          event_type: isResolved ? "resolution" : "note",
+          incident_id: incident.id,
+          location_id: incident.location_id,
+        });
+
+      if (noteError) throw noteError;
+    }
+
+    await syncLocationIncidentStatus(supabase, {
+      companyId: incident.company_id,
+      locationId: incident.location_id,
+    });
+    await revalidateIncidentPaths(supabase, {
+      companyId: incident.company_id,
+      incidentId: incident.id,
+    });
+    finish(path, "success", "Incidente actualizado.");
+  } catch (error) {
+    unstable_rethrow(error);
+    finish(path, "error", errorMessage(error, "No se pudo actualizar el incidente."));
+  }
+}
+
+export async function resolveLocationIncident(formData: FormData) {
+  formData.set("status", "resolved");
+  await updateLocationIncident(formData);
+}
+
+export async function cancelLocationIncident(formData: FormData) {
+  formData.set("status", "canceled");
+  await updateLocationIncident(formData);
+}
+
+export async function updateLocationIncidentStatus(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/incidents");
+
+  try {
+    const user = await requireUser(path);
+    const id = field(formData, "id");
+    const supabase = await createClient();
+    const incident = await incidentForAction(supabase, id);
+
+    await assertCanManageCompany(incident.company_id);
+
+    const status = incidentStatus(formData);
+    const isResolved = status === "resolved" || status === "canceled";
+    const { error } = await supabase
+      .from("location_incidents")
+      .update({
+        resolved_at: isResolved ? new Date().toISOString() : null,
+        resolved_by: isResolved ? user.id : null,
+        status,
+      })
+      .eq("id", incident.id)
+      .eq("company_id", incident.company_id);
+
+    if (error) throw error;
+
+    const { error: noteError } = await supabase
+      .from("location_incident_notes")
+      .insert({
+        author_id: user.id,
+        body: `Estado actualizado a ${incidentStatusLabel(status)}.`,
+        company_id: incident.company_id,
+        event_type: "status_change",
+        incident_id: incident.id,
+        location_id: incident.location_id,
+      });
+
+    if (noteError) throw noteError;
+
+    await syncLocationIncidentStatus(supabase, {
+      companyId: incident.company_id,
+      locationId: incident.location_id,
+    });
+    await revalidateIncidentPaths(supabase, {
+      companyId: incident.company_id,
+      incidentId: incident.id,
+    });
+    finish(path, "success", "Estado actualizado.");
+  } catch (error) {
+    unstable_rethrow(error);
+    finish(path, "error", errorMessage(error, "No se pudo actualizar el estado."));
+  }
+}
+
+export async function deleteLocationIncident(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/incidents");
+
+  try {
+    await requireUser(path);
+    const id = field(formData, "id");
+    const supabase = await createClient();
+    const incident = await incidentForAction(supabase, id);
+
+    await assertCanManageCompany(incident.company_id);
+
+    const { data: attachments, error: attachmentError } = await supabase
+      .from("location_incident_attachments")
+      .select("storage_path")
+      .eq("incident_id", incident.id)
+      .eq("company_id", incident.company_id);
+
+    if (attachmentError) throw attachmentError;
+
+    const storagePaths = (attachments ?? [])
+      .map((attachment) => attachment.storage_path)
+      .filter((storagePath): storagePath is string => Boolean(storagePath));
+
+    if (storagePaths.length) {
+      const { error: removeError } = await supabase.storage
+        .from(INCIDENT_IMAGE_BUCKET)
+        .remove(storagePaths);
+
+      if (removeError) throw removeError;
+    }
+
+    const { error } = await supabase
+      .from("location_incidents")
+      .delete()
+      .eq("id", incident.id)
+      .eq("company_id", incident.company_id);
+
+    if (error) throw error;
+
+    await syncLocationIncidentStatus(supabase, {
+      companyId: incident.company_id,
+      locationId: incident.location_id,
+    });
+    await revalidateIncidentPaths(supabase, {
+      companyId: incident.company_id,
+      incidentId: incident.id,
+    });
+    finish(path, "success", "Incidente eliminado.");
+  } catch (error) {
+    unstable_rethrow(error);
+    finish(path, "error", errorMessage(error, "No se pudo eliminar el incidente."));
+  }
+}
+
+export async function addLocationIncidentNote(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/incidents");
+
+  try {
+    const user = await requireUser(path);
+    const incidentId = field(formData, "incidentId");
+    const body = field(formData, "body");
+
+    if (!body) throw new Error("Captura un comentario.");
+
+    const supabase = await createClient();
+    const incident = await incidentForAction(supabase, incidentId);
+    const permission = await assertCanCommentIncidents(supabase, incident.company_id);
+
+    if (!permission.ok) throw new Error(permission.message);
+
+    const { data: note, error } = await supabase
+      .from("location_incident_notes")
+      .insert({
+        author_id: user.id,
+        body,
+        company_id: incident.company_id,
+        event_type: "note",
+        incident_id: incident.id,
+        location_id: incident.location_id,
+      })
+      .select("id")
+      .single();
+
+    if (error) throw error;
+
+    await uploadIncidentImages(supabase, {
+      caption: optionalField(formData, "caption"),
+      companyId: incident.company_id,
+      files: incidentImageFiles(formData),
+      incidentId: incident.id,
+      locationId: incident.location_id,
+      noteId: note.id,
+      uploadedBy: user.id,
+    });
+    await revalidateIncidentPaths(supabase, {
+      companyId: incident.company_id,
+      incidentId: incident.id,
+    });
+    finish(path, "success", "Comentario agregado.");
+  } catch (error) {
+    unstable_rethrow(error);
+    finish(path, "error", errorMessage(error, "No se pudo agregar el comentario."));
+  }
+}
+
+export async function uploadIncidentAttachment(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/incidents");
+
+  try {
+    const user = await requireUser(path);
+    const incidentId = field(formData, "incidentId");
+    const supabase = await createClient();
+    const incident = await incidentForAction(supabase, incidentId);
+    await assertCanManageCompany(incident.company_id);
+
+    const files = incidentImageFiles(formData).concat(incidentImageFiles(formData, "file"));
+
+    if (!files.length) throw new Error("Selecciona al menos una imagen.");
+
+    await uploadIncidentImages(supabase, {
+      caption: optionalField(formData, "caption"),
+      companyId: incident.company_id,
+      files,
+      incidentId: incident.id,
+      locationId: incident.location_id,
+      uploadedBy: user.id,
+    });
+    await revalidateIncidentPaths(supabase, {
+      companyId: incident.company_id,
+      incidentId: incident.id,
+    });
+    finish(path, "success", "Imagen subida.");
+  } catch (error) {
+    unstable_rethrow(error);
+    finish(path, "error", errorMessage(error, "No se pudo subir la imagen."));
+  }
+}
+
+export async function deleteIncidentAttachment(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/incidents");
+
+  try {
+    await requireUser(path);
+    const id = field(formData, "id");
+    const supabase = await createClient();
+    const { data: attachment, error } = await supabase
+      .from("location_incident_attachments")
+      .select("id, bucket, company_id, incident_id, storage_path")
+      .eq("id", id)
+      .eq("status", "active")
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!attachment) throw new Error("No se encontro la imagen.");
+
+    await assertCanManageCompany(attachment.company_id);
+
+    const { error: removeError } = await supabase.storage
+      .from(INCIDENT_IMAGE_BUCKET)
+      .remove([attachment.storage_path]);
+
+    if (removeError) throw removeError;
+
+    const { error: updateError } = await supabase
+      .from("location_incident_attachments")
+      .update({ status: "deleted" })
+      .eq("id", attachment.id);
+
+    if (updateError) throw updateError;
+
+    await revalidateIncidentPaths(supabase, {
+      companyId: attachment.company_id,
+      incidentId: attachment.incident_id,
+    });
+    finish(path, "success", "Imagen eliminada.");
+  } catch (error) {
+    unstable_rethrow(error);
+    finish(path, "error", errorMessage(error, "No se pudo eliminar la imagen."));
   }
 }
 

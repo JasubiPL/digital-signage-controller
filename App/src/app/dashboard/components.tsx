@@ -116,20 +116,24 @@ export function StatusBadge({ children }: Readonly<{ children: React.ReactNode }
     inactive: "Inactiva",
     incident: "Pantalla con incidente",
     maintenance: "Mantenimiento",
+    manager: "Manager",
     ok: "OK",
     operator: "Operador",
     remodeling: "Remodelacion",
     super_admin: "Super usuario",
-    user: "Usuario consulta",
+    user: "Consultor",
     viewer: "Consulta",
   };
   const isGood = value === "ok" || value === "active" || value === "super_admin";
+  const isManager = value === "manager";
   const isWarning = value === "remodeling" || value === "maintenance";
   const isPending = value === "draft";
   const isDanger = value === "incident" || value === "archived" || value === "inactive";
   const color = isGood
     ? "border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-[var(--color-primary-soft)]"
-    : isWarning
+    : isManager
+      ? "border-[rgba(255,177,59,0.34)] bg-[var(--color-tertiary-muted)] text-[var(--color-tertiary-soft)]"
+      : isWarning
       ? "border-[rgba(244,63,94,0.34)] bg-[var(--color-secondary-muted)] text-[var(--color-secondary-soft)]"
       : isPending
         ? "border-[rgba(255,177,59,0.34)] bg-[var(--color-tertiary-muted)] text-[var(--color-tertiary-soft)]"

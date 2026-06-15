@@ -73,4 +73,4 @@ SUPABASE_SERVICE_ROLE_KEY=
 - `/dashboard/screens`
 - `/dashboard/assignments`
 - `/dashboard/files`
-
+- `/dashboard/incidents`

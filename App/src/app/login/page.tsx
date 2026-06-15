@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
-import { FiGrid, FiMail, FiShield, FiUsers } from "react-icons/fi";
+import { FiMail, FiShield, FiUsers } from "react-icons/fi";
 
+import { BrandIcon } from "@/app/brand-icon";
+import { SystemFooter } from "@/app/system-footer";
 import { sanitizeNextPath } from "@/lib/auth/redirect";
 import { getCurrentUser } from "@/server/auth/session";
 
@@ -27,15 +29,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   }
 
   return (
-    <main className="login-shell min-h-screen overflow-hidden px-5 py-10 text-[var(--color-text-primary)]">
+    <main className="login-shell flex min-h-screen flex-col overflow-hidden px-5 py-8 text-[var(--color-text-primary)]">
       <div aria-hidden="true" className="login-grid-lines" />
 
-      <section className="relative z-10 mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-xl flex-col justify-center">
+      <section className="relative z-10 mx-auto flex w-full max-w-xl flex-1 flex-col justify-center py-8">
         <div className="login-card glass-panel-strong rounded-lg px-7 py-9 sm:px-14 sm:py-12">
           <div className="flex items-center justify-center gap-5 text-[var(--color-primary)]">
-            <div className="grid h-12 w-12 place-items-center rounded-lg border border-[var(--color-primary-border)] bg-[var(--color-primary-muted)]">
-              <FiGrid aria-hidden="true" className="h-6 w-6" />
-            </div>
+            <BrandIcon className="h-12 w-12" priority />
             <div className="h-11 w-px bg-[var(--color-border)]" />
             <div>
               <p className="font-display text-2xl font-extrabold tracking-tight text-[var(--color-primary-soft)]">
@@ -97,6 +97,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </p>
         </div>
       </section>
+      <SystemFooter className="relative z-10 pb-1" />
     </main>
   );
 }

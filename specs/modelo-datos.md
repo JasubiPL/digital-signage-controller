@@ -10,6 +10,7 @@ Archivos principales:
 - `supabase/migrations/202606120001_initial_schema.sql`
 - `supabase/migrations/202606120002_rls_policies.sql`
 - `supabase/migrations/202606120003_storage.sql`
+- `supabase/migrations/202606140001_manager_incidents.sql`
 - `supabase/seed.sql`
 
 ## Entidades
@@ -61,11 +62,13 @@ Campos principales:
 Roles globales:
 
 - `super_admin`: super usuario con administracion completa.
-- `user`: usuario de consulta, solo lectura.
+- `manager`: consulta datos activos y puede comentar incidentes.
+- `user`: consultor, solo lectura general sin acceso a incidentes.
 
 La migracion `202606120006_two_global_roles.sql` elimina el modelo de roles por
 compania. Las marcas visibles se resuelven desde `companies` activas para ambos
-roles; solo `super_admin` puede crear, editar o eliminar informacion.
+roles de consulta. La migracion `202606140001_manager_incidents.sql` agrega
+`manager` y mantiene a `super_admin` como unico rol con escritura general.
 
 ### `locations`
 
@@ -144,6 +147,66 @@ Campos principales:
 - `original_name`
 - `mime_type`
 - `size_bytes`
+- `status`
+
+### `location_incidents`
+
+Incidentes operativos por taquilla.
+
+Campos principales:
+
+- `company_id`
+- `location_id`
+- `title`
+- `description`
+- `category`
+- `priority`
+- `status`
+- `assignee_name`
+- `reported_by`
+- `resolved_by`
+- `opened_at`
+- `resolved_at`
+- `resolution_summary`
+
+Estados:
+
+- `open`
+- `in_progress`
+- `waiting`
+- `resolved`
+- `canceled`
+
+### `location_incident_notes`
+
+Historial y comentarios de seguimiento para incidentes.
+
+Campos principales:
+
+- `incident_id`
+- `company_id`
+- `location_id`
+- `author_id`
+- `body`
+- `event_type`
+
+### `location_incident_attachments`
+
+Imagenes privadas de evidencia asociadas a un incidente o comentario.
+
+Campos principales:
+
+- `incident_id`
+- `note_id`
+- `company_id`
+- `location_id`
+- `uploaded_by`
+- `bucket`
+- `storage_path`
+- `original_name`
+- `mime_type`
+- `size_bytes`
+- `caption`
 - `status`
 
 ## Storage

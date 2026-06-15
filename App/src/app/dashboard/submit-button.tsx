@@ -49,7 +49,7 @@ export function IconSubmitButton({
   );
 }
 
-function Spinner({ compact = false }: Readonly<{ compact?: boolean }>) {
+export function Spinner({ compact = false }: Readonly<{ compact?: boolean }>) {
   return (
     <span
       aria-hidden="true"

@@ -40,3 +40,4 @@ out
 .agents/
 .codex/skills/
 skills-lock.json
+.claude

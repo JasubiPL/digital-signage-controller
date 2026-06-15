@@ -3,13 +3,15 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import {
+  FiAlertTriangle,
   FiChevronRight,
   FiGrid,
-  FiLogOut,
   FiMonitor,
   FiRadio,
   FiUsers,
 } from "react-icons/fi";
+
+import { BrandIcon } from "@/app/brand-icon";
 
 type Company = {
   id: string;
@@ -19,6 +21,7 @@ type Company = {
 };
 
 type DashboardSidebarProps = {
+  canAccessIncidents: boolean;
   canManageUsers: boolean;
   companies: Company[];
   homeHref?: string;
@@ -26,6 +29,7 @@ type DashboardSidebarProps = {
 };
 
 export function DashboardSidebar({
+  canAccessIncidents,
   canManageUsers,
   companies,
   homeHref,
@@ -77,6 +81,15 @@ export function DashboardSidebar({
             Usuarios
           </MobileLink>
         ) : null}
+        {canAccessIncidents ? (
+          <MobileLink
+            active={pathname === "/dashboard/incidents"}
+            href="/dashboard/incidents"
+            onNavigate={navigate}
+          >
+            Incidentes
+          </MobileLink>
+        ) : null}
         {orderedCompanies.map((company) => (
           <MobileLink
             active={pathname === `/dashboard/locations/${company.slug}`}
@@ -110,9 +123,7 @@ export function DashboardSidebar({
             onClick={() => navigate(defaultHref)}
             type="button"
           >
-            <span className="grid h-11 w-11 place-items-center rounded-lg border border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-xl text-[var(--color-primary)] transition group-hover:border-[var(--color-primary)]">
-              <FiGrid aria-hidden="true" />
-            </span>
+            <BrandIcon className="h-11 w-11 transition group-hover:border-[var(--color-primary)]" />
             <span className="grid">
               <span className="font-display text-xl font-extrabold leading-none tracking-tight text-[var(--color-primary-soft)]">
                 DS Controller
@@ -143,6 +154,17 @@ export function DashboardSidebar({
                 onNavigate={navigate}
               >
                 Usuarios
+              </SidebarLink>
+            ) : null}
+
+            {canAccessIncidents ? (
+              <SidebarLink
+                active={pathname.startsWith("/dashboard/incidents")}
+                href="/dashboard/incidents"
+                icon={<FiAlertTriangle aria-hidden="true" />}
+                onNavigate={navigate}
+              >
+                Incidentes
               </SidebarLink>
             ) : null}
 
@@ -181,13 +203,6 @@ export function DashboardSidebar({
             />
           </nav>
         </section>
-
-        <form action="/logout" className="border-t border-[var(--color-border)] px-4 py-5" method="post">
-          <button className="flex min-h-12 w-full items-center justify-center gap-2.5 rounded-md border border-[var(--color-border)] bg-[rgba(19,27,46,0.74)] px-4 py-2.5 text-sm font-extrabold text-[var(--color-text-secondary)] transition hover:border-[var(--color-secondary)] hover:bg-[var(--color-secondary-muted)] hover:text-[var(--color-secondary-soft)] hover:shadow-[0_14px_28px_rgba(244,63,94,0.1)]">
-            <FiLogOut aria-hidden="true" className="text-base" />
-            Logout
-          </button>
-        </form>
       </aside>
 
       {isPending ? <DashboardLoadingOverlay /> : null}

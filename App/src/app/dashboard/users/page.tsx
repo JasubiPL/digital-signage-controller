@@ -45,7 +45,7 @@ type Profile = {
   created_at: string;
   email: string;
   full_name: string | null;
-  global_role: "super_admin" | "user";
+  global_role: "super_admin" | "manager" | "user";
   id: string;
 };
 
@@ -107,14 +107,18 @@ export default async function UsersPage({ searchParams }: Readonly<UsersPageProp
         </DashboardDialog>
       </PageHeader>
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-4">
         <UserMetric label="Usuarios" value={typedProfiles.length} />
         <UserMetric
           label="Super usuarios"
           value={typedProfiles.filter((profile) => profile.global_role === "super_admin").length}
         />
         <UserMetric
-          label="Usuarios consulta"
+          label="Managers"
+          value={typedProfiles.filter((profile) => profile.global_role === "manager").length}
+        />
+        <UserMetric
+          label="Consultores"
           value={typedProfiles.filter((profile) => profile.global_role === "user").length}
         />
       </section>
@@ -153,6 +157,12 @@ export default async function UsersPage({ searchParams }: Readonly<UsersPageProp
                   </td>
                   <td className={listingActionCellClass}>
                     <div className="flex items-center justify-center gap-2">
+                      <DashboardDialog
+                        title={`Detalle de ${profile.email}`}
+                        trigger={<ActionIconTrigger label="Ver" tone="view" />}
+                      >
+                        <ViewUserDetails profile={profile} />
+                      </DashboardDialog>
                       <DashboardDialog
                         title={`Modificar ${profile.email}`}
                         trigger={<ActionIconTrigger label="Modificar" tone="edit" />}
@@ -199,13 +209,11 @@ function avatarSrcForProfile(profile: Profile) {
     return "/default-avatar/admin.png";
   }
 
-  const variants = ["/default-avatar/consultant.png", "/default-avatar/manager.png"];
-  const hash = Array.from(profile.id || profile.email).reduce(
-    (sum, char) => sum + char.charCodeAt(0),
-    0,
-  );
+  if (profile.global_role === "manager") {
+    return "/default-avatar/manager.png";
+  }
 
-  return variants[hash % variants.length];
+  return "/default-avatar/consultant.png";
 }
 
 function UsersShell({
@@ -283,6 +291,19 @@ function EditUserForm({
           type="email"
         />
       </Field>
+      <Field label="Nueva contrasena">
+        <input
+          autoComplete="new-password"
+          className={inputClass}
+          minLength={8}
+          name="password"
+          placeholder="Dejar en blanco para no cambiar"
+          type="password"
+        />
+        <p className="mt-1.5 text-xs font-semibold leading-5 text-[var(--color-text-muted)]">
+          Minimo 8 caracteres. Solo se actualiza si capturas un valor.
+        </p>
+      </Field>
       <RoleField defaultValue={profile.global_role} disabledUserOption={isEditingSelf} />
       {isEditingSelf ? (
         <p className="text-xs font-semibold leading-5 text-[var(--color-text-muted)]">
@@ -293,6 +314,73 @@ function EditUserForm({
         Guardar cambios
       </SubmitButton>
     </form>
+  );
+}
+
+const roleLabels: Record<Profile["global_role"], string> = {
+  manager: "Manager",
+  super_admin: "Super usuario",
+  user: "Consultor",
+};
+
+function ViewUserDetails({ profile }: Readonly<{ profile: Profile }>) {
+  const createdAt = new Date(profile.created_at).toLocaleString("es-MX", {
+    dateStyle: "long",
+    timeStyle: "short",
+  });
+
+  return (
+    <div className="grid gap-4">
+      <div className="flex items-center gap-3">
+        <UserAvatar profile={profile} />
+        <div>
+          <p className="font-display text-base font-extrabold text-[var(--color-text-primary)]">
+            {profile.full_name || "Sin nombre"}
+          </p>
+          <p className="font-mono text-xs text-[var(--color-primary)]">{profile.email}</p>
+        </div>
+      </div>
+
+      <dl className="grid gap-3">
+        <DetailRow label="Nombre" value={profile.full_name || "Sin nombre"} />
+        <DetailRow label="Email" value={profile.email} />
+        <DetailRow label="Rol" value={roleLabels[profile.global_role]} />
+        <DetailRow label="Alta" value={createdAt} />
+        <DetailRow label="ID" value={profile.id} mono />
+      </dl>
+
+      <div className="rounded-md border border-[var(--color-border)] bg-[rgba(148,163,184,0.08)] px-4 py-3">
+        <p className="mono-label text-xs text-[var(--color-text-muted)]">Contrasena</p>
+        <p className="mt-1.5 font-mono text-sm tracking-[0.3em] text-[var(--color-text-soft)]">
+          ••••••••
+        </p>
+        <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-text-muted)]">
+          Por seguridad, las contrasenas se guardan cifradas y no se pueden
+          mostrar. Para cambiarla usa la opcion Modificar.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function DetailRow({
+  label,
+  mono = false,
+  value,
+}: Readonly<{
+  label: string;
+  mono?: boolean;
+  value: string;
+}>) {
+  return (
+    <div className="grid gap-1 border-b border-[var(--color-border)] pb-3 last:border-b-0 last:pb-0 sm:grid-cols-[8rem_1fr] sm:items-baseline">
+      <dt className="mono-label text-xs text-[var(--color-text-muted)]">{label}</dt>
+      <dd
+        className={`text-sm font-semibold text-[var(--color-text-primary)] ${mono ? "break-all font-mono text-xs text-[var(--color-text-soft)]" : ""}`}
+      >
+        {value}
+      </dd>
+    </div>
   );
 }
 
@@ -339,15 +427,18 @@ function RoleField({
   defaultValue,
   disabledUserOption = false,
 }: Readonly<{
-  defaultValue: "super_admin" | "user";
+  defaultValue: "super_admin" | "manager" | "user";
   disabledUserOption?: boolean;
 }>) {
   return (
     <Field label="Rol">
       <select className={inputClass} defaultValue={defaultValue} name="globalRole">
         <option value="super_admin">Super usuario</option>
+        <option disabled={disabledUserOption} value="manager">
+          Manager
+        </option>
         <option disabled={disabledUserOption} value="user">
-          Usuario consulta
+          Consultor
         </option>
       </select>
     </Field>

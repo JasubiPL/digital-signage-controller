@@ -133,9 +133,9 @@ Desde Supabase SQL Editor:
 Cuando Supabase CLI este configurado:
 
 ```sh
-supabase link --project-ref hlpgjwoeiykcditbwtvq
-supabase db push
-supabase db seed
+npm run supabase:link -- <tu-project-ref>
+npm run supabase:push
+npm run supabase:seed
 ```
 
 Los usuarios de Auth y sus roles siguen siendo manuales porque requieren emails

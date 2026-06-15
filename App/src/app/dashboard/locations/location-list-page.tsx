@@ -86,7 +86,11 @@ export async function LocationListPage({
   const availableCompanies = selectedCompany ? [selectedCompany] : companies;
   const companyIds = availableCompanies.map((company) => company.id);
   const isAdmin = access.isGlobalAdmin;
-  const [{ data: locations }, { data: campaigns }, { data: assignments }] =
+  const [
+    { data: locations },
+    { data: campaigns },
+    { data: assignments },
+  ] =
     await Promise.all([
       companyIds.length
         ? supabase
@@ -293,7 +297,7 @@ function LocationStatusBadge({ children }: Readonly<{ children: React.ReactNode 
     value === "ok"
       ? "border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-[var(--color-primary-soft)]"
       : value === "remodeling"
-        ? "border-[rgba(244,63,94,0.34)] bg-[var(--color-secondary-muted)] text-[var(--color-secondary-soft)]"
+        ? "border-[rgba(255,177,59,0.34)] bg-[var(--color-tertiary-muted)] text-[var(--color-tertiary-soft)]"
         : "border-[rgba(244,63,94,0.34)] bg-[var(--color-secondary-muted)] text-[var(--color-secondary-soft)]";
 
   return (
