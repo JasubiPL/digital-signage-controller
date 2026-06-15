@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import {
@@ -87,12 +86,10 @@ export async function LocationListPage({
   const availableCompanies = selectedCompany ? [selectedCompany] : companies;
   const companyIds = availableCompanies.map((company) => company.id);
   const isAdmin = access.isGlobalAdmin;
-  const canAccessIncidents = access.canAccessIncidents;
   const [
     { data: locations },
     { data: campaigns },
     { data: assignments },
-    { data: activeIncidents },
   ] =
     await Promise.all([
       companyIds.length
@@ -115,26 +112,11 @@ export async function LocationListPage({
             .select("id, company_id, location_id, campaign_id, status, campaigns(id, name, status)")
             .in("company_id", companyIds)
         : Promise.resolve({ data: [] }),
-      canAccessIncidents && companyIds.length
-        ? supabase
-            .from("location_incidents")
-            .select("location_id")
-            .in("company_id", companyIds)
-            .in("status", ["open", "in_progress", "waiting"])
-        : Promise.resolve({ data: [] }),
     ]);
   const companyById = new Map(companies.map((company) => [company.id, company]));
   const brandName = selectedCompany ? brandLabel(selectedCompany) : "Todas";
   const campaignsById = new Map((campaigns ?? []).map((campaign) => [campaign.id, campaign]));
   const campaignsByLocation = new Map<string, AssignedCampaign[]>();
-  const incidentCountByLocation = new Map<string, number>();
-
-  for (const incident of activeIncidents ?? []) {
-    incidentCountByLocation.set(
-      incident.location_id,
-      (incidentCountByLocation.get(incident.location_id) ?? 0) + 1,
-    );
-  }
 
   for (const assignment of (assignments ?? []) as LocationAssignment[]) {
     const campaign =
@@ -207,15 +189,7 @@ export async function LocationListPage({
                 return (
                   <tr className={listingRowClass} key={location.id}>
                     <td className={`${listingCellClass} font-semibold text-[var(--color-text-primary)]`}>
-                      <span>{location.name}</span>
-                      {canAccessIncidents && (incidentCountByLocation.get(location.id) ?? 0) > 0 ? (
-                        <Link
-                          className="mt-2 inline-flex rounded-full border border-[rgba(244,63,94,0.34)] bg-[var(--color-secondary-muted)] px-3 py-1 font-mono text-[10px] font-extrabold uppercase tracking-[0.08em] text-[var(--color-secondary-soft)]"
-                          href={`/dashboard/incidents?locationId=${location.id}`}
-                        >
-                          {incidentCountByLocation.get(location.id)} incidente(s)
-                        </Link>
-                      ) : null}
+                      {location.name}
                     </td>
                     {!selectedCompany ? (
                       <td className={listingCellClass}>
@@ -323,7 +297,7 @@ function LocationStatusBadge({ children }: Readonly<{ children: React.ReactNode 
     value === "ok"
       ? "border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-[var(--color-primary-soft)]"
       : value === "remodeling"
-        ? "border-[rgba(244,63,94,0.34)] bg-[var(--color-secondary-muted)] text-[var(--color-secondary-soft)]"
+        ? "border-[rgba(255,177,59,0.34)] bg-[var(--color-tertiary-muted)] text-[var(--color-tertiary-soft)]"
         : "border-[rgba(244,63,94,0.34)] bg-[var(--color-secondary-muted)] text-[var(--color-secondary-soft)]";
 
   return (

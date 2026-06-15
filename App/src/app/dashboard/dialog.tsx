@@ -1,20 +1,28 @@
 "use client";
 
-import { type ReactNode, useRef } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 import { FiX } from "react-icons/fi";
 
 type DashboardDialogProps = {
   children: ReactNode;
+  defaultOpen?: boolean;
   title: string;
   trigger: ReactNode;
 };
 
 export function DashboardDialog({
   children,
+  defaultOpen = false,
   title,
   trigger,
 }: Readonly<DashboardDialogProps>) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    if (defaultOpen) {
+      dialogRef.current?.showModal();
+    }
+  }, [defaultOpen]);
 
   return (
     <>

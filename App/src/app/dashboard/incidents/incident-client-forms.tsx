@@ -72,9 +72,11 @@ type UploadTarget = {
 
 export function CreateIncidentForm({
   companies,
+  defaultLocationId,
   locations,
 }: Readonly<{
   companies: Company[];
+  defaultLocationId?: string;
   locations: Location[];
 }>) {
   const router = useRouter();
@@ -82,7 +84,9 @@ export function CreateIncidentForm({
   const [assigneeName, setAssigneeName] = useState("");
   const [category, setCategory] = useState("other");
   const [description, setDescription] = useState("");
-  const [locationId, setLocationId] = useState(locations[0]?.id ?? "");
+  const [locationId, setLocationId] = useState(
+    defaultLocationId ?? locations[0]?.id ?? "",
+  );
   const [priority, setPriority] = useState("medium");
   const [submitting, setSubmitting] = useState(false);
   const [title, setTitle] = useState("");

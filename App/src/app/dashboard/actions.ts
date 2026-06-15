@@ -373,10 +373,14 @@ export async function updateManagedUser(formData: FormData) {
     const userId = field(formData, "userId");
     const email = field(formData, "email").toLowerCase();
     const fullName = field(formData, "fullName");
+    const password = field(formData, "password");
     const globalRole = profileRole(formData);
 
     if (!userId) throw new Error("Usuario invalido.");
     if (!email) throw new Error("Captura el email del usuario.");
+    if (password && password.length < 8) {
+      throw new Error("La contraseña debe tener al menos 8 caracteres.");
+    }
     if (scope.user.id === userId && globalRole !== "super_admin") {
       throw new Error("No puedes quitarte tu propio rol de super usuario.");
     }
@@ -384,6 +388,7 @@ export async function updateManagedUser(formData: FormData) {
     const admin = createAdminClient();
     const { error: authError } = await admin.auth.admin.updateUserById(userId, {
       email: email || undefined,
+      password: password || undefined,
       user_metadata: {
         full_name: fullName || email,
       },
@@ -669,15 +674,30 @@ export async function updateLocation(formData: FormData) {
     const companyId = field(formData, "companyId");
     await assertCanManageCompany(companyId);
 
+    const status = field(formData, "status") || "ok";
+    const locationUpdate: {
+      device: string | null;
+      name: string;
+      projection: string | null;
+      status?: string;
+    } = {
+      device: optionalField(formData, "device"),
+      name: field(formData, "name"),
+      projection: optionalField(formData, "projection"),
+    };
+
+    // El estatus "incident" se asigna automaticamente al registrar un
+    // incidente. Aqui solo guardamos los demas campos y mandamos al usuario a
+    // crear el incidente con la taquilla preseleccionada; si lo cancela, la
+    // taquilla conserva su estatus anterior.
+    if (status !== "incident") {
+      locationUpdate.status = status;
+    }
+
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("locations")
-      .update({
-        device: optionalField(formData, "device"),
-        name: field(formData, "name"),
-        projection: optionalField(formData, "projection"),
-        status: field(formData, "status") || "ok",
-      })
+      .update(locationUpdate)
       .eq("id", id)
       .eq("company_id", companyId)
       .select("id")
@@ -687,6 +707,11 @@ export async function updateLocation(formData: FormData) {
     if (!data) throw new Error("No se encontro la taquilla para actualizar.");
 
     revalidatePath(path);
+
+    if (status === "incident") {
+      redirect(`/dashboard/incidents?newIncidentLocation=${id}`);
+    }
+
     finish(path, "success", "Taquilla actualizada.");
   } catch (error) {
     unstable_rethrow(error);

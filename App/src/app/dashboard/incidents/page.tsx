@@ -42,6 +42,7 @@ type IncidentsPageProps = {
     companyId?: string;
     error?: string;
     locationId?: string;
+    newIncidentLocation?: string;
     priority?: string;
     status?: string;
     success?: string;
@@ -132,6 +133,11 @@ export default async function IncidentsPage({
   const typedLocations = (locations ?? []) as Location[];
   const companyById = new Map(companies.map((company) => [company.id, company]));
   const locationById = new Map(typedLocations.map((location) => [location.id, location]));
+  const createForLocationId = typedLocations.some(
+    (location) => location.id === filters.newIncidentLocation,
+  )
+    ? filters.newIncidentLocation
+    : undefined;
 
   return (
     <div className="mx-auto flex w-full flex-col gap-6">
@@ -140,11 +146,13 @@ export default async function IncidentsPage({
       <PageHeader eyebrow="Incidentes" title="Seguimiento de taquillas">
         {access.isGlobalAdmin ? (
           <DashboardDialog
+            defaultOpen={Boolean(createForLocationId)}
             title="Nuevo incidente"
             trigger={<ListingPrimaryAction>Nuevo Incidente +</ListingPrimaryAction>}
           >
             <CreateIncidentForm
               companies={companies}
+              defaultLocationId={createForLocationId}
               locations={typedLocations}
             />
           </DashboardDialog>
