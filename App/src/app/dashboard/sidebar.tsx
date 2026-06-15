@@ -6,7 +6,6 @@ import {
   FiAlertTriangle,
   FiChevronRight,
   FiGrid,
-  FiLogOut,
   FiMonitor,
   FiRadio,
   FiUsers,
@@ -204,13 +203,6 @@ export function DashboardSidebar({
             />
           </nav>
         </section>
-
-        <form action="/logout" className="border-t border-[var(--color-border)] px-4 py-5" method="post">
-          <button className="flex min-h-12 w-full items-center justify-center gap-2.5 rounded-md border border-[var(--color-border)] bg-[rgba(19,27,46,0.74)] px-4 py-2.5 text-sm font-extrabold text-[var(--color-text-secondary)] transition hover:border-[var(--color-secondary)] hover:bg-[var(--color-secondary-muted)] hover:text-[var(--color-secondary-soft)] hover:shadow-[0_14px_28px_rgba(244,63,94,0.1)]">
-            <FiLogOut aria-hidden="true" className="text-base" />
-            Logout
-          </button>
-        </form>
       </aside>
 
       {isPending ? <DashboardLoadingOverlay /> : null}

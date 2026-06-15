@@ -1,9 +1,8 @@
-import Image from "next/image";
-
 import { SystemFooter } from "@/app/system-footer";
 
 import { getDashboardContext } from "./data";
 import { DashboardSidebar } from "./sidebar";
+import { UserMenu } from "./user-menu";
 
 export default async function DashboardLayout({
   children,
@@ -48,23 +47,11 @@ export default async function DashboardLayout({
               mobile
             />
           </div>
-          <div className="flex items-center gap-2.5">
-            <p className="flex flex-col items-end text-xs font-extrabold text-[var(--color-text-primary)]">
-              <span>Hola {displayName}</span>
-              <small className="font-mono text-[9px] tracking-[0.08em] text-[var(--color-primary)]">
-                {email || "correo no disponible"}
-              </small>
-            </p>
-            <span className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-full border border-[var(--color-primary-border)] bg-[var(--color-primary-muted)]">
-              <Image
-                alt={`Avatar de ${displayName}`}
-                className="h-full w-full object-cover"
-                height={40}
-                src={avatarSrc}
-                width={40}
-              />
-            </span>
-          </div>
+          <UserMenu
+            avatarSrc={avatarSrc}
+            displayName={displayName}
+            email={email}
+          />
         </header>
         <main className="h-full flex-1 overflow-y-auto px-5 py-6 lg:px-6">
           {children}
