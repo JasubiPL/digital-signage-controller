@@ -1,14 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import type { ComponentProps, Dispatch, ReactNode, SetStateAction } from "react";
-import { useRef, useState, useTransition } from "react";
-import { FiBold, FiEdit2, FiImage, FiItalic, FiLink, FiList, FiMessageCircle, FiTrash2, FiType, FiX } from "react-icons/fi";
+import type { ComponentProps, Dispatch, SetStateAction } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { FiEdit2, FiImage, FiMessageCircle, FiTrash2, FiX } from "react-icons/fi";
 
 import {
   updateLocationIncident,
   updateLocationIncidentStatus,
 } from "@/app/dashboard/actions";
+import { Spinner, SubmitButton } from "@/app/dashboard/submit-button";
 
 import {
   buttonClass,
@@ -16,6 +17,11 @@ import {
   Field,
   inputClass,
 } from "../components";
+import {
+  RichTextEditor,
+  stripHtml,
+  toolbarButtonClass,
+} from "../rich-text-editor";
 import {
   ImageUploadField,
   type UploadQueueItem,
@@ -58,10 +64,6 @@ const incidentCategories = [
 ];
 const incidentPriorities = ["low", "medium", "high", "critical"];
 const incidentStatuses = ["open", "in_progress", "waiting", "resolved", "canceled"];
-const toolbarButtonClass =
-  "inline-grid h-9 w-9 place-items-center rounded-md border border-[var(--color-border)] bg-[rgba(2,6,23,0.52)] text-[var(--color-text-muted)] transition hover:border-[var(--color-primary-border)] hover:text-[var(--color-primary-soft)] disabled:cursor-not-allowed disabled:opacity-50";
-const toolbarSelectClass =
-  "h-9 rounded-md border border-[var(--color-border)] bg-[rgba(2,6,23,0.52)] px-2 text-xs font-extrabold text-[var(--color-text-primary)] outline-none transition focus:border-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-50";
 
 type UploadTarget = {
   incidentId: string;
@@ -310,6 +312,13 @@ export function AddNoteForm({
   const validationError = validateUploadItems(items);
   const canSubmit = Boolean(stripHtml(body).trim()) && !validationError && !submitting;
 
+  useEffect(() => {
+    if (!message) return;
+
+    const timer = window.setTimeout(() => setMessage(null), 4000);
+    return () => window.clearTimeout(timer);
+  }, [message]);
+
   return (
     <form
       className={`grid gap-3 rounded-lg border border-[var(--color-border)] bg-[rgba(6,14,32,0.42)] ${compact ? "p-3" : "p-4"}`}
@@ -390,10 +399,10 @@ export function AddNoteForm({
         </p>
       ) : null}
       <dialog
-        className="glass-panel-strong fixed inset-0 m-auto hidden max-h-[calc(100vh-2rem)] w-[min(92vw,42rem)] flex-col overflow-hidden rounded-lg p-0 text-[var(--color-text-primary)] shadow-[0_24px_70px_rgba(0,0,0,0.36)] backdrop:bg-[#020617]/72 open:flex"
+        className="glass-panel-strong fixed inset-0 m-auto hidden h-fit max-h-[calc(100vh-2rem)] w-[min(92vw,42rem)] overflow-y-auto rounded-lg p-0 text-[var(--color-text-primary)] shadow-[0_24px_70px_rgba(0,0,0,0.36)] backdrop:bg-[#020617]/72 open:block"
         ref={imageDialogRef}
       >
-        <header className="flex flex-none items-center justify-between border-b border-[var(--color-border)] px-5 py-4">
+        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface-panel-strong)] px-5 py-4">
           <div>
             <h2 className="font-display text-lg font-extrabold tracking-tight text-[var(--color-text-primary)]">Imagenes del comentario</h2>
             <span className="mt-2.5 block h-0.5 w-12 rounded-sm bg-[var(--color-primary)]" />
@@ -407,7 +416,7 @@ export function AddNoteForm({
             <FiX aria-hidden="true" className="h-5 w-5" />
           </button>
         </header>
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
+        <div className="px-5 py-5">
           <ImageUploadField
             disabled={submitting}
             items={items}
@@ -429,7 +438,8 @@ export function AddNoteForm({
         disabled={!canSubmit}
         type="submit"
       >
-        {submitting ? "Comentando..." : submitLabel}
+        {submitting ? <Spinner /> : null}
+        <span>{submitting ? "Comentando..." : submitLabel}</span>
       </button>
     </form>
   );
@@ -544,7 +554,7 @@ export function IncidentNoteActions({
               onClick={deleteNote}
               type="button"
             >
-              <FiTrash2 aria-hidden="true" />
+              {deleting ? <Spinner compact /> : <FiTrash2 aria-hidden="true" />}
               {deleting ? "Eliminando..." : "Eliminar"}
             </button>
           </>
@@ -578,7 +588,8 @@ export function IncidentNoteActions({
               onClick={saveEdit}
               type="button"
             >
-              {editing ? "Guardando..." : "Guardar"}
+              {editing ? <Spinner compact /> : null}
+              <span>{editing ? "Guardando..." : "Guardar"}</span>
             </button>
             <button
               className={`${ghostButtonClass} min-h-10 px-4 py-1.5`}
@@ -669,193 +680,11 @@ export function AdminIncidentForm({
       <Field label="Nota opcional">
         <textarea className={inputClass} name="note" rows={2} />
       </Field>
-      <button className={buttonClass} type="submit">
+      <SubmitButton className={buttonClass} pendingLabel="Guardando incidente...">
         Guardar incidente
-      </button>
+      </SubmitButton>
     </form>
   );
-}
-
-export function RichTextEditor({
-  disabled,
-  extraToolbar,
-  label,
-  name,
-  onChange,
-  placeholder,
-  value,
-}: Readonly<{
-  disabled: boolean;
-  extraToolbar?: ReactNode;
-  label: string;
-  name: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  value: string;
-}>) {
-  const editorRef = useRef<HTMLDivElement>(null);
-  const [html, setHtml] = useState(value);
-
-  const bindEditor = (node: HTMLDivElement | null) => {
-    editorRef.current = node;
-
-    if (node && node.dataset.editorReady !== "true") {
-      node.innerHTML = html;
-      node.dataset.editorReady = "true";
-    }
-  };
-
-  const updateHtml = (nextHtml: string) => {
-    setHtml(nextHtml);
-    onChange(nextHtml);
-  };
-
-  const runCommand = (command: string, commandValue?: string) => {
-    editorRef.current?.focus();
-    document.execCommand(command, false, commandValue);
-    updateHtml(editorRef.current?.innerHTML ?? "");
-  };
-
-  const addLink = () => {
-    const rawUrl = window.prompt("URL del enlace");
-    if (!rawUrl?.trim()) return;
-
-    const url = normalizeUrl(rawUrl.trim());
-    editorRef.current?.focus();
-
-    if (window.getSelection()?.toString()) {
-      document.execCommand("createLink", false, url);
-    } else {
-      const label = window.prompt("Texto del enlace", url)?.trim() || url;
-      document.execCommand("insertHTML", false, `<a href="${escapeAttribute(url)}">${escapeText(label)}</a>`);
-    }
-
-    updateHtml(editorRef.current?.innerHTML ?? "");
-  };
-
-  return (
-    <Field label={label}>
-      <div className="overflow-hidden rounded-md border border-[var(--color-border)] bg-[rgba(2,6,23,0.34)]">
-        <div className="flex flex-wrap items-center gap-2 border-b border-[var(--color-border)] px-3 py-2">
-          <button
-            aria-label="Negritas"
-            className={toolbarButtonClass}
-            disabled={disabled}
-            onClick={() => runCommand("bold")}
-            title="Negritas"
-            type="button"
-          >
-            <FiBold aria-hidden="true" />
-          </button>
-          <button
-            aria-label="Cursiva"
-            className={toolbarButtonClass}
-            disabled={disabled}
-            onClick={() => runCommand("italic")}
-            title="Cursiva"
-            type="button"
-          >
-            <FiItalic aria-hidden="true" />
-          </button>
-          <button
-            aria-label="Agregar enlace"
-            className={toolbarButtonClass}
-            disabled={disabled}
-            onClick={addLink}
-            title="Agregar enlace"
-            type="button"
-          >
-            <FiLink aria-hidden="true" />
-          </button>
-          <button
-            aria-label="Lista"
-            className={toolbarButtonClass}
-            disabled={disabled}
-            onClick={() => runCommand("insertUnorderedList")}
-            title="Lista"
-            type="button"
-          >
-            <FiList aria-hidden="true" />
-          </button>
-          <span className="ml-1 hidden text-[var(--color-text-muted)] sm:inline-flex">
-            <FiType aria-hidden="true" />
-          </span>
-          <select
-            aria-label="Tipografia"
-            className={toolbarSelectClass}
-            defaultValue=""
-            disabled={disabled}
-            onChange={(event) => {
-              if (!event.currentTarget.value) return;
-              runCommand("fontName", event.currentTarget.value);
-              event.currentTarget.value = "";
-            }}
-          >
-            <option value="">Fuente</option>
-            <option value="sans">Sans</option>
-            <option value="serif">Serif</option>
-            <option value="mono">Mono</option>
-          </select>
-          <select
-            aria-label="Tamano de letra"
-            className={toolbarSelectClass}
-            defaultValue=""
-            disabled={disabled}
-            onChange={(event) => {
-              if (!event.currentTarget.value) return;
-              runCommand("fontSize", event.currentTarget.value);
-              event.currentTarget.value = "";
-            }}
-          >
-            <option value="">Tamano</option>
-            <option value="2">Chico</option>
-            <option value="3">Normal</option>
-            <option value="5">Grande</option>
-          </select>
-          {extraToolbar}
-        </div>
-        <input name={name} type="hidden" value={html} />
-        <div
-          aria-label={label}
-          className="min-h-32 w-full overflow-auto px-4 py-3 text-sm font-semibold leading-7 text-[var(--color-text-primary)] outline-none empty:before:text-[var(--color-text-muted)] empty:before:content-[attr(data-placeholder)] focus:ring-4 focus:ring-[rgba(34,211,238,0.10)]"
-          contentEditable={!disabled}
-          data-placeholder={placeholder ?? ""}
-          onInput={(event) => updateHtml(event.currentTarget.innerHTML)}
-          ref={bindEditor}
-          role="textbox"
-          suppressContentEditableWarning
-        />
-        <textarea
-          className="sr-only"
-          name={`${name}PlainTextCheck`}
-          readOnly
-          required
-          value={stripHtml(html)}
-        />
-      </div>
-    </Field>
-  );
-}
-
-function normalizeUrl(value: string) {
-  if (/^(https?:|mailto:|tel:)/i.test(value)) return value;
-
-  return `https://${value}`;
-}
-
-function escapeAttribute(value: string) {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/"/g, "&quot;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
-
-function escapeText(value: string) {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
 }
 
 function DescriptionEditor(props: Omit<ComponentProps<typeof RichTextEditor>, "label" | "name">) {
@@ -1115,13 +944,4 @@ function statusLabel(value: string) {
   };
 
   return labels[value] ?? value;
-}
-
-function stripHtml(value: string) {
-  return value
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<\/(div|p|li|h[1-6])>/gi, "\n")
-    .replace(/<[^>]*>/g, "")
-    .replace(/&nbsp;/g, " ")
-    .trim();
 }

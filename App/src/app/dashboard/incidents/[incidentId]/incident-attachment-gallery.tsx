@@ -105,11 +105,11 @@ export function AttachmentGallery({
       </section>
 
       <dialog
-        className="glass-panel-strong fixed inset-0 m-auto hidden max-h-[calc(100vh-2rem)] w-[min(94vw,64rem)] flex-col overflow-hidden rounded-lg p-0 text-[var(--color-text-primary)] shadow-[0_24px_70px_rgba(0,0,0,0.36)] backdrop:bg-[#020617]/72 open:flex"
+        className="glass-panel-strong fixed inset-0 m-auto hidden h-fit max-h-[calc(100vh-2rem)] w-[min(94vw,64rem)] overflow-y-auto rounded-lg p-0 text-[var(--color-text-primary)] shadow-[0_24px_70px_rgba(0,0,0,0.36)] backdrop:bg-[#020617]/72 open:block"
         onCancel={() => setSelectedAttachment(null)}
         ref={dialogRef}
       >
-        <header className="flex flex-none items-center justify-between border-b border-[var(--color-border)] px-5 py-4">
+        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface-panel-strong)] px-5 py-4">
           <div className="min-w-0">
             <h2 className="truncate font-display text-lg font-extrabold tracking-tight text-[var(--color-text-primary)]">
               {selectedAttachment?.label ?? "Imagen del incidente"}
@@ -125,7 +125,7 @@ export function AttachmentGallery({
             <FiX aria-hidden="true" className="h-5 w-5" />
           </button>
         </header>
-        <div className="min-h-0 flex-1 overflow-auto px-5 py-5">
+        <div className="px-5 py-5">
           {selectedAttachment ? (
             <img
               alt={selectedAttachment.label}

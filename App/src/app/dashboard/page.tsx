@@ -1,14 +1,19 @@
 import { redirect } from "next/navigation";
 import {
-  FiArchive,
+  FiAlertTriangle,
   FiBriefcase,
+  FiCheckCircle,
+  FiClock,
   FiHardDrive,
   FiMonitor,
   FiRadio,
+  FiUsers,
 } from "react-icons/fi";
 
 import { bootstrapFirstAdmin } from "@/server/auth/bootstrap";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/server/supabase/admin";
+import { supabaseServerEnv } from "@/server/supabase/env";
 import {
   ensureProfile,
   getBootstrapState,
@@ -16,7 +21,7 @@ import {
   requireUser,
 } from "@/server/auth/session";
 
-import { buttonClass, Feedback, PageHeader, StatusBadge } from "./components";
+import { buttonClass, Feedback, PageHeader } from "./components";
 import { SubmitButton } from "./submit-button";
 
 type DashboardPageProps = {
@@ -50,11 +55,24 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const companyIds = access.data
     .map((item) => item.companies?.id)
     .filter((id): id is string => Boolean(id));
+  const adminClient = supabaseServerEnv.hasSecretKey ? createAdminClient() : null;
+  const incidentCountByStatus = (status: string) =>
+    companyIds.length
+      ? supabase
+          .from("location_incidents")
+          .select("id", { count: "exact", head: true })
+          .in("company_id", companyIds)
+          .eq("status", status)
+      : Promise.resolve({ count: 0 });
   const [
     { count: campaignCount },
     { count: locationCount },
     { count: screenCount },
     { count: mediaCount },
+    { count: openIncidentCount },
+    { count: inProgressIncidentCount },
+    { count: resolvedIncidentCount },
+    { count: userCount },
   ] = await Promise.all([
     companyIds.length
       ? supabase.from("campaigns").select("id", { count: "exact", head: true }).in("company_id", companyIds)
@@ -72,6 +90,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           .in("company_id", companyIds)
           .eq("status", "active")
       : Promise.resolve({ count: 0 }),
+    incidentCountByStatus("open"),
+    incidentCountByStatus("in_progress"),
+    incidentCountByStatus("resolved"),
+    (adminClient ?? supabase).from("profiles").select("id", { count: "exact", head: true }),
   ]);
 
   return (
@@ -105,6 +127,33 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           icon={<FiHardDrive aria-hidden="true" />}
           label="Archivos"
           value={mediaCount ?? 0}
+        />
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-4">
+        <MetricCard
+          helper="Incidentes pendientes"
+          icon={<FiAlertTriangle aria-hidden="true" />}
+          label="Abiertos"
+          value={openIncidentCount ?? 0}
+        />
+        <MetricCard
+          helper="Incidentes en atencion"
+          icon={<FiClock aria-hidden="true" />}
+          label="En proceso"
+          value={inProgressIncidentCount ?? 0}
+        />
+        <MetricCard
+          helper="Incidentes cerrados"
+          icon={<FiCheckCircle aria-hidden="true" />}
+          label="Resueltos"
+          value={resolvedIncidentCount ?? 0}
+        />
+        <MetricCard
+          helper="Cuentas registradas"
+          icon={<FiUsers aria-hidden="true" />}
+          label="Usuarios"
+          value={userCount ?? 0}
         />
       </section>
 
@@ -152,40 +201,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         </StateCard>
       ) : null}
 
-      {profile.ok && access.isGlobalAdmin ? (
-        <StateCard title="Super usuario">
-          Este usuario tiene acceso administrativo a todas las compañías activas.
-        </StateCard>
-      ) : null}
-
-      {profile.ok && access.data.length > 0 ? (
-        <section className="grid gap-4">
-          <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center rounded-md border border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-[var(--color-primary)]">
-              <FiArchive aria-hidden="true" />
-            </span>
-            <h2 className="font-display text-2xl font-extrabold tracking-tight text-[var(--color-text-primary)]">
-              Compañías disponibles
-            </h2>
-          </div>
-          <section className="grid gap-4 md:grid-cols-2">
-            {access.data.map((item) => (
-              <article
-                className="glass-panel rounded-lg p-5 transition hover:border-[var(--color-primary-border)] hover:bg-[rgba(34,211,238,0.055)]"
-                key={`${item.companies?.id}-${item.role}`}
-              >
-                <StatusBadge>{item.role}</StatusBadge>
-                <h2 className="mt-4 font-display text-lg font-extrabold text-[var(--color-text-primary)]">
-                  {item.companies?.name ?? "Compañía sin nombre"}
-                </h2>
-                <p className="mt-1 font-mono text-sm font-semibold text-[var(--color-text-muted)]">
-                  Slug: {item.companies?.slug ?? "sin-slug"}
-                </p>
-              </article>
-            ))}
-          </section>
-        </section>
-      ) : null}
     </div>
   );
 }

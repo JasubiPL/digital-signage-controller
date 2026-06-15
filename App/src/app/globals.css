@@ -219,7 +219,7 @@ body {
   width: 55%;
 }
 
-.rich-text-content :where(h1, h2, h3, h4) {
+:where(.rich-text-content, .rich-text-editor) :where(h1, h2, h3, h4) {
   color: var(--color-text-primary);
   font-family: var(--font-display);
   font-weight: 800;
@@ -227,31 +227,31 @@ body {
   margin: 0.85rem 0 0.45rem;
 }
 
-.rich-text-content :where(ul, ol) {
+:where(.rich-text-content, .rich-text-editor) :where(ul, ol) {
   display: grid;
   gap: 0.35rem;
   margin: 0.65rem 0;
   padding-left: 1.25rem;
 }
 
-.rich-text-content ul {
+:where(.rich-text-content, .rich-text-editor) ul {
   list-style: disc;
 }
 
-.rich-text-content ol {
+:where(.rich-text-content, .rich-text-editor) ol {
   list-style: decimal;
 }
 
-.rich-text-content :where(strong, b) {
+:where(.rich-text-content, .rich-text-editor) :where(strong, b) {
   color: var(--color-text-primary);
   font-weight: 900;
 }
 
-.rich-text-content :where(em, i) {
-  color: var(--color-primary-soft);
+:where(.rich-text-content, .rich-text-editor) :where(em, i) {
+  color: inherit;
 }
 
-.rich-text-content a {
+:where(.rich-text-content, .rich-text-editor) a {
   color: var(--color-primary-soft);
   text-decoration: underline;
   text-decoration-thickness: 0.08em;

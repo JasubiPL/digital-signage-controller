@@ -294,9 +294,11 @@ export default async function IncidentDetailPage({
                   ))}
                 </div>
               )}
-              <div className="relative pl-8">
-                <Avatar profile={currentUserProfile} />
-                <AddNoteForm incidentId={incident.id} />
+              <div className="pl-8">
+                <div className="relative">
+                  <Avatar profile={currentUserProfile} />
+                  <AddNoteForm incidentId={incident.id} />
+                </div>
               </div>
             </div>
           </section>
@@ -348,14 +350,46 @@ function ActivityItem({
 }>) {
   const authorName = profile?.full_name || profile?.email || "Usuario";
   const canManage = note.event_type === "note" && note.author_id === currentUserId;
+  const isReply = level > 0;
+  const isSystemEvent = note.event_type !== "note";
+  const label = isReply && note.event_type === "note" ? "Respuesta" : eventLabel(note.event_type);
+
+  if (isSystemEvent) {
+    return (
+      <article className="relative rounded-lg border border-dashed border-[var(--color-border)] bg-[rgba(2,6,23,0.24)] px-4 py-3">
+        <SystemEventMarker />
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-semibold text-[var(--color-text-secondary)]">
+            <span className="font-mono text-[0.65rem] font-extrabold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
+              {label}
+            </span>
+            <span>{note.body}</span>
+          </p>
+          <span className="flex items-center gap-2 font-mono text-xs font-bold text-[var(--color-text-muted)]">
+            <span>{authorName}</span>
+            <span aria-hidden="true">·</span>
+            <time>{formatDateTime(note.created_at)}</time>
+          </span>
+        </div>
+      </article>
+    );
+  }
 
   return (
-    <article className="relative rounded-lg border border-[var(--color-border)] bg-[rgba(2,6,23,0.42)] p-4">
-      <Avatar profile={profile} />
+    <article
+      className={`relative rounded-lg border border-[var(--color-border)] ${
+        isReply ? "bg-[rgba(6,14,32,0.32)] p-3.5" : "bg-[rgba(2,6,23,0.42)] p-4"
+      }`}
+    >
+      <Avatar profile={profile} small={isReply} />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <span className="font-mono text-xs font-extrabold uppercase tracking-[0.12em] text-[var(--color-primary)]">
-            {eventLabel(note.event_type)}
+          <span
+            className={`font-mono text-xs font-extrabold uppercase tracking-[0.12em] ${
+              isReply ? "text-[var(--color-text-muted)]" : "text-[var(--color-primary)]"
+            }`}
+          >
+            {label}
           </span>
           <p className="mt-1 text-sm font-extrabold text-[var(--color-text-primary)]">
             {authorName}
@@ -381,7 +415,7 @@ function ActivityItem({
         />
       ) : null}
       {replies.length ? (
-        <div className="mt-5 grid gap-4 border-l border-[var(--color-border)] pl-8">
+        <div className="relative mt-5 grid gap-4 pl-8 before:absolute before:left-3 before:top-2 before:h-[calc(100%-1rem)] before:w-px before:bg-[var(--color-border)]">
           {replies.map((reply) => (
             <ActivityItem
               attachments={attachmentsByNote.get(reply.id) ?? []}
@@ -419,7 +453,19 @@ function RichTextContent({
   );
 }
 
-function Avatar({ profile }: Readonly<{ profile?: Profile }>) {
+function SystemEventMarker() {
+  return (
+    <span
+      aria-hidden="true"
+      className="absolute -left-[2.125rem] top-3 grid h-7 w-7 place-items-center rounded-full border border-[var(--color-border)] bg-[rgba(2,6,23,0.62)] text-[var(--color-text-muted)]"
+      title="Evento automatico"
+    >
+      <FiCpu className="h-3.5 w-3.5" />
+    </span>
+  );
+}
+
+function Avatar({ profile, small = false }: Readonly<{ profile?: Profile; small?: boolean }>) {
   const label = profile?.full_name || profile?.email || "Usuario";
   const avatarSrc = profile ? avatarSrcForProfile(profile) : "";
   const initials = label
@@ -432,7 +478,9 @@ function Avatar({ profile }: Readonly<{ profile?: Profile }>) {
   return (
     <span
       aria-label={label}
-      className="absolute -left-[2.25rem] top-4 grid h-8 w-8 place-items-center overflow-hidden rounded-full border border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] bg-cover bg-center font-mono text-xs font-extrabold text-[var(--color-primary)]"
+      className={`absolute grid place-items-center overflow-hidden rounded-full border border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] bg-cover bg-center font-mono font-extrabold text-[var(--color-primary)] ${
+        small ? "-left-[2.125rem] top-3.5 h-7 w-7 text-[0.65rem]" : "-left-[2.25rem] top-4 h-8 w-8 text-xs"
+      }`}
       style={avatarSrc ? { backgroundImage: `url(${JSON.stringify(avatarSrc)})` } : undefined}
       title={label}
     >

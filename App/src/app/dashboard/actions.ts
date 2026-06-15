@@ -128,6 +128,18 @@ function incidentStatus(formData: FormData) {
     : "open";
 }
 
+const incidentStatusLabels: Record<IncidentStatus, string> = {
+  canceled: "Cancelado",
+  in_progress: "En proceso",
+  open: "Abierto",
+  resolved: "Resuelto",
+  waiting: "En espera",
+};
+
+function incidentStatusLabel(status: IncidentStatus) {
+  return incidentStatusLabels[status] ?? status;
+}
+
 function incidentImageFiles(formData: FormData, key = "images") {
   return formData
     .getAll(key)
@@ -941,7 +953,7 @@ export async function updateLocationIncidentStatus(formData: FormData) {
       .from("location_incident_notes")
       .insert({
         author_id: user.id,
-        body: `Estado actualizado a ${status}.`,
+        body: `Estado actualizado a ${incidentStatusLabel(status)}.`,
         company_id: incident.company_id,
         event_type: "status_change",
         incident_id: incident.id,
