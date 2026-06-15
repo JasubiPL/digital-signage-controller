@@ -15,7 +15,7 @@ import {
   requireUuid,
 } from "@/server/api/validation";
 
-const locationStatuses = ["ok", "remodeling", "incident"] as const;
+const locationStatuses = ["ok", "remodeling", "incident", "pending_migration"] as const;
 
 export async function GET(request: Request) {
   try {

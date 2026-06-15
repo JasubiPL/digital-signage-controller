@@ -13,7 +13,7 @@ import {
   validateUuid,
 } from "@/server/api/validation";
 
-const locationStatuses = ["ok", "remodeling", "incident"] as const;
+const locationStatuses = ["ok", "remodeling", "incident", "pending_migration"] as const;
 
 type RouteContext = {
   params: Promise<{

@@ -281,7 +281,9 @@ function locationStatusValue(status?: string | null) {
   if (status === "active") return "ok";
   if (status === "maintenance") return "remodeling";
   if (status === "inactive") return "incident";
-  if (status === "remodeling" || status === "incident") return status;
+  if (status === "remodeling" || status === "incident" || status === "pending_migration") {
+    return status;
+  }
 
   return "ok";
 }
@@ -291,14 +293,17 @@ function LocationStatusBadge({ children }: Readonly<{ children: React.ReactNode 
   const labelByStatus: Record<string, string> = {
     incident: "Con Incidente",
     ok: "OK",
+    pending_migration: "Pendiente de migrar",
     remodeling: "Remodelacion",
   };
   const tone =
     value === "ok"
-      ? "border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-[var(--color-primary-soft)]"
+      ? "border-[rgba(34,197,94,0.4)] bg-[rgba(34,197,94,0.12)] text-[#86efac]"
       : value === "remodeling"
         ? "border-[rgba(255,177,59,0.34)] bg-[var(--color-tertiary-muted)] text-[var(--color-tertiary-soft)]"
-        : "border-[rgba(244,63,94,0.34)] bg-[var(--color-secondary-muted)] text-[var(--color-secondary-soft)]";
+        : value === "pending_migration"
+          ? "border-[rgba(59,130,246,0.4)] bg-[rgba(59,130,246,0.12)] text-[#bfdbfe]"
+          : "border-[rgba(244,63,94,0.34)] bg-[var(--color-secondary-muted)] text-[var(--color-secondary-soft)]";
 
   return (
     <span className={`inline-flex min-w-28 items-center justify-center gap-2.5 rounded-full border px-4 py-1.5 font-mono text-xs font-extrabold ${tone}`}>
@@ -372,6 +377,7 @@ function LocationForm({
         <select className={inputClass} defaultValue={locationStatusValue(location?.status)} name="status">
           <option value="ok">OK</option>
           <option value="remodeling">Remodelacion</option>
+          <option value="pending_migration">Pendiente de migrar</option>
           <option value="incident">Con Incidente</option>
         </select>
       </Field>

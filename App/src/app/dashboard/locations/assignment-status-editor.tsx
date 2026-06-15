@@ -15,7 +15,7 @@ const statusLabels: Record<AssignmentStatus, string> = {
 
 const statusTones: Record<AssignmentStatus, string> = {
   active:
-    "border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-[var(--color-primary-soft)]",
+    "border-[rgba(34,197,94,0.4)] bg-[rgba(34,197,94,0.12)] text-[#86efac]",
   draft:
     "border-[rgba(255,177,59,0.34)] bg-[var(--color-tertiary-muted)] text-[var(--color-tertiary-soft)]",
   inactive:

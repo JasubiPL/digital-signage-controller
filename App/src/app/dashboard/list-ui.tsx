@@ -108,12 +108,15 @@ export function ListingStatusBadge({ children }: Readonly<{ children: ReactNode 
     user: "Consultor",
     viewer: "Consulta",
   };
-  const isGood = value === "active" || value === "ok" || value === "super_admin";
+  const isHealthy = value === "active" || value === "ok";
+  const isGood = value === "super_admin";
   const isManager = value === "manager";
   const isWarning = value === "remodeling" || value === "maintenance";
   const isPending = value === "draft";
   const isDanger = value === "incident" || value === "archived" || value === "inactive";
-  const tone = isGood
+  const tone = isHealthy
+    ? "border-[rgba(34,197,94,0.4)] bg-[rgba(34,197,94,0.12)] text-[#86efac]"
+    : isGood
     ? "border-[var(--color-primary-border)] bg-[var(--color-primary-muted)] text-[var(--color-primary-soft)]"
     : isManager
       ? "border-[rgba(255,177,59,0.34)] bg-[var(--color-tertiary-muted)] text-[var(--color-tertiary-soft)]"

@@ -88,6 +88,7 @@ Estados operativos:
 - `ok`: se muestra como `OK`.
 - `remodeling`: se muestra como `Remodelacion`.
 - `incident`: se muestra como `Pantalla con incidente`.
+- `pending_migration`: se muestra como `Pendiente de migrar`.
 - `archived`: oculto/retirado operativo.
 
 ### `campaigns`

@@ -88,7 +88,7 @@ function errorMessage(error: unknown, fallback: string) {
       typeof maybeError.message === "string" &&
       maybeError.message.includes("locations_status_check")
     ) {
-      return "Falta aplicar la migracion de estatus de taquillas. Ejecuta la migracion 202606120005_location_operational_status.sql en Supabase.";
+      return "Falta aplicar la migracion de estatus de taquillas. Ejecuta las migraciones 202606120005_location_operational_status.sql y 202606150001_location_pending_migration_status.sql en Supabase.";
     }
 
     if (typeof maybeError.message === "string") return maybeError.message;
