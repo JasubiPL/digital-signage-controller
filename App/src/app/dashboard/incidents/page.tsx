@@ -112,18 +112,34 @@ export default async function IncidentsPage({
   const selectedCompanyId = companyIds.includes(filters.companyId ?? "")
     ? filters.companyId
     : "";
+  const scopedCompanyIds = selectedCompanyId ? [selectedCompanyId] : companyIds;
+
+  // Resolve the taquilla filter through the junction table.
+  let incidentIdFilter: string[] | null | undefined;
+  if (companyIds.length && filters.locationId) {
+    const { data: filterLinks } = await supabase
+      .from("location_incident_locations")
+      .select("incident_id")
+      .in("company_id", scopedCompanyIds)
+      .eq("location_id", filters.locationId);
+    const matchedIds = Array.from(
+      new Set((filterLinks ?? []).map((link) => link.incident_id as string)),
+    );
+    incidentIdFilter = matchedIds.length ? matchedIds : null;
+  }
+
   const [{ data: locations }, incidentResult] = companyIds.length
     ? await Promise.all([
         supabase
           .from("locations")
           .select("id, company_id, name")
-          .in("company_id", selectedCompanyId ? [selectedCompanyId] : companyIds)
+          .in("company_id", scopedCompanyIds)
           .order("name", { ascending: true }),
         loadIncidents(supabase, {
           category: validOption(filters.category, incidentCategories),
           companyIds,
           companyId: selectedCompanyId,
-          locationId: filters.locationId,
+          incidentIds: incidentIdFilter,
           priority: validOption(filters.priority, incidentPriorities),
           status: validOption(filters.status, incidentStatuses),
         }),
@@ -133,6 +149,23 @@ export default async function IncidentsPage({
   const typedLocations = (locations ?? []) as Location[];
   const companyById = new Map(companies.map((company) => [company.id, company]));
   const locationById = new Map(typedLocations.map((location) => [location.id, location]));
+
+  // Map every incident to the names of all its taquillas.
+  const incidentIds = incidents.map((incident) => incident.id);
+  const { data: incidentLinks } = incidentIds.length
+    ? await supabase
+        .from("location_incident_locations")
+        .select("incident_id, location_id")
+        .in("incident_id", incidentIds)
+    : { data: [] };
+  const locationNamesByIncident = new Map<string, string[]>();
+  for (const link of (incidentLinks ?? []) as { incident_id: string; location_id: string }[]) {
+    const name = locationById.get(link.location_id)?.name;
+    if (!name) continue;
+    const current = locationNamesByIncident.get(link.incident_id) ?? [];
+    current.push(name);
+    locationNamesByIncident.set(link.incident_id, current);
+  }
   const createForLocationId = typedLocations.some(
     (location) => location.id === filters.newIncidentLocation,
   )
@@ -217,7 +250,13 @@ export default async function IncidentsPage({
                     {brandLabel(companyById.get(incident.company_id))}
                   </td>
                   <td className={listingCellClass}>
-                    {locationById.get(incident.location_id)?.name ?? "Sin taquilla"}
+                    {(() => {
+                      const names = locationNamesByIncident.get(incident.id) ?? [];
+                      if (!names.length) return "Sin taquilla";
+                      if (names.length <= 2) return names.join(", ");
+
+                      return `${names.slice(0, 2).join(", ")} +${names.length - 2}`;
+                    })()}
                   </td>
                   <td className={listingCellClass}>
                     <IncidentBadge value={incident.priority} />
@@ -258,18 +297,21 @@ async function loadIncidents(
     category?: string;
     companyId?: string;
     companyIds: string[];
-    locationId?: string;
+    incidentIds?: string[] | null;
     priority?: string;
     status?: string;
   },
 ) {
+  // A null incidentIds means the location filter matched no incidents.
+  if (filters.incidentIds === null) return { data: [] };
+
   let query = supabase
     .from("location_incidents")
     .select("id, company_id, location_id, title, description, category, priority, status, assignee_name, reported_by, resolved_by, opened_at, resolved_at, resolution_summary, created_at, updated_at")
     .in("company_id", filters.companyId ? [filters.companyId] : filters.companyIds)
     .order("updated_at", { ascending: false });
 
-  if (filters.locationId) query = query.eq("location_id", filters.locationId);
+  if (filters.incidentIds) query = query.in("id", filters.incidentIds);
   if (filters.status) query = query.eq("status", filters.status);
   if (filters.priority) query = query.eq("priority", filters.priority);
   if (filters.category) query = query.eq("category", filters.category);

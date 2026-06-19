@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { FiEdit2, FiImage, FiMessageCircle, FiTrash2, FiX } from "react-icons/fi";
 
 import {
+  updateIncidentLocations,
   updateLocationIncident,
   updateLocationIncidentStatus,
 } from "@/app/dashboard/actions";
@@ -84,8 +85,13 @@ export function CreateIncidentForm({
   const [assigneeName, setAssigneeName] = useState("");
   const [category, setCategory] = useState("other");
   const [description, setDescription] = useState("");
-  const [locationId, setLocationId] = useState(
-    defaultLocationId ?? locations[0]?.id ?? "",
+  const initialCompanyId =
+    locations.find((location) => location.id === defaultLocationId)?.company_id ??
+    locations[0]?.company_id ??
+    "";
+  const [companyId, setCompanyId] = useState(initialCompanyId);
+  const [locationIds, setLocationIds] = useState<string[]>(
+    defaultLocationId ? [defaultLocationId] : [],
   );
   const [priority, setPriority] = useState("medium");
   const [submitting, setSubmitting] = useState(false);
@@ -93,8 +99,14 @@ export function CreateIncidentForm({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const validationError = validateUploadItems(items);
+  const companyOptions = companies.filter((company) =>
+    locations.some((location) => location.company_id === company.id),
+  );
+  const companyLocations = locations.filter(
+    (location) => location.company_id === companyId,
+  );
   const requiredFieldsReady = Boolean(
-    locationId &&
+    locationIds.length &&
       title.trim() &&
       description.trim() &&
       category &&
@@ -102,6 +114,25 @@ export function CreateIncidentForm({
       assigneeName.trim(),
   );
   const canSubmit = requiredFieldsReady && !validationError && !submitting;
+
+  function handleCompanyChange(nextCompanyId: string) {
+    setCompanyId(nextCompanyId);
+    setLocationIds((current) =>
+      current.filter((id) =>
+        locations.some(
+          (location) => location.id === id && location.company_id === nextCompanyId,
+        ),
+      ),
+    );
+  }
+
+  function toggleLocation(id: string) {
+    setLocationIds((current) =>
+      current.includes(id)
+        ? current.filter((value) => value !== id)
+        : [...current, id],
+    );
+  }
 
   return (
     <form
@@ -130,7 +161,7 @@ export function CreateIncidentForm({
               assigneeName: assigneeName.trim(),
               category,
               description: description.trim(),
-              locationId,
+              locationIds,
               priority,
               title: title.trim(),
             }),
@@ -163,21 +194,57 @@ export function CreateIncidentForm({
         }
       }}
     >
-      <Field label="Taquilla">
+      <Field label="Marca">
         <select
           className={inputClass}
           disabled={submitting}
-          name="locationId"
-          onChange={(event) => setLocationId(event.currentTarget.value)}
-          required
-          value={locationId}
+          onChange={(event) => handleCompanyChange(event.currentTarget.value)}
+          value={companyId}
         >
-          {locations.map((location) => (
-            <option key={location.id} value={location.id}>
-              {brandLabel(companies.find((company) => company.id === location.company_id))} · {location.name}
+          {companyOptions.map((company) => (
+            <option key={company.id} value={company.id}>
+              {brandLabel(company)}
             </option>
           ))}
         </select>
+      </Field>
+      <Field label="Taquillas">
+        {companyLocations.length ? (
+          <div className="grid max-h-56 gap-1 overflow-y-auto rounded-md border border-[var(--color-border)] bg-[rgba(2,6,23,0.42)] p-2">
+            {companyLocations.map((location) => {
+              const checked = locationIds.includes(location.id);
+
+              return (
+                <label
+                  className={`flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm font-semibold transition ${
+                    checked
+                      ? "bg-[var(--color-primary-muted)] text-[var(--color-primary-soft)]"
+                      : "text-[var(--color-text-secondary)] hover:bg-[rgba(148,163,184,0.08)]"
+                  }`}
+                  key={location.id}
+                >
+                  <input
+                    checked={checked}
+                    className="h-4 w-4 accent-[var(--color-primary)]"
+                    disabled={submitting}
+                    onChange={() => toggleLocation(location.id)}
+                    type="checkbox"
+                  />
+                  {location.name}
+                </label>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="rounded-md border border-[var(--color-border)] px-3 py-2 text-sm font-semibold text-[var(--color-text-muted)]">
+            Esta marca no tiene taquillas registradas.
+          </p>
+        )}
+        {locationIds.length ? (
+          <p className="mt-2 font-mono text-xs font-extrabold uppercase tracking-[0.12em] text-[var(--color-primary)]">
+            {locationIds.length} taquilla(s) seleccionada(s)
+          </p>
+        ) : null}
       </Field>
       <Field label="Titulo">
         <input
@@ -686,6 +753,76 @@ export function AdminIncidentForm({
       </Field>
       <SubmitButton className={buttonClass} pendingLabel="Guardando incidente...">
         Guardar incidente
+      </SubmitButton>
+    </form>
+  );
+}
+
+export function ManageIncidentLocationsForm({
+  incidentId,
+  locations,
+  returnPath,
+  selectedLocationIds,
+}: Readonly<{
+  incidentId: string;
+  locations: Location[];
+  returnPath: string;
+  selectedLocationIds: string[];
+}>) {
+  const [selected, setSelected] = useState<string[]>(selectedLocationIds);
+
+  function toggle(id: string) {
+    setSelected((current) =>
+      current.includes(id)
+        ? current.filter((value) => value !== id)
+        : [...current, id],
+    );
+  }
+
+  return (
+    <form action={updateIncidentLocations} className="grid gap-3">
+      <input name="returnPath" type="hidden" value={returnPath} />
+      <input name="id" type="hidden" value={incidentId} />
+      <Field label="Taquillas afectadas">
+        {locations.length ? (
+          <div className="grid max-h-56 gap-1 overflow-y-auto rounded-md border border-[var(--color-border)] bg-[rgba(2,6,23,0.42)] p-2">
+            {locations.map((location) => {
+              const checked = selected.includes(location.id);
+
+              return (
+                <label
+                  className={`flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm font-semibold transition ${
+                    checked
+                      ? "bg-[var(--color-primary-muted)] text-[var(--color-primary-soft)]"
+                      : "text-[var(--color-text-secondary)] hover:bg-[rgba(148,163,184,0.08)]"
+                  }`}
+                  key={location.id}
+                >
+                  <input
+                    checked={checked}
+                    className="h-4 w-4 accent-[var(--color-primary)]"
+                    name="locationIds"
+                    onChange={() => toggle(location.id)}
+                    type="checkbox"
+                    value={location.id}
+                  />
+                  {location.name}
+                </label>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="rounded-md border border-[var(--color-border)] px-3 py-2 text-sm font-semibold text-[var(--color-text-muted)]">
+            Esta marca no tiene taquillas registradas.
+          </p>
+        )}
+      </Field>
+      <SubmitButton
+        className={`${buttonClass} disabled:cursor-not-allowed disabled:opacity-75`}
+        disabled={!selected.length}
+        pendingLabel="Guardando taquillas..."
+      >
+        Guardar taquillas
       </SubmitButton>
     </form>
   );
