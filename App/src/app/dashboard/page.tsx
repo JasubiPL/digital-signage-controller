@@ -43,6 +43,28 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   ]);
 
   if (!access.isGlobalAdmin) {
+    // First run: no super admin exists yet. Let this user claim the role
+    // instead of redirecting them away.
+    if (profile.ok && bootstrap.canBootstrap) {
+      return (
+        <div className="mx-auto flex min-h-[60vh] w-full max-w-xl flex-col justify-center gap-6">
+          <Feedback error={error} />
+          <StateCard title="Bienvenido — configuración inicial">
+            <p>
+              Esta es la primera vez que se abre el proyecto y aun no existe un
+              super usuario. Conviertete en el super usuario para empezar a crear
+              marcas y configurar el sistema.
+            </p>
+            <form action={bootstrapFirstAdmin} className="mt-4">
+              <SubmitButton className={buttonClass} pendingLabel="Configurando...">
+                Convertirme en super usuario
+              </SubmitButton>
+            </form>
+          </StateCard>
+        </div>
+      );
+    }
+
     const firstCompany = access.data.find((item) => item.companies)?.companies;
 
     if (firstCompany) {
@@ -164,9 +186,14 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       ) : null}
 
       {profile.ok && bootstrap.companyCount === 0 ? (
-        <StateCard title="No hay compañías configuradas">
-          El schema esta aplicado, pero falta ejecutar o verificar el seed de
-          compañías antes de asignar permisos.
+        <StateCard title="No hay marcas configuradas">
+          <p>
+            Aun no existe ninguna marca. Crea la primera desde Configuracion para
+            empezar a registrar taquillas, campañas e incidentes.
+          </p>
+          <a className={`${buttonClass} mt-4 inline-flex w-fit`} href="/dashboard/settings">
+            Ir a Configuracion
+          </a>
         </StateCard>
       ) : null}
 

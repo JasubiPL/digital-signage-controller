@@ -18,7 +18,7 @@ import {
   inputClass,
   PageHeader,
 } from "../components";
-import { getDashboardContext } from "../data";
+import { getDashboardContext, loadIncidentCatalogs, type CatalogOption } from "../data";
 import { DashboardDialog } from "../dialog";
 import {
   CreateIncidentForm,
@@ -82,17 +82,6 @@ type Incident = {
 };
 
 const incidentStatuses = ["open", "in_progress", "waiting", "resolved", "canceled"];
-const incidentPriorities = ["low", "medium", "high", "critical"];
-const incidentCategories = [
-  "screen_issue",
-  "player_offline",
-  "content_not_loading",
-  "usb_issue",
-  "streaming_issue",
-  "physical_damage",
-  "remodeling_operation",
-  "other",
-];
 const activeStatuses = ["open", "in_progress", "waiting"];
 
 export default async function IncidentsPage({
@@ -107,6 +96,10 @@ export default async function IncidentsPage({
   if (!access.canAccessIncidents) {
     notFound();
   }
+
+  const catalogs = await loadIncidentCatalogs(supabase);
+  const categorySlugs = catalogs.categories.map((option) => option.slug);
+  const prioritySlugs = catalogs.priorities.map((option) => option.slug);
 
   const companyIds = companies.map((company) => company.id);
   const selectedCompanyId = companyIds.includes(filters.companyId ?? "")
@@ -136,11 +129,11 @@ export default async function IncidentsPage({
           .in("company_id", scopedCompanyIds)
           .order("name", { ascending: true }),
         loadIncidents(supabase, {
-          category: validOption(filters.category, incidentCategories),
+          category: validOption(filters.category, categorySlugs),
           companyIds,
           companyId: selectedCompanyId,
           incidentIds: incidentIdFilter,
-          priority: validOption(filters.priority, incidentPriorities),
+          priority: validOption(filters.priority, prioritySlugs),
           status: validOption(filters.status, incidentStatuses),
         }),
       ])
@@ -184,9 +177,11 @@ export default async function IncidentsPage({
             trigger={<ListingPrimaryAction>Nuevo Incidente +</ListingPrimaryAction>}
           >
             <CreateIncidentForm
+              categories={catalogs.activeCategories}
               companies={companies}
               defaultLocationId={createForLocationId}
               locations={typedLocations}
+              priorities={catalogs.activePriorities}
             />
           </DashboardDialog>
         ) : null}
@@ -216,9 +211,11 @@ export default async function IncidentsPage({
       </section>
 
       <IncidentFilters
+        categories={catalogs.categories}
         companies={companies}
         filters={filters}
         locations={typedLocations}
+        priorities={catalogs.priorities}
       />
 
       {!incidents.length ? (
@@ -243,7 +240,7 @@ export default async function IncidentsPage({
                   <td className={`${listingCellClass} min-w-72`}>
                     <p className="font-semibold text-[var(--color-text-primary)]">{incident.title}</p>
                     <p className="mt-1 line-clamp-2 text-xs font-semibold leading-5 text-[var(--color-text-muted)]">
-                      {categoryLabel(incident.category)} · Actualizado {formatDateTime(incident.updated_at)}
+                      {catalogs.categoryLabels.get(incident.category) ?? incident.category} · Actualizado {formatDateTime(incident.updated_at)}
                     </p>
                   </td>
                   <td className={listingCellClass}>
@@ -259,10 +256,13 @@ export default async function IncidentsPage({
                     })()}
                   </td>
                   <td className={listingCellClass}>
-                    <IncidentBadge value={incident.priority} />
+                    <IncidentBadge
+                      label={catalogs.priorityLabels.get(incident.priority) ?? incident.priority}
+                      value={incident.priority}
+                    />
                   </td>
                   <td className={listingCellClass}>
-                    <IncidentBadge value={incident.status} />
+                    <IncidentBadge label={statusLabel(incident.status)} value={incident.status} />
                   </td>
                   <td className={listingCellClass}>
                     {incident.assignee_name || "Sin asignar"}
@@ -320,10 +320,13 @@ async function loadIncidents(
 }
 
 function IncidentFilters({
+  categories,
   companies,
   filters,
   locations,
+  priorities,
 }: Readonly<{
+  categories: CatalogOption[];
   companies: Company[];
   filters: {
     category?: string;
@@ -333,6 +336,7 @@ function IncidentFilters({
     status?: string;
   };
   locations: Location[];
+  priorities: CatalogOption[];
 }>) {
   return (
     <form className="glass-panel grid gap-4 rounded-lg p-4 md:grid-cols-6">
@@ -369,9 +373,9 @@ function IncidentFilters({
       <Field label="Prioridad">
         <select className={inputClass} defaultValue={filters.priority ?? ""} name="priority">
           <option value="">Todas</option>
-          {incidentPriorities.map((priority) => (
-            <option key={priority} value={priority}>
-              {priorityLabel(priority)}
+          {priorities.map((priority) => (
+            <option key={priority.slug} value={priority.slug}>
+              {priority.label}
             </option>
           ))}
         </select>
@@ -379,9 +383,9 @@ function IncidentFilters({
       <Field label="Categoria">
         <select className={inputClass} defaultValue={filters.category ?? ""} name="category">
           <option value="">Todas</option>
-          {incidentCategories.map((category) => (
-            <option key={category} value={category}>
-              {categoryLabel(category)}
+          {categories.map((category) => (
+            <option key={category.slug} value={category.slug}>
+              {category.label}
             </option>
           ))}
         </select>
@@ -415,7 +419,7 @@ function IncidentMetric({
   );
 }
 
-function IncidentBadge({ value }: Readonly<{ value: string }>) {
+function IncidentBadge({ label, value }: Readonly<{ label?: string; value: string }>) {
   const tone =
     value === "critical" || value === "open"
       ? "border-[rgba(244,63,94,0.34)] bg-[var(--color-secondary-muted)] text-[var(--color-secondary-soft)]"
@@ -428,7 +432,7 @@ function IncidentBadge({ value }: Readonly<{ value: string }>) {
   return (
     <span className={`inline-flex min-w-28 items-center justify-center gap-2 rounded-full border px-3 py-1.5 font-mono text-xs font-extrabold ${tone}`}>
       <span className="h-1.5 w-1.5 rounded-full bg-current" />
-      {statusLabel(value) || priorityLabel(value) || value}
+      {label || value}
     </span>
   );
 }
@@ -439,37 +443,8 @@ function validOption(value: string | undefined, options: string[]) {
 
 function brandLabel(company?: Company) {
   if (!company) return "Sin marca";
-  if (company.slug === "etn") return "ETN";
-  if (company.slug === "gho") return "GHO";
-  if (company.slug === "costaline") return "Costaline";
 
   return company.legacy_code || company.name;
-}
-
-function categoryLabel(value: string) {
-  const labels: Record<string, string> = {
-    content_not_loading: "Contenido sin cargar",
-    other: "Otro",
-    physical_damage: "Dano fisico",
-    player_offline: "Player offline",
-    remodeling_operation: "Remodelacion",
-    screen_issue: "Pantalla",
-    streaming_issue: "Streaming",
-    usb_issue: "USB",
-  };
-
-  return labels[value] ?? value;
-}
-
-function priorityLabel(value: string) {
-  const labels: Record<string, string> = {
-    critical: "Critica",
-    high: "Alta",
-    low: "Baja",
-    medium: "Media",
-  };
-
-  return labels[value] ?? "";
 }
 
 function statusLabel(value: string) {

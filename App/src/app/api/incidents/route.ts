@@ -4,18 +4,6 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/server/auth/session";
 
-const categories = [
-  "screen_issue",
-  "player_offline",
-  "content_not_loading",
-  "usb_issue",
-  "streaming_issue",
-  "physical_damage",
-  "remodeling_operation",
-  "other",
-] as const;
-const priorities = ["low", "medium", "high", "critical"] as const;
-
 export async function POST(request: Request) {
   const user = await requireUser("/dashboard/incidents");
   const body = await request.json().catch(() => null) as {
@@ -93,15 +81,11 @@ export async function POST(request: Request) {
     .from("location_incidents")
     .insert({
       assignee_name: body.assigneeName?.trim() || null,
-      category: categories.includes(body.category as (typeof categories)[number])
-        ? body.category
-        : "other",
+      category: body.category?.trim() || "other",
       company_id: companyId,
       description,
       location_id: locationIds[0],
-      priority: priorities.includes(body.priority as (typeof priorities)[number])
-        ? body.priority
-        : "medium",
+      priority: body.priority?.trim() || "medium",
       reported_by: user.id,
       status: "open",
       title,
