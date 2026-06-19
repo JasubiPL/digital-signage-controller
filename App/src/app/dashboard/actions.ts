@@ -1580,3 +1580,135 @@ export async function deleteMediaFile(formData: FormData) {
     finish(path, "error", error instanceof Error ? error.message : "No se pudo eliminar el archivo.");
   }
 }
+
+// --- Configuration: brands (companies) -----------------------------------
+
+const companyStatuses = ["active", "inactive", "archived"] as const;
+type CompanyStatus = (typeof companyStatuses)[number];
+const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+async function assertSuperAdmin() {
+  const user = await requireUser("/dashboard/settings");
+  const access = await getUserCompanyAccess(user.id);
+
+  if (access.error) throw new Error(access.error);
+  if (!access.isGlobalAdmin) {
+    throw new Error("Solo un super usuario puede administrar la configuracion.");
+  }
+
+  return user;
+}
+
+function companyStatus(formData: FormData) {
+  const status = field(formData, "status");
+
+  return companyStatuses.includes(status as CompanyStatus)
+    ? (status as CompanyStatus)
+    : "active";
+}
+
+function normalizedSlug(formData: FormData) {
+  return field(formData, "slug").toLowerCase();
+}
+
+export async function createCompany(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/settings");
+
+  try {
+    await assertSuperAdmin();
+    const slug = normalizedSlug(formData);
+    const name = field(formData, "name");
+    const legacyCode = optionalField(formData, "legacyCode");
+
+    if (!name) throw new Error("Captura el nombre de la marca.");
+    if (!slugPattern.test(slug)) {
+      throw new Error("El identificador (slug) solo admite minusculas, numeros y guiones.");
+    }
+
+    const supabase = await createClient();
+    const { error } = await supabase.from("companies").insert({
+      legacy_code: legacyCode,
+      name,
+      slug,
+      status: companyStatus(formData),
+    });
+
+    if (error) throw error;
+
+    revalidatePath(path);
+    revalidatePath("/dashboard");
+    finish(path, "success", "Marca creada.");
+  } catch (error) {
+    unstable_rethrow(error);
+    finish(path, "error", errorMessage(error, "No se pudo crear la marca."));
+  }
+}
+
+export async function updateCompany(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/settings");
+
+  try {
+    await assertSuperAdmin();
+    const id = field(formData, "id");
+    const slug = normalizedSlug(formData);
+    const name = field(formData, "name");
+
+    if (!id) throw new Error("Marca invalida.");
+    if (!name) throw new Error("Captura el nombre de la marca.");
+    if (!slugPattern.test(slug)) {
+      throw new Error("El identificador (slug) solo admite minusculas, numeros y guiones.");
+    }
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("companies")
+      .update({
+        legacy_code: optionalField(formData, "legacyCode"),
+        name,
+        slug,
+        status: companyStatus(formData),
+      })
+      .eq("id", id)
+      .select("id")
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) throw new Error("No se encontro la marca para actualizar.");
+
+    revalidatePath(path);
+    revalidatePath("/dashboard");
+    finish(path, "success", "Marca actualizada.");
+  } catch (error) {
+    unstable_rethrow(error);
+    finish(path, "error", errorMessage(error, "No se pudo actualizar la marca."));
+  }
+}
+
+export async function deleteCompany(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/settings");
+
+  try {
+    await assertSuperAdmin();
+    const id = field(formData, "id");
+
+    if (!id) throw new Error("Marca invalida.");
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("companies")
+      .delete()
+      .eq("id", id)
+      .select("id")
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) throw new Error("No se encontro la marca para eliminar.");
+
+    revalidatePath(path);
+    revalidatePath("/dashboard");
+    finish(path, "success", "Marca eliminada.");
+  } catch (error) {
+    unstable_rethrow(error);
+    finish(path, "error", errorMessage(error, "No se pudo eliminar la marca. Verifica que no tenga taquillas o campañas asociadas."));
+  }
+}

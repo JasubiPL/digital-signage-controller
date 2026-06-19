@@ -641,9 +641,6 @@ function groupBy<T>(items: T[], key: keyof T) {
 
 function brandLabel(company?: Company) {
   if (!company) return "Sin marca";
-  if (company.slug === "etn") return "ETN";
-  if (company.slug === "gho") return "GHO";
-  if (company.slug === "costaline") return "Costaline";
 
   return company.legacy_code || company.name;
 }

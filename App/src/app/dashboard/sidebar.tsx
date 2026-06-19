@@ -8,6 +8,7 @@ import {
   FiGrid,
   FiMonitor,
   FiRadio,
+  FiSettings,
   FiUsers,
 } from "react-icons/fi";
 
@@ -88,6 +89,15 @@ export function DashboardSidebar({
             onNavigate={navigate}
           >
             Incidentes
+          </MobileLink>
+        ) : null}
+        {canManageUsers ? (
+          <MobileLink
+            active={pathname.startsWith("/dashboard/settings")}
+            href="/dashboard/settings"
+            onNavigate={navigate}
+          >
+            Configuracion
           </MobileLink>
         ) : null}
         {orderedCompanies.map((company) => (
@@ -201,6 +211,17 @@ export function DashboardSidebar({
               routeBase="/dashboard/campaigns"
               title="Campañas"
             />
+
+            {canManageUsers ? (
+              <SidebarLink
+                active={pathname.startsWith("/dashboard/settings")}
+                href="/dashboard/settings"
+                icon={<FiSettings aria-hidden="true" />}
+                onNavigate={navigate}
+              >
+                Configuracion
+              </SidebarLink>
+            ) : null}
           </nav>
         </section>
       </aside>
@@ -333,9 +354,6 @@ function MobileLink({
 }
 
 function brandLabel(company: Company) {
-  if (company.slug === "etn") return "ETN";
-  if (company.slug === "gho") return "GHO";
-  if (company.slug === "costaline") return "Costaline";
 
   return company.legacy_code || company.name;
 }
