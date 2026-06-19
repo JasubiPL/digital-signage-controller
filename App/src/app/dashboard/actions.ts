@@ -1788,15 +1788,28 @@ async function deleteCatalog(
   const id = field(formData, "id");
   if (!id) throw new Error("Registro invalido.");
 
-  const { data: row, error: rowError } = await supabase
+  // Never let a catalog become empty.
+  const { count, error: countError } = await supabase
     .from(table)
-    .select("is_system")
-    .eq("id", id)
-    .maybeSingle();
+    .select("id", { count: "exact", head: true });
 
-  if (rowError) throw rowError;
-  if (row?.is_system) {
-    throw new Error("No puedes eliminar un valor del sistema. Puedes desactivarlo.");
+  if (countError) throw countError;
+  if ((count ?? 0) <= 1) {
+    throw new Error("Debe existir al menos un valor. No puedes eliminar el ultimo.");
+  }
+
+  // The 'admin' company role drives authorization, so it cannot be removed.
+  if (table === "company_roles") {
+    const { data: row, error: rowError } = await supabase
+      .from(table)
+      .select("slug")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (rowError) throw rowError;
+    if (row?.slug === "admin") {
+      throw new Error("El rol 'admin' no se puede eliminar porque controla los permisos.");
+    }
   }
 
   const { data, error } = await supabase

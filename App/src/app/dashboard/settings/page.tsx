@@ -303,13 +303,13 @@ function CatalogSection({
                         >
                           <CatalogForm action={updateAction} item={item} withWeight={withWeight} />
                         </DashboardDialog>
-                        {item.is_system ? null : (
+                        {items.length > 1 ? (
                           <form action={deleteAction}>
                             <input name="returnPath" type="hidden" value={returnPath} />
                             <input name="id" type="hidden" value={item.id} />
                             <DeleteActionButton label={`Eliminar ${item.label}`} />
                           </form>
-                        )}
+                        ) : null}
                       </div>
                     </td>
                   </tr>
