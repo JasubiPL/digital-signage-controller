@@ -29,19 +29,6 @@ const assignmentStatuses = ["active", "draft", "inactive"] as const;
 type AssignmentStatus = (typeof assignmentStatuses)[number];
 const profileRoles = ["super_admin", "manager", "user"] as const;
 type ProfileRole = (typeof profileRoles)[number];
-const incidentCategories = [
-  "screen_issue",
-  "player_offline",
-  "content_not_loading",
-  "usb_issue",
-  "streaming_issue",
-  "physical_damage",
-  "remodeling_operation",
-  "other",
-] as const;
-type IncidentCategory = (typeof incidentCategories)[number];
-const incidentPriorities = ["low", "medium", "high", "critical"] as const;
-type IncidentPriority = (typeof incidentPriorities)[number];
 const incidentStatuses = ["open", "in_progress", "waiting", "resolved", "canceled"] as const;
 type IncidentStatus = (typeof incidentStatuses)[number];
 const activeIncidentStatuses = ["open", "in_progress", "waiting"] as const;
@@ -105,19 +92,13 @@ function profileRole(formData: FormData) {
 }
 
 function incidentCategory(formData: FormData) {
-  const category = field(formData, "category");
-
-  return incidentCategories.includes(category as IncidentCategory)
-    ? (category as IncidentCategory)
-    : "other";
+  // Categories are configurable; the form only offers valid catalog slugs.
+  return field(formData, "category") || "other";
 }
 
 function incidentPriority(formData: FormData) {
-  const priority = field(formData, "priority");
-
-  return incidentPriorities.includes(priority as IncidentPriority)
-    ? (priority as IncidentPriority)
-    : "medium";
+  // Priorities are configurable; the form only offers valid catalog slugs.
+  return field(formData, "priority") || "medium";
 }
 
 function incidentStatus(formData: FormData) {
@@ -1579,4 +1560,332 @@ export async function deleteMediaFile(formData: FormData) {
     unstable_rethrow(error);
     finish(path, "error", error instanceof Error ? error.message : "No se pudo eliminar el archivo.");
   }
+}
+
+// --- Configuration: brands (companies) -----------------------------------
+
+const companyStatuses = ["active", "inactive", "archived"] as const;
+type CompanyStatus = (typeof companyStatuses)[number];
+const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+async function assertSuperAdmin() {
+  const user = await requireUser("/dashboard/settings");
+  const access = await getUserCompanyAccess(user.id);
+
+  if (access.error) throw new Error(access.error);
+  if (!access.isGlobalAdmin) {
+    throw new Error("Solo un super usuario puede administrar la configuracion.");
+  }
+
+  return user;
+}
+
+function companyStatus(formData: FormData) {
+  const status = field(formData, "status");
+
+  return companyStatuses.includes(status as CompanyStatus)
+    ? (status as CompanyStatus)
+    : "active";
+}
+
+function normalizedSlug(formData: FormData) {
+  return field(formData, "slug").toLowerCase();
+}
+
+export async function createCompany(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/settings");
+
+  try {
+    await assertSuperAdmin();
+    const slug = normalizedSlug(formData);
+    const name = field(formData, "name");
+    const legacyCode = optionalField(formData, "legacyCode");
+
+    if (!name) throw new Error("Captura el nombre de la marca.");
+    if (!slugPattern.test(slug)) {
+      throw new Error("El identificador (slug) solo admite minusculas, numeros y guiones.");
+    }
+
+    const supabase = await createClient();
+    const { error } = await supabase.from("companies").insert({
+      legacy_code: legacyCode,
+      name,
+      slug,
+      status: companyStatus(formData),
+    });
+
+    if (error) throw error;
+
+    revalidatePath(path);
+    revalidatePath("/dashboard");
+    finish(path, "success", "Marca creada.");
+  } catch (error) {
+    unstable_rethrow(error);
+    finish(path, "error", errorMessage(error, "No se pudo crear la marca."));
+  }
+}
+
+export async function updateCompany(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/settings");
+
+  try {
+    await assertSuperAdmin();
+    const id = field(formData, "id");
+    const slug = normalizedSlug(formData);
+    const name = field(formData, "name");
+
+    if (!id) throw new Error("Marca invalida.");
+    if (!name) throw new Error("Captura el nombre de la marca.");
+    if (!slugPattern.test(slug)) {
+      throw new Error("El identificador (slug) solo admite minusculas, numeros y guiones.");
+    }
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("companies")
+      .update({
+        legacy_code: optionalField(formData, "legacyCode"),
+        name,
+        slug,
+        status: companyStatus(formData),
+      })
+      .eq("id", id)
+      .select("id")
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) throw new Error("No se encontro la marca para actualizar.");
+
+    revalidatePath(path);
+    revalidatePath("/dashboard");
+    finish(path, "success", "Marca actualizada.");
+  } catch (error) {
+    unstable_rethrow(error);
+    finish(path, "error", errorMessage(error, "No se pudo actualizar la marca."));
+  }
+}
+
+export async function deleteCompany(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/settings");
+
+  try {
+    await assertSuperAdmin();
+    const id = field(formData, "id");
+
+    if (!id) throw new Error("Marca invalida.");
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("companies")
+      .delete()
+      .eq("id", id)
+      .select("id")
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) throw new Error("No se encontro la marca para eliminar.");
+
+    revalidatePath(path);
+    revalidatePath("/dashboard");
+    finish(path, "success", "Marca eliminada.");
+  } catch (error) {
+    unstable_rethrow(error);
+    finish(path, "error", errorMessage(error, "No se pudo eliminar la marca. Verifica que no tenga taquillas o campañas asociadas."));
+  }
+}
+
+// --- Configuration: catalogs (incident categories/priorities, company roles) ---
+
+type CatalogTable = "incident_categories" | "incident_priorities" | "company_roles";
+const catalogSlugPattern = /^[a-z0-9]+(?:_[a-z0-9]+)*$/;
+
+function catalogSort(formData: FormData) {
+  return Number.parseInt(field(formData, "sortOrder"), 10) || 0;
+}
+
+function catalogActive(formData: FormData) {
+  const value = field(formData, "isActive");
+  return value === "true" || value === "on";
+}
+
+async function runCatalogAction(
+  path: string,
+  successMessage: string,
+  fallbackMessage: string,
+  work: (supabase: SupabaseClient) => Promise<void>,
+) {
+  try {
+    await assertSuperAdmin();
+    const supabase = await createClient();
+    await work(supabase);
+    revalidatePath(path);
+    finish(path, "success", successMessage);
+  } catch (error) {
+    unstable_rethrow(error);
+    finish(path, "error", errorMessage(error, fallbackMessage));
+  }
+}
+
+async function insertCatalog(
+  supabase: SupabaseClient,
+  table: CatalogTable,
+  formData: FormData,
+  extra: Record<string, unknown> = {},
+) {
+  const slug = normalizedSlug(formData);
+  const label = field(formData, "label");
+
+  if (!label) throw new Error("Captura la etiqueta.");
+  if (!catalogSlugPattern.test(slug)) {
+    throw new Error("El identificador solo admite minusculas, numeros y guion bajo.");
+  }
+
+  const { error } = await supabase.from(table).insert({
+    is_active: true,
+    label,
+    slug,
+    sort_order: catalogSort(formData),
+    ...extra,
+  });
+
+  if (error) throw error;
+}
+
+async function updateCatalog(
+  supabase: SupabaseClient,
+  table: CatalogTable,
+  formData: FormData,
+  extra: Record<string, unknown> = {},
+) {
+  const id = field(formData, "id");
+  const label = field(formData, "label");
+
+  if (!id) throw new Error("Registro invalido.");
+  if (!label) throw new Error("Captura la etiqueta.");
+
+  // Slug is the stable key referenced by existing rows, so it is not editable.
+  const { data, error } = await supabase
+    .from(table)
+    .update({
+      is_active: catalogActive(formData),
+      label,
+      sort_order: catalogSort(formData),
+      ...extra,
+    })
+    .eq("id", id)
+    .select("id")
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) throw new Error("No se encontro el registro para actualizar.");
+}
+
+async function deleteCatalog(
+  supabase: SupabaseClient,
+  table: CatalogTable,
+  formData: FormData,
+) {
+  const id = field(formData, "id");
+  if (!id) throw new Error("Registro invalido.");
+
+  // Never let a catalog become empty.
+  const { count, error: countError } = await supabase
+    .from(table)
+    .select("id", { count: "exact", head: true });
+
+  if (countError) throw countError;
+  if ((count ?? 0) <= 1) {
+    throw new Error("Debe existir al menos un valor. No puedes eliminar el ultimo.");
+  }
+
+  // The 'admin' company role drives authorization, so it cannot be removed.
+  if (table === "company_roles") {
+    const { data: row, error: rowError } = await supabase
+      .from(table)
+      .select("slug")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (rowError) throw rowError;
+    if (row?.slug === "admin") {
+      throw new Error("El rol 'admin' no se puede eliminar porque controla los permisos.");
+    }
+  }
+
+  const { data, error } = await supabase
+    .from(table)
+    .delete()
+    .eq("id", id)
+    .select("id")
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) throw new Error("No se encontro el registro para eliminar.");
+}
+
+export async function createIncidentCategory(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/settings");
+  await runCatalogAction(path, "Categoria creada.", "No se pudo crear la categoria.", (supabase) =>
+    insertCatalog(supabase, "incident_categories", formData),
+  );
+}
+
+export async function updateIncidentCategory(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/settings");
+  await runCatalogAction(path, "Categoria actualizada.", "No se pudo actualizar la categoria.", (supabase) =>
+    updateCatalog(supabase, "incident_categories", formData),
+  );
+}
+
+export async function deleteIncidentCategory(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/settings");
+  await runCatalogAction(path, "Categoria eliminada.", "No se pudo eliminar la categoria.", (supabase) =>
+    deleteCatalog(supabase, "incident_categories", formData),
+  );
+}
+
+export async function createIncidentPriority(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/settings");
+  await runCatalogAction(path, "Prioridad creada.", "No se pudo crear la prioridad.", (supabase) =>
+    insertCatalog(supabase, "incident_priorities", formData, {
+      weight: Number.parseInt(field(formData, "weight"), 10) || 0,
+    }),
+  );
+}
+
+export async function updateIncidentPriority(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/settings");
+  await runCatalogAction(path, "Prioridad actualizada.", "No se pudo actualizar la prioridad.", (supabase) =>
+    updateCatalog(supabase, "incident_priorities", formData, {
+      weight: Number.parseInt(field(formData, "weight"), 10) || 0,
+    }),
+  );
+}
+
+export async function deleteIncidentPriority(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/settings");
+  await runCatalogAction(path, "Prioridad eliminada.", "No se pudo eliminar la prioridad.", (supabase) =>
+    deleteCatalog(supabase, "incident_priorities", formData),
+  );
+}
+
+export async function createCompanyRole(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/settings");
+  await runCatalogAction(path, "Rol creado.", "No se pudo crear el rol.", (supabase) =>
+    insertCatalog(supabase, "company_roles", formData),
+  );
+}
+
+export async function updateCompanyRole(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/settings");
+  await runCatalogAction(path, "Rol actualizado.", "No se pudo actualizar el rol.", (supabase) =>
+    updateCatalog(supabase, "company_roles", formData),
+  );
+}
+
+export async function deleteCompanyRole(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/settings");
+  await runCatalogAction(path, "Rol eliminado.", "No se pudo eliminar el rol.", (supabase) =>
+    deleteCatalog(supabase, "company_roles", formData),
+  );
 }

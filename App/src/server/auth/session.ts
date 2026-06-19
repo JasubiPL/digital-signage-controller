@@ -149,7 +149,9 @@ export async function getBootstrapState() {
   const hasSuperAdmin = hasAdmin === true;
 
   return {
-    canBootstrap: !adminError && !companyError && !hasSuperAdmin && (companyCount ?? 0) > 0,
+    // The first registered user may become super_admin even on an empty
+    // database (no companies yet) so the project can bootstrap from scratch.
+    canBootstrap: !adminError && !hasSuperAdmin,
     accessCount: hasSuperAdmin ? 1 : 0,
     companyCount: companyCount ?? 0,
     error: adminError?.message ?? companyError?.message ?? null,

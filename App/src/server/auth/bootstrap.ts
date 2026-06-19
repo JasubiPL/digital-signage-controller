@@ -21,13 +21,14 @@ export async function bootstrapFirstAdmin() {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase
-    .from("profiles")
-    .update({ global_role: "super_admin" })
-    .eq("id", user.id);
+  const { data: promoted, error } = await supabase.rpc("claim_super_admin");
 
   if (error) {
     redirect(`/dashboard?error=${encodeURIComponent(error.message)}`);
+  }
+
+  if (promoted !== true) {
+    redirect("/dashboard?error=bootstrap-not-available");
   }
 
   revalidatePath("/dashboard");

@@ -381,9 +381,6 @@ function CheckboxList({
 
 function brandLabel(company?: { legacy_code?: string | null; name: string; slug: string }) {
   if (!company) return "Sin marca";
-  if (company.slug === "etn") return "ETN";
-  if (company.slug === "gho") return "GHO";
-  if (company.slug === "costaline") return "Costaline";
 
   return company.legacy_code || company.name;
 }
