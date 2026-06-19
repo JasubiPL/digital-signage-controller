@@ -18,7 +18,7 @@ import {
   EmptyState,
   Feedback,
 } from "../../components";
-import { getDashboardContext } from "../../data";
+import { getDashboardContext, loadIncidentCatalogs } from "../../data";
 import { DashboardDialog } from "../../dialog";
 import {
   AddNoteForm,
@@ -168,6 +168,7 @@ export default async function IncidentDetailPage({
       .order("created_at", { ascending: true }),
   ]);
 
+  const catalogs = await loadIncidentCatalogs(supabase);
   const companyLocations = (companyLocationsData ?? []) as Location[];
   const linkedLocationIds = new Set(
     (linkData ?? []).map((link) => link.location_id as string),
@@ -230,7 +231,10 @@ export default async function IncidentDetailPage({
             {incident.title}
           </h1>
           <div className="flex flex-wrap items-center gap-2">
-            <IncidentBadge value={incident.priority} />
+            <IncidentBadge
+              label={catalogs.priorityLabels.get(incident.priority) ?? incident.priority}
+              value={incident.priority}
+            />
             <IncidentStatusSelect
               disabled={!access.isGlobalAdmin}
               incidentId={incident.id}
@@ -260,7 +264,12 @@ export default async function IncidentDetailPage({
                   }
                 >
                   <div className="grid gap-5">
-                    <AdminIncidentForm incident={incident} returnPath={returnPath} />
+                    <AdminIncidentForm
+                      categories={catalogs.activeCategories}
+                      incident={incident}
+                      priorities={catalogs.activePriorities}
+                      returnPath={returnPath}
+                    />
                     <ManageIncidentLocationsForm
                       incidentId={incident.id}
                       locations={companyLocations}
@@ -608,7 +617,7 @@ function DetailItem({
   );
 }
 
-function IncidentBadge({ value }: Readonly<{ value: string }>) {
+function IncidentBadge({ label, value }: Readonly<{ label?: string; value: string }>) {
   const tone =
     value === "critical" || value === "open"
       ? "border-[rgba(244,63,94,0.34)] bg-[var(--color-secondary-muted)] text-[var(--color-secondary-soft)]"
@@ -621,7 +630,7 @@ function IncidentBadge({ value }: Readonly<{ value: string }>) {
   return (
     <span className={`inline-flex min-w-28 items-center justify-center gap-2 rounded-full border px-3 py-1.5 font-mono text-xs font-extrabold ${tone}`}>
       <span className="h-1.5 w-1.5 rounded-full bg-current" />
-      {statusLabel(value) || priorityLabel(value) || value}
+      {label || value}
     </span>
   );
 }
@@ -643,29 +652,6 @@ function brandLabel(company?: Company) {
   if (!company) return "Sin marca";
 
   return company.legacy_code || company.name;
-}
-
-function priorityLabel(value: string) {
-  const labels: Record<string, string> = {
-    critical: "Critica",
-    high: "Alta",
-    low: "Baja",
-    medium: "Media",
-  };
-
-  return labels[value] ?? "";
-}
-
-function statusLabel(value: string) {
-  const labels: Record<string, string> = {
-    canceled: "Cancelado",
-    in_progress: "En proceso",
-    open: "Abierto",
-    resolved: "Resuelto",
-    waiting: "En espera",
-  };
-
-  return labels[value] ?? "";
 }
 
 function eventLabel(value: string) {

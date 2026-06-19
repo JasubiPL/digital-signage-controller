@@ -53,17 +53,11 @@ type EditableIncident = {
   title: string;
 };
 
-const incidentCategories = [
-  "screen_issue",
-  "player_offline",
-  "content_not_loading",
-  "usb_issue",
-  "streaming_issue",
-  "physical_damage",
-  "remodeling_operation",
-  "other",
-];
-const incidentPriorities = ["low", "medium", "high", "critical"];
+type CatalogOption = {
+  label: string;
+  slug: string;
+};
+
 const incidentStatuses = ["open", "in_progress", "waiting", "resolved", "canceled"];
 
 type UploadTarget = {
@@ -72,18 +66,24 @@ type UploadTarget = {
 };
 
 export function CreateIncidentForm({
+  categories,
   companies,
   defaultLocationId,
   locations,
+  priorities,
 }: Readonly<{
+  categories: CatalogOption[];
   companies: Company[];
   defaultLocationId?: string;
   locations: Location[];
+  priorities: CatalogOption[];
 }>) {
   const router = useRouter();
   const [items, setItems] = useState<UploadQueueItem[]>([]);
   const [assigneeName, setAssigneeName] = useState("");
-  const [category, setCategory] = useState("other");
+  const [category, setCategory] = useState(
+    categories.find((option) => option.slug === "other")?.slug ?? categories[0]?.slug ?? "",
+  );
   const [description, setDescription] = useState("");
   const initialCompanyId =
     locations.find((location) => location.id === defaultLocationId)?.company_id ??
@@ -93,7 +93,9 @@ export function CreateIncidentForm({
   const [locationIds, setLocationIds] = useState<string[]>(
     defaultLocationId ? [defaultLocationId] : [],
   );
-  const [priority, setPriority] = useState("medium");
+  const [priority, setPriority] = useState(
+    priorities.find((option) => option.slug === "medium")?.slug ?? priorities[0]?.slug ?? "",
+  );
   const [submitting, setSubmitting] = useState(false);
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState<string | null>(null);
@@ -262,8 +264,8 @@ export function CreateIncidentForm({
         value={description}
       />
       <section className="grid gap-4 md:grid-cols-3">
-        <CategoryField disabled={submitting} onChange={setCategory} value={category} />
-        <PriorityField disabled={submitting} onChange={setPriority} value={priority} />
+        <CategoryField disabled={submitting} onChange={setCategory} options={categories} value={category} />
+        <PriorityField disabled={submitting} onChange={setPriority} options={priorities} value={priority} />
         <Field label="Responsable">
           <input
             className={inputClass}
@@ -719,10 +721,14 @@ export function IncidentStatusSelect({
 }
 
 export function AdminIncidentForm({
+  categories,
   incident,
+  priorities,
   returnPath,
 }: Readonly<{
+  categories: CatalogOption[];
   incident: EditableIncident;
+  priorities: CatalogOption[];
   returnPath: string;
 }>) {
   return (
@@ -739,8 +745,8 @@ export function AdminIncidentForm({
         onChange={() => undefined}
         value={incident.description}
       />
-      <CategoryField defaultValue={incident.category} disabled={false} />
-      <PriorityField defaultValue={incident.priority} disabled={false} />
+      <CategoryField defaultValue={incident.category} disabled={false} options={categories} />
+      <PriorityField defaultValue={incident.priority} disabled={false} options={priorities} />
       <input name="status" type="hidden" value={incident.status} />
       <Field label="Responsable">
         <input className={inputClass} defaultValue={incident.assignee_name ?? ""} name="assigneeName" />
@@ -954,32 +960,38 @@ function uploadOneFile({
 
 class UploadCanceledError extends Error {}
 
-function CategoryField({
+function CatalogSelectField({
   defaultValue,
   disabled,
+  label,
+  name,
   onChange,
+  options,
   value,
 }: Readonly<{
   defaultValue?: string;
   disabled: boolean;
+  label: string;
+  name: string;
   onChange?: (value: string) => void;
+  options: CatalogOption[];
   value?: string;
 }>) {
   const valueProps = value === undefined ? { defaultValue } : { value };
 
   return (
-    <Field label="Categoria">
+    <Field label={label}>
       <select
         className={inputClass}
         disabled={disabled}
-        name="category"
+        name={name}
         onChange={(event) => onChange?.(event.currentTarget.value)}
         required
         {...valueProps}
       >
-        {incidentCategories.map((category) => (
-          <option key={category} value={category}>
-            {categoryLabel(category)}
+        {options.map((option) => (
+          <option key={option.slug} value={option.slug}>
+            {option.label}
           </option>
         ))}
       </select>
@@ -987,37 +999,16 @@ function CategoryField({
   );
 }
 
-function PriorityField({
-  defaultValue,
-  disabled,
-  onChange,
-  value,
-}: Readonly<{
-  defaultValue?: string;
-  disabled: boolean;
-  onChange?: (value: string) => void;
-  value?: string;
-}>) {
-  const valueProps = value === undefined ? { defaultValue } : { value };
+function CategoryField(
+  props: Readonly<Omit<Parameters<typeof CatalogSelectField>[0], "label" | "name">>,
+) {
+  return <CatalogSelectField {...props} label="Categoria" name="category" />;
+}
 
-  return (
-    <Field label="Prioridad">
-      <select
-        className={inputClass}
-        disabled={disabled}
-        name="priority"
-        onChange={(event) => onChange?.(event.currentTarget.value)}
-        required
-        {...valueProps}
-      >
-        {incidentPriorities.map((priority) => (
-          <option key={priority} value={priority}>
-            {priorityLabel(priority)}
-          </option>
-        ))}
-      </select>
-    </Field>
-  );
+function PriorityField(
+  props: Readonly<Omit<Parameters<typeof CatalogSelectField>[0], "label" | "name">>,
+) {
+  return <CatalogSelectField {...props} label="Prioridad" name="priority" />;
 }
 
 function FormMessage({
@@ -1044,32 +1035,6 @@ function brandLabel(company?: Company) {
   if (!company) return "Sin marca";
 
   return company.legacy_code || company.name;
-}
-
-function categoryLabel(value: string) {
-  const labels: Record<string, string> = {
-    content_not_loading: "Contenido sin cargar",
-    other: "Otro",
-    physical_damage: "Dano fisico",
-    player_offline: "Player offline",
-    remodeling_operation: "Remodelacion",
-    screen_issue: "Pantalla",
-    streaming_issue: "Streaming",
-    usb_issue: "USB",
-  };
-
-  return labels[value] ?? value;
-}
-
-function priorityLabel(value: string) {
-  const labels: Record<string, string> = {
-    critical: "Critica",
-    high: "Alta",
-    low: "Baja",
-    medium: "Media",
-  };
-
-  return labels[value] ?? value;
 }
 
 function statusLabel(value: string) {
