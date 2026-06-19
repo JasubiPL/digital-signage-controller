@@ -5,10 +5,12 @@ import { useFormStatus } from "react-dom";
 export function SubmitButton({
   children,
   className,
+  disabled = false,
   pendingLabel = "Guardando...",
 }: Readonly<{
   children: React.ReactNode;
   className: string;
+  disabled?: boolean;
   pendingLabel?: string;
 }>) {
   const { pending } = useFormStatus();
@@ -16,7 +18,7 @@ export function SubmitButton({
   return (
     <button
       className={`${className} disabled:cursor-not-allowed disabled:opacity-75`}
-      disabled={pending}
+      disabled={pending || disabled}
       type="submit"
     >
       {pending ? <Spinner /> : null}

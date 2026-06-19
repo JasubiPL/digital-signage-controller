@@ -23,6 +23,7 @@ export async function POST(request: Request) {
     category?: string;
     description?: string;
     locationId?: string;
+    locationIds?: string[];
     priority?: string;
     title?: string;
   } | null;
@@ -31,11 +32,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Payload invalido." }, { status: 400 });
   }
 
-  const locationId = body.locationId?.trim();
+  const locationIds = Array.from(
+    new Set(
+      [...(body.locationIds ?? []), body.locationId ?? ""]
+        .map((value) => String(value ?? "").trim())
+        .filter(Boolean),
+    ),
+  );
   const title = body.title?.trim();
   const description = body.description?.trim();
 
-  if (!locationId || !title || !description) {
+  if (!locationIds.length || !title || !description) {
     return NextResponse.json(
       { error: "Taquilla, titulo y descripcion son requeridos." },
       { status: 400 },
@@ -43,25 +50,35 @@ export async function POST(request: Request) {
   }
 
   const supabase = await createClient();
-  const { data: location, error: locationError } = await supabase
+  const { data: locationRows, error: locationError } = await supabase
     .from("locations")
     .select("id, company_id")
-    .eq("id", locationId)
-    .maybeSingle();
+    .in("id", locationIds);
 
   if (locationError) {
     return NextResponse.json({ error: locationError.message }, { status: 500 });
   }
 
-  if (!location) {
-    return NextResponse.json({ error: "Taquilla no encontrada." }, { status: 404 });
+  const locations = locationRows ?? [];
+
+  if (locations.length !== locationIds.length) {
+    return NextResponse.json({ error: "Una o mas taquillas no fueron encontradas." }, { status: 404 });
+  }
+
+  const companyId = locations[0].company_id;
+
+  if (locations.some((location) => location.company_id !== companyId)) {
+    return NextResponse.json(
+      { error: "Todas las taquillas deben pertenecer a la misma marca." },
+      { status: 400 },
+    );
   }
 
   const { data: canManage, error: permissionError } = await supabase.rpc(
     "has_company_role",
     {
       _allowed_roles: ["admin"],
-      _company_id: location.company_id,
+      _company_id: companyId,
     },
   );
 
@@ -79,9 +96,9 @@ export async function POST(request: Request) {
       category: categories.includes(body.category as (typeof categories)[number])
         ? body.category
         : "other",
-      company_id: location.company_id,
+      company_id: companyId,
       description,
-      location_id: location.id,
+      location_id: locationIds[0],
       priority: priorities.includes(body.priority as (typeof priorities)[number])
         ? body.priority
         : "medium",
@@ -96,11 +113,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  const { error: linksError } = await supabase
+    .from("location_incident_locations")
+    .insert(
+      locationIds.map((locationId) => ({
+        company_id: companyId,
+        incident_id: incident.id,
+        location_id: locationId,
+      })),
+    );
+
+  if (linksError) {
+    return NextResponse.json({ error: linksError.message }, { status: 500 });
+  }
+
   const { error: locationStatusError } = await supabase
     .from("locations")
     .update({ status: "incident" })
-    .eq("id", incident.location_id)
-    .eq("company_id", incident.company_id);
+    .in("id", locationIds)
+    .eq("company_id", companyId);
 
   if (locationStatusError) {
     return NextResponse.json({ error: locationStatusError.message }, { status: 500 });

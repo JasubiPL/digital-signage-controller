@@ -146,6 +146,19 @@ function incidentImageFiles(formData: FormData, key = "images") {
     .filter((value): value is File => value instanceof File && value.size > 0);
 }
 
+function parseLocationIds(formData: FormData) {
+  const ids = formData
+    .getAll("locationIds")
+    .map((value) => String(value).trim())
+    .filter(Boolean);
+
+  // Backwards-compatible fallback for the single-location field.
+  const single = field(formData, "locationId");
+  if (single) ids.push(single);
+
+  return Array.from(new Set(ids));
+}
+
 async function revalidateIncidentPaths(
   supabase: SupabaseClient,
   input: { companyId?: string | null; incidentId?: string | null } = {},
@@ -169,6 +182,20 @@ async function revalidateIncidentPaths(
   }
 }
 
+async function getIncidentLocationIds(
+  supabase: SupabaseClient,
+  incidentId: string,
+) {
+  const { data, error } = await supabase
+    .from("location_incident_locations")
+    .select("location_id")
+    .eq("incident_id", incidentId);
+
+  if (error) throw error;
+
+  return (data ?? []).map((row) => row.location_id as string);
+}
+
 async function syncLocationIncidentStatus(
   supabase: SupabaseClient,
   input: {
@@ -176,22 +203,53 @@ async function syncLocationIncidentStatus(
     locationId: string;
   },
 ) {
-  const { count, error: countError } = await supabase
-    .from("location_incidents")
-    .select("id", { count: "exact", head: true })
+  const { data: links, error: linksError } = await supabase
+    .from("location_incident_locations")
+    .select("incident_id")
     .eq("company_id", input.companyId)
-    .eq("location_id", input.locationId)
-    .in("status", [...activeIncidentStatuses]);
+    .eq("location_id", input.locationId);
 
-  if (countError) throw countError;
+  if (linksError) throw linksError;
+
+  const incidentIds = (links ?? []).map((link) => link.incident_id as string);
+  let hasActive = false;
+
+  if (incidentIds.length) {
+    const { count, error: countError } = await supabase
+      .from("location_incidents")
+      .select("id", { count: "exact", head: true })
+      .eq("company_id", input.companyId)
+      .in("id", incidentIds)
+      .in("status", [...activeIncidentStatuses]);
+
+    if (countError) throw countError;
+    hasActive = (count ?? 0) > 0;
+  }
 
   const { error } = await supabase
     .from("locations")
-    .update({ status: (count ?? 0) > 0 ? "incident" : "ok" })
+    .update({ status: hasActive ? "incident" : "ok" })
     .eq("id", input.locationId)
     .eq("company_id", input.companyId);
 
   if (error) throw error;
+}
+
+async function syncIncidentLocationsStatus(
+  supabase: SupabaseClient,
+  input: {
+    companyId: string;
+    locationIds: string[];
+  },
+) {
+  for (const locationId of Array.from(new Set(input.locationIds))) {
+    if (!locationId) continue;
+
+    await syncLocationIncidentStatus(supabase, {
+      companyId: input.companyId,
+      locationId,
+    });
+  }
 }
 
 async function uploadIncidentImages(
@@ -808,24 +866,33 @@ export async function createLocationIncident(formData: FormData) {
 
   try {
     const user = await requireUser(path);
-    const locationId = field(formData, "locationId");
+    const locationIds = parseLocationIds(formData);
     const title = field(formData, "title");
     const description = field(formData, "description");
 
+    if (!locationIds.length) throw new Error("Selecciona al menos una taquilla.");
     if (!title) throw new Error("Captura el titulo del incidente.");
     if (!description) throw new Error("Captura la descripcion del incidente.");
 
     const supabase = await createClient();
-    const { data: location, error: locationError } = await supabase
+    const { data: locationRows, error: locationError } = await supabase
       .from("locations")
       .select("id, company_id")
-      .eq("id", locationId)
-      .maybeSingle();
+      .in("id", locationIds);
 
     if (locationError) throw locationError;
-    if (!location) throw new Error("Selecciona una taquilla valida.");
 
-    await assertCanManageCompany(location.company_id);
+    const locations = locationRows ?? [];
+    if (locations.length !== locationIds.length) {
+      throw new Error("Una o mas taquillas seleccionadas no son validas.");
+    }
+
+    const companyId = locations[0].company_id;
+    if (locations.some((location) => location.company_id !== companyId)) {
+      throw new Error("Todas las taquillas deben pertenecer a la misma marca.");
+    }
+
+    await assertCanManageCompany(companyId);
 
     const status = incidentStatus(formData);
     const isResolved = status === "resolved" || status === "canceled";
@@ -834,9 +901,9 @@ export async function createLocationIncident(formData: FormData) {
       .insert({
         assignee_name: optionalField(formData, "assigneeName"),
         category: incidentCategory(formData),
-        company_id: location.company_id,
+        company_id: companyId,
         description,
-        location_id: location.id,
+        location_id: locationIds[0],
         priority: incidentPriority(formData),
         reported_by: user.id,
         resolved_at: isResolved ? new Date().toISOString() : null,
@@ -850,6 +917,18 @@ export async function createLocationIncident(formData: FormData) {
 
     if (error) throw error;
 
+    const { error: linksError } = await supabase
+      .from("location_incident_locations")
+      .insert(
+        locationIds.map((locationId) => ({
+          company_id: companyId,
+          incident_id: incident.id,
+          location_id: locationId,
+        })),
+      );
+
+    if (linksError) throw linksError;
+
     await uploadIncidentImages(supabase, {
       caption: optionalField(formData, "caption"),
       companyId: incident.company_id,
@@ -858,9 +937,9 @@ export async function createLocationIncident(formData: FormData) {
       locationId: incident.location_id,
       uploadedBy: user.id,
     });
-    await syncLocationIncidentStatus(supabase, {
+    await syncIncidentLocationsStatus(supabase, {
       companyId: incident.company_id,
-      locationId: incident.location_id,
+      locationIds,
     });
     await revalidateIncidentPaths(supabase, {
       companyId: incident.company_id,
@@ -924,9 +1003,9 @@ export async function updateLocationIncident(formData: FormData) {
       if (noteError) throw noteError;
     }
 
-    await syncLocationIncidentStatus(supabase, {
+    await syncIncidentLocationsStatus(supabase, {
       companyId: incident.company_id,
-      locationId: incident.location_id,
+      locationIds: await getIncidentLocationIds(supabase, incident.id),
     });
     await revalidateIncidentPaths(supabase, {
       companyId: incident.company_id,
@@ -947,6 +1026,78 @@ export async function resolveLocationIncident(formData: FormData) {
 export async function cancelLocationIncident(formData: FormData) {
   formData.set("status", "canceled");
   await updateLocationIncident(formData);
+}
+
+export async function updateIncidentLocations(formData: FormData) {
+  const path = returnPath(formData, "/dashboard/incidents");
+
+  try {
+    await requireUser(path);
+    const id = field(formData, "id");
+    const locationIds = parseLocationIds(formData);
+
+    if (!locationIds.length) throw new Error("Selecciona al menos una taquilla.");
+
+    const supabase = await createClient();
+    const incident = await incidentForAction(supabase, id);
+    await assertCanManageCompany(incident.company_id);
+
+    const { data: locationRows, error: locationError } = await supabase
+      .from("locations")
+      .select("id")
+      .eq("company_id", incident.company_id)
+      .in("id", locationIds);
+
+    if (locationError) throw locationError;
+    if ((locationRows ?? []).length !== locationIds.length) {
+      throw new Error("Una o mas taquillas no pertenecen a la marca del incidente.");
+    }
+
+    const previousLocationIds = await getIncidentLocationIds(supabase, incident.id);
+
+    const { error: deleteError } = await supabase
+      .from("location_incident_locations")
+      .delete()
+      .eq("incident_id", incident.id);
+
+    if (deleteError) throw deleteError;
+
+    const { error: insertError } = await supabase
+      .from("location_incident_locations")
+      .insert(
+        locationIds.map((locationId) => ({
+          company_id: incident.company_id,
+          incident_id: incident.id,
+          location_id: locationId,
+        })),
+      );
+
+    if (insertError) throw insertError;
+
+    // Keep the primary taquilla (used for storage paths) within the new set.
+    if (!locationIds.includes(incident.location_id)) {
+      const { error: primaryError } = await supabase
+        .from("location_incidents")
+        .update({ location_id: locationIds[0] })
+        .eq("id", incident.id)
+        .eq("company_id", incident.company_id);
+
+      if (primaryError) throw primaryError;
+    }
+
+    await syncIncidentLocationsStatus(supabase, {
+      companyId: incident.company_id,
+      locationIds: Array.from(new Set([...previousLocationIds, ...locationIds])),
+    });
+    await revalidateIncidentPaths(supabase, {
+      companyId: incident.company_id,
+      incidentId: incident.id,
+    });
+    finish(path, "success", "Taquillas actualizadas.");
+  } catch (error) {
+    unstable_rethrow(error);
+    finish(path, "error", errorMessage(error, "No se pudieron actualizar las taquillas."));
+  }
 }
 
 export async function updateLocationIncidentStatus(formData: FormData) {
@@ -987,9 +1138,9 @@ export async function updateLocationIncidentStatus(formData: FormData) {
 
     if (noteError) throw noteError;
 
-    await syncLocationIncidentStatus(supabase, {
+    await syncIncidentLocationsStatus(supabase, {
       companyId: incident.company_id,
-      locationId: incident.location_id,
+      locationIds: await getIncidentLocationIds(supabase, incident.id),
     });
     await revalidateIncidentPaths(supabase, {
       companyId: incident.company_id,
@@ -1012,6 +1163,8 @@ export async function deleteLocationIncident(formData: FormData) {
     const incident = await incidentForAction(supabase, id);
 
     await assertCanManageCompany(incident.company_id);
+
+    const affectedLocationIds = await getIncidentLocationIds(supabase, incident.id);
 
     const { data: attachments, error: attachmentError } = await supabase
       .from("location_incident_attachments")
@@ -1041,9 +1194,9 @@ export async function deleteLocationIncident(formData: FormData) {
 
     if (error) throw error;
 
-    await syncLocationIncidentStatus(supabase, {
+    await syncIncidentLocationsStatus(supabase, {
       companyId: incident.company_id,
-      locationId: incident.location_id,
+      locationIds: affectedLocationIds.length ? affectedLocationIds : [incident.location_id],
     });
     await revalidateIncidentPaths(supabase, {
       companyId: incident.company_id,

@@ -5,6 +5,7 @@ import {
   FiAlertTriangle,
   FiArrowLeft,
   FiCalendar,
+  FiChevronRight,
   FiClock,
   FiCpu,
   FiEdit3,
@@ -24,6 +25,7 @@ import {
   AdminIncidentForm,
   IncidentNoteActions,
   IncidentStatusSelect,
+  ManageIncidentLocationsForm,
   UploadIncidentAttachmentForm,
 } from "../incident-client-forms";
 import { AttachmentGallery } from "./incident-attachment-gallery";
@@ -138,28 +140,45 @@ export default async function IncidentDetailPage({
   if (!incidentData) notFound();
 
   const incident = incidentData as Incident;
-  const [{ data: locationData }, { data: notesData }, { data: attachmentsData }] =
-    await Promise.all([
-      supabase
-        .from("locations")
-        .select("id, company_id, name, device, projection, status")
-        .eq("id", incident.location_id)
-        .eq("company_id", incident.company_id)
-        .maybeSingle(),
-      supabase
-        .from("location_incident_notes")
-        .select("id, incident_id, parent_note_id, company_id, location_id, author_id, body, event_type, created_at")
-        .eq("incident_id", incident.id)
-        .order("created_at", { ascending: true }),
-      supabase
-        .from("location_incident_attachments")
-        .select("id, incident_id, note_id, company_id, location_id, original_name, mime_type, size_bytes, caption, status, created_at")
-        .eq("incident_id", incident.id)
-        .eq("status", "active")
-        .order("created_at", { ascending: true }),
-    ]);
+  const [
+    { data: companyLocationsData },
+    { data: linkData },
+    { data: notesData },
+    { data: attachmentsData },
+  ] = await Promise.all([
+    supabase
+      .from("locations")
+      .select("id, company_id, name, device, projection, status")
+      .eq("company_id", incident.company_id)
+      .order("name", { ascending: true }),
+    supabase
+      .from("location_incident_locations")
+      .select("location_id")
+      .eq("incident_id", incident.id),
+    supabase
+      .from("location_incident_notes")
+      .select("id, incident_id, parent_note_id, company_id, location_id, author_id, body, event_type, created_at")
+      .eq("incident_id", incident.id)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("location_incident_attachments")
+      .select("id, incident_id, note_id, company_id, location_id, original_name, mime_type, size_bytes, caption, status, created_at")
+      .eq("incident_id", incident.id)
+      .eq("status", "active")
+      .order("created_at", { ascending: true }),
+  ]);
 
-  const location = (locationData ?? undefined) as Location | undefined;
+  const companyLocations = (companyLocationsData ?? []) as Location[];
+  const linkedLocationIds = new Set(
+    (linkData ?? []).map((link) => link.location_id as string),
+  );
+  // Fall back to the primary taquilla if the junction has no rows yet (pre-migration data).
+  if (!linkedLocationIds.size && incident.location_id) {
+    linkedLocationIds.add(incident.location_id);
+  }
+  const incidentLocations = companyLocations.filter((location) =>
+    linkedLocationIds.has(location.id),
+  );
   const notes = (notesData ?? []) as IncidentNote[];
   const attachments = (attachmentsData ?? []) as IncidentAttachment[];
   const authorIds = Array.from(
@@ -242,6 +261,12 @@ export default async function IncidentDetailPage({
                 >
                   <div className="grid gap-5">
                     <AdminIncidentForm incident={incident} returnPath={returnPath} />
+                    <ManageIncidentLocationsForm
+                      incidentId={incident.id}
+                      locations={companyLocations}
+                      returnPath={returnPath}
+                      selectedLocationIds={incidentLocations.map((incidentLocation) => incidentLocation.id)}
+                    />
                     <UploadIncidentAttachmentForm incidentId={incident.id} />
                     <AttachmentGallery
                       attachments={incidentAttachments}
@@ -312,8 +337,36 @@ export default async function IncidentDetailPage({
             <dl className="mt-5 grid gap-4 text-sm">
               <DetailItem icon={<FiUser aria-hidden="true" />} label="Asignado a" value={incident.assignee_name || "Sin asignar"} />
               <DetailItem icon={<FiMapPin aria-hidden="true" />} label="Marca" value={brandLabel(company)} />
-              <DetailItem icon={<FiMapPin aria-hidden="true" />} label="Taquilla" value={location?.name ?? "Sin taquilla"} />
-              <DetailItem icon={<FiCpu aria-hidden="true" />} label="Dispositivo" value={location?.device || location?.projection || "Sin dispositivo"} />
+              <div className="grid grid-cols-[1.25rem_6rem_minmax(0,1fr)] items-start gap-2">
+                <span className="mt-0.5 text-[var(--color-primary)]"><FiMapPin aria-hidden="true" /></span>
+                <dt className="font-semibold text-[var(--color-text-muted)]">
+                  {incidentLocations.length > 1 ? "Taquillas" : "Taquilla"}
+                </dt>
+                <dd className="min-w-0 font-extrabold text-[var(--color-text-primary)]">
+                  {!incidentLocations.length ? (
+                    "Sin taquilla"
+                  ) : incidentLocations.length === 1 ? (
+                    <LocationLabel location={incidentLocations[0]} />
+                  ) : (
+                    <details className="group">
+                      <summary className="flex cursor-pointer list-none items-center gap-1.5 text-[var(--color-primary-soft)] transition hover:text-[var(--color-primary)] [&::-webkit-details-marker]:hidden">
+                        <FiChevronRight
+                          aria-hidden="true"
+                          className="shrink-0 transition group-open:rotate-90"
+                        />
+                        {incidentLocations.length} taquillas
+                      </summary>
+                      <ul className="mt-2 grid max-h-64 gap-1 overflow-y-auto pr-1">
+                        {incidentLocations.map((incidentLocation) => (
+                          <li key={incidentLocation.id}>
+                            <LocationLabel location={incidentLocation} />
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
+                  )}
+                </dd>
+              </div>
               <DetailItem icon={<FiCalendar aria-hidden="true" />} label="Inicio" value={formatDateTime(incident.opened_at)} />
             </dl>
           </section>
@@ -517,6 +570,19 @@ function SectionTitle({
       <span className="text-[var(--color-primary)]">{icon}</span>
       {title}
     </h2>
+  );
+}
+
+function LocationLabel({ location }: Readonly<{ location: Location }>) {
+  const device = location.device || location.projection;
+
+  return (
+    <>
+      {location.name}
+      {device ? (
+        <span className="ml-1 font-semibold text-[var(--color-text-muted)]">· {device}</span>
+      ) : null}
+    </>
   );
 }
 
